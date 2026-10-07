@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLST Trucking LLC</title>
+<style>
+:root { color-scheme: light dark; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b0d10; color: #f5f6f7; }
+#app { min-height: 100vh; background: light-dark(#f5f6f7,#0b0d10); color: light-dark(#111418,#f5f6f7); }
+.nav { position: fixed; top: 0; width: 100%; z-index: 10; backdrop-filter: blur(16px); background: color-mix(in srgb, light-dark(#f5f6f7,#0b0d10) 84%, transparent); border-bottom: 1px solid light-dark(#dfe3e7,#242930); }
+.nav-inner { max-width: 1180px; margin: auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+.logo { font-weight: 900; letter-spacing: -.04em; font-size: 21px; }
+.logo span { color: #d71920; }
+.navlinks { display: flex; gap: 24px; align-items: center; }
+.navlinks a { color: inherit; text-decoration: none; font-size: 14px; font-weight: 700; opacity: .82; }
+.navlinks a:hover { opacity: 1; }
+.btn { display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 8px; padding: 13px 19px; font-weight: 800; text-decoration: none; cursor: pointer; }
+.btn-red { background: #d71920; color: white; box-shadow: 0 10px 30px rgba(215,25,32,.22); }
+.btn-dark { background: light-dark(#111418,#f5f6f7); color: light-dark(white,#111418); }
+.hero { min-height: 760px; display: grid; place-items: center; position: relative; overflow: hidden; background: radial-gradient(circle at 75% 40%, rgba(215,25,32,.24), transparent 35%), linear-gradient(120deg,#0b0d10 0%,#15191f 52%,#0b0d10 100%); color: white; }
+.hero:after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(135deg, transparent 0 90px, rgba(255,255,255,.025) 91px 92px); pointer-events: none; }
+.hero-inner { width: min(1180px, calc(100% - 48px)); position: relative; z-index: 1; padding: 150px 0 90px; }
+.kicker { color: #e42a31; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; font-size: 13px; }
+h1 { font-size: clamp(48px, 8vw, 88px); line-height: .94; letter-spacing: -.065em; max-width: 850px; margin: 18px 0 25px; }
+.hero p { max-width: 630px; font-size: 19px; line-height: 1.65; color: #c8cdd3; margin-bottom: 34px; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.stats { display: grid; grid-template-columns: repeat(3,1fr); max-width: 760px; gap: 12px; margin-top: 75px; }
+.stat { border-left: 2px solid #d71920; padding: 6px 18px; background: rgba(255,255,255,.035); }
+.stat b { display: block; font-size: 28px; }
+.stat span { color: #aeb5bd; font-size: 13px; }
+.section { max-width: 1180px; margin: auto; padding: 105px 24px; }
+.section-head { display:flex; justify-content:space-between; align-items:end; gap: 30px; margin-bottom: 45px; }
+.eyebrow { color:#d71920; text-transform:uppercase; letter-spacing:.14em; font-size:12px; font-weight:900; }
+h2 { font-size: clamp(35px,5vw,56px); letter-spacing:-.05em; line-height:1; margin:10px 0 0; }
+.section-head p { max-width: 450px; line-height:1.65; color: light-dark(#606871,#aeb5bd); }
+.cards { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+.card { border:1px solid light-dark(#dfe3e7,#2a3037); border-radius:14px; padding:30px; background: light-dark(#fff,#12161b); }
+.icon { width:46px;height:46px;border-radius:10px;background:#d71920;color:#fff;display:grid;place-items:center;font-weight:900;margin-bottom:25px; }
+.card h3 { margin:0 0 10px; font-size:21px; }
+.card p { color:light-dark(#68717a,#aeb5bd); line-height:1.65; margin:0; }
+.band { background:#d71920; color:white; }
+.band .section { display:flex; justify-content:space-between; align-items:center; gap:30px; padding-top:70px; padding-bottom:70px; }
+.band h2 { max-width:700px; }
+.contact { display:grid; grid-template-columns:1fr 1fr; gap:60px; }
+.contact-list { display:grid; gap:16px; margin-top:28px; }
+.contact-item { padding:20px; border:1px solid light-dark(#dfe3e7,#2a3037); border-radius:12px; }
+.contact-item small { display:block; text-transform:uppercase; letter-spacing:.12em; color:#d71920; font-weight:900; margin-bottom:6px; }
+.form { display:grid; gap:13px; }
+input, textarea { width:100%; padding:15px; border-radius:8px; border:1px solid light-dark(#d5dbe0,#30363d); background:light-dark(#fff,#11151a); color:inherit; font:inherit; }
+textarea { min-height:140px; resize:vertical; }
+footer { border-top:1px solid light-dark(#dfe3e7,#242930); padding:28px 24px; color:light-dark(#6b737b,#949ca5); }
+.footer-inner { max-width:1180px;margin:auto;display:flex;justify-content:space-between;gap:20px; font-size:13px; }
+@media(max-width:800px){ .navlinks {display:none;} .hero{min-height:700px;} .stats,.cards,.contact{grid-template-columns:1fr;} .section-head,.band .section,.footer-inner{display:block;} .section-head p{margin-top:20px;} .band .btn{margin-top:24px;} }
+</style>
+</head>
+<body>
+<div id="app">
+<nav class="nav"><div class="nav-inner"><div class="logo">CLST <span>TRUCKING</span> LLC</div><div class="navlinks"><a href="#services">Services</a><a href="#about">About</a><a href="#contact">Contact</a><a class="btn btn-red" href="#quote">Request a Quote</a></div></div></nav>
+<header class="hero"><div class="hero-inner"><div class="kicker">Freight • Reliability • Performance</div><h1>Moving freight.<br><span style="color:#d71920">Moving business.</span></h1><p>CLST Trucking LLC delivers dependable transportation solutions built around communication, safety and on-time performance.</p><div class="actions"><a class="btn btn-red" href="#quote">Get a Freight Quote</a><a class="btn btn-dark" href="#services">Explore Services</a></div><div class="stats"><div class="stat"><b>24/7</b><span>Communication mindset</span></div><div class="stat"><b>On-Time</b><span>Delivery focused</span></div><div class="stat"><b>Safety</b><span>Every mile matters</span></div></div></div></header>
+<section id="services" class="section"><div class="section-head"><div><div class="eyebrow">What we do</div><h2>Transportation<br>without the headaches.</h2></div><p>From pickup to delivery, CLST Trucking is built to keep your freight moving and your operation informed.</p></div><div class="cards"><article class="card"><div class="icon">01</div><h3>Dry Van Freight</h3><p>Reliable transportation for general, palletized and boxed freight with a focus on secure handling and dependable delivery.</p></article><article class="card"><div class="icon">02</div><h3>Regional & Long Haul</h3><p>Flexible coverage for regional routes and longer-distance lanes, helping shippers keep schedules predictable.</p></article><article class="card"><div class="icon">03</div><h3>Dedicated Service</h3><p>Consistent transportation support for customers who value clear communication and a dependable freight partner.</p></article></div></section>
+<div class="band"><div class="section"><h2>Need a carrier you can count on?</h2><a class="btn btn-dark" href="#quote">Start a Conversation</a></div></div>
+<section id="about" class="section"><div class="section-head"><div><div class="eyebrow">Why CLST</div><h2>Built for the road.<br>Focused on you.</h2></div><p>Our approach is simple: communicate clearly, protect the load, respect the schedule and do the job right.</p></div><div class="cards"><article class="card"><div class="icon">✓</div><h3>Reliable Communication</h3><p>Stay informed with straightforward updates and a team that takes your shipment seriously.</p></article><article class="card"><div class="icon">✓</div><h3>Safety First</h3><p>We treat safe operations as a core responsibility—not an afterthought.</p></article><article class="card"><div class="icon">✓</div><h3>Professional Service</h3><p>A dependable, professional experience from the first conversation through final delivery.</p></article></div></section>
+<section id="contact" class="section" style="padding-top:50px"><div class="contact"><div><div class="eyebrow">Let's move</div><h2>Tell us what<br>you need hauled.</h2><div class="contact-list"><div class="contact-item"><small>Phone</small> Add your company phone number</div><div class="contact-item"><small>Email</small> Add your business email</div><div class="contact-item"><small>Service Area</small> United States • Regional & Long Haul</div></div></div><div id="quote" class="card"><div class="eyebrow">Request a quote</div><h3 style="font-size:28px;margin:8px 0 22px">Start your shipment</h3><form class="form" onsubmit="event.preventDefault(); alert('Thanks! Your quote request is ready to connect to your business email.');"><input placeholder="Your name" required><input type="email" placeholder="Business email" required><input placeholder="Pickup & delivery locations"><textarea placeholder="Tell us about the freight, dates and equipment needed"></textarea><button class="btn btn-red" type="submit">Request Quote</button></form></div></div></section>
+<footer><div class="footer-inner"><div>© 2026 CLST Trucking LLC. All rights reserved.</div><div>Professional transportation solutions.</div></div></footer>
+</div>
+</body>
+</html>
