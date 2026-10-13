@@ -423,4 +423,39 @@
     $("search").addEventListener("input", render);
   </script>
 </body>
+  
+<section id="clst-ai-chat" style="max-width:900px;margin:24px auto;padding:20px;border:1px solid #dbe3ed;border-radius:14px;font-family:Arial,sans-serif;background:#fff;color:#172033">
+  <h2 style="margin-top:0">🤖 Ask CLST Trucking AI</h2>
+  <p style="color:#64748b">Ask about a load number or search your loaded Gmail messages.</p>
+  <div id="clst-chat-history" style="min-height:60px;padding:12px;background:#f5f8fc;border-radius:9px;margin-bottom:12px">
+    <p>Welcome! Load Gmail messages first, then ask about a load.</p>
+  </div>
+  <form id="clst-chat-form" style="display:flex;gap:8px;flex-wrap:wrap">
+    <input id="clst-chat-question" required placeholder="Example: Find load 2011384" style="flex:1;min-width:220px;padding:12px;border:1px solid #cbd5e1;border-radius:8px">
+    <button style="padding:12px 18px;background:#2563eb;color:white;border:0;border-radius:8px;cursor:pointer">Ask</button>
+  </form>
+  <p style="font-size:12px;color:#64748b">Initial test: searches messages already displayed on this page. It does not yet extract rates from PDF attachments or call an AI model.</p>
+</section>
+<script>
+document.getElementById('clst-chat-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const input = document.getElementById('clst-chat-question');
+  const history = document.getElementById('clst-chat-history');
+  const question = input.value.trim();
+  const rows = [...document.querySelectorAll('tr')];
+  const matches = rows.filter(row => row.innerText.toLowerCase().includes(question.toLowerCase()));
+  const answer = document.createElement('div');
+  answer.style.cssText = 'padding:10px 0;border-bottom:1px solid #dbe3ed';
+  const q = document.createElement('p');
+  q.textContent = 'You: ' + question;
+  const a = document.createElement('p');
+  a.textContent = matches.length
+    ? 'Matching Gmail records:\n' + matches.map(row => row.innerText).join('\n')
+    : 'No matching displayed record found. Click “Load Gmail messages” and try again. This search cannot read PDF contents or calculate the rate yet.';
+  answer.append(q, a);
+  history.appendChild(answer);
+  input.value = '';
+});
+</script>
+
 </html>
