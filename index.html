@@ -1,214 +1,67 @@
-```html
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b1220">
 <title>CLST Trucking AI</title>
-
 <style>
-:root {
-  --bg:#0b1220;
-  --panel:#111c2e;
-  --panel2:#17263c;
-  --border:#293a53;
-  --text:#f3f6fc;
-  --muted:#9aabc2;
-  --blue:#428cff;
-  --green:#36d99a;
-  --red:#ff727e;
-  --yellow:#ffd166;
-}
-* { box-sizing:border-box; }
-body {
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial,Helvetica,sans-serif;
-}
-button,input { font:inherit; }
-button {
-  border:0;
-  border-radius:9px;
-  padding:12px 16px;
-  font-weight:700;
-  cursor:pointer;
-}
-button:disabled { opacity:.6; cursor:wait; }
-.primary { background:var(--blue); color:white; }
-.secondary {
-  background:var(--panel2);
-  color:white;
-  border:1px solid var(--border);
-}
-header {
-  padding:22px 5%;
-  background:#0e1829;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:16px;
-  flex-wrap:wrap;
-}
-.brand { display:flex; align-items:center; gap:13px; }
-.logo {
-  width:48px;
-  height:48px;
-  display:grid;
-  place-items:center;
-  background:var(--blue);
-  border-radius:12px;
-  font-size:23px;
-  font-weight:900;
-}
-h1 { margin:0 0 5px; font-size:24px; }
-h2 { margin:0 0 8px; font-size:24px; }
-h3 { margin:0; font-size:18px; }
-.subtitle,.muted { color:var(--muted); }
-.subtitle { font-size:13px; }
-.connection { font-size:13px; color:var(--muted); }
-.dot {
-  display:inline-block;
-  width:9px;
-  height:9px;
-  border-radius:50%;
-  background:var(--yellow);
-  margin-right:7px;
-}
-main { max-width:1400px; margin:auto; padding:28px 5% 50px; }
-.welcome,.panel-heading {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:14px;
-  flex-wrap:wrap;
-}
-.welcome { margin-bottom:22px; }
-.actions { display:flex; gap:10px; flex-wrap:wrap; }
-.notice,.status {
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:14px;
-  font-size:13px;
-  line-height:1.55;
-  overflow-wrap:anywhere;
-}
-.notice { background:var(--panel2); color:var(--muted); margin-bottom:15px; }
-.status { background:var(--panel); margin-bottom:22px; }
-.status.success { color:var(--green); }
-.status.error { color:var(--red); }
-.stats {
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:15px;
-  margin-bottom:22px;
-}
-.stat,.panel {
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:13px;
-}
-.stat { padding:20px; }
-.stat-label { color:var(--muted); font-size:13px; }
-.stat-number { font-size:27px; font-weight:800; margin-top:10px; overflow-wrap:anywhere; }
-.panel { padding:20px; margin-bottom:22px; }
-.panel-heading { margin-bottom:17px; }
-.search {
-  width:100%;
-  max-width:350px;
-  background:var(--bg);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:11px;
-  color:var(--text);
-}
-.rate-grid {
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:15px;
-}
-.rate-card {
-  background:#101a2a;
-  border:1px solid var(--border);
-  border-radius:11px;
-  padding:17px;
-  min-width:0;
-}
-.rate-card h4 { margin:0 0 10px; font-size:16px; overflow-wrap:anywhere; }
-.pill {
-  display:inline-block;
-  border-radius:20px;
-  padding:5px 9px;
-  background:#24354d;
-  color:#c5d7f1;
-  font-size:11px;
-  font-weight:700;
-}
-.amount { font-size:25px; font-weight:800; margin:13px 0; }
-.detail {
-  display:grid;
-  grid-template-columns:minmax(95px, .8fr) minmax(0,1.2fr);
-  gap:12px;
-  padding:9px 0;
-  border-bottom:1px solid #24334a;
-  font-size:12px;
-  line-height:1.5;
-}
-.detail span:first-child { color:var(--muted); }
-.detail span:last-child { text-align:right; overflow-wrap:anywhere; }
-.error-box {
-  border:1px solid #713843;
-  background:#291923;
-  color:#ffb7bf;
-  padding:11px;
-  border-radius:8px;
-  font-size:12px;
-  line-height:1.5;
-  overflow-wrap:anywhere;
-  margin-top:12px;
-}
-.empty {
-  border:1px dashed var(--border);
-  color:var(--muted);
-  border-radius:10px;
-  padding:25px 15px;
-  text-align:center;
-  line-height:1.6;
-}
-table { border-collapse:collapse; width:100%; min-width:600px; }
-th,td {
-  text-align:left;
-  vertical-align:top;
-  padding:12px;
-  border-bottom:1px solid var(--border);
-  font-size:12px;
-  overflow-wrap:anywhere;
-}
-th { color:var(--muted); }
-.table-wrap { overflow-x:auto; }
-footer {
-  text-align:center;
-  color:var(--muted);
-  padding:22px;
-  border-top:1px solid var(--border);
-  font-size:12px;
-}
-@media(max-width:750px) {
-  header { padding:18px 5%; }
-  h1 { font-size:20px; }
-  main { padding-top:20px; }
-  .stats { grid-template-columns:1fr; }
-  .rate-grid { grid-template-columns:1fr; }
-  .panel { padding:15px; }
-  .actions { width:100%; }
-  .actions button { flex:1; }
-  .search { max-width:100%; }
-}
+:root{color-scheme:dark;--bg:#0b1220;--panel:#111c2e;--panel2:#17263c;--border:#293a53;--text:#f3f6fc;--muted:#9aabc2;--blue:#428cff;--green:#36d99a;--red:#ff858e;--yellow:#ffd166}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Arial,Helvetica,sans-serif}
+button,input{font:inherit}
+button{border:0;border-radius:9px;padding:12px 16px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}
+.primary{background:var(--blue);color:#fff}
+.secondary{background:var(--panel2);color:#fff;border:1px solid var(--border)}
+header{padding:22px 5%;background:#0e1829;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:13px}
+.logo{width:48px;height:48px;display:grid;place-items:center;background:var(--blue);border-radius:12px;font-size:23px;font-weight:900}
+h1{margin:0 0 5px;font-size:24px}
+h2{margin:0 0 8px;font-size:24px}
+h3{margin:0;font-size:18px}
+.subtitle,.muted,.stat-label{color:var(--muted)}
+.subtitle,.connection{font-size:13px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--yellow);margin-right:7px}
+main{max-width:1400px;margin:auto;padding:28px 5% 50px}
+.welcome,.panel-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.welcome{margin-bottom:22px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.notice,.status{border:1px solid var(--border);border-radius:10px;padding:14px;font-size:13px;line-height:1.55;overflow-wrap:anywhere}
+.notice{background:var(--panel2);color:var(--muted);margin-bottom:15px}
+.status{background:var(--panel);margin-bottom:22px}
+.status.success{color:var(--green)}
+.status.error{color:var(--red)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-bottom:22px}
+.stat,.panel{background:var(--panel);border:1px solid var(--border);border-radius:13px}
+.stat{padding:20px}
+.stat-number{font-size:27px;font-weight:800;margin-top:10px;overflow-wrap:anywhere}
+.panel{padding:20px;margin-bottom:22px}
+.panel-heading{margin-bottom:17px}
+.search{width:100%;max-width:350px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px;color:var(--text)}
+.rate-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.rate-card{background:#101a2a;border:1px solid var(--border);border-radius:11px;padding:17px;min-width:0}
+.rate-card h4{margin:0 0 10px;font-size:16px;overflow-wrap:anywhere}
+.pill{display:inline-block;border-radius:20px;padding:5px 9px;background:#24354d;color:#c5d7f1;font-size:11px;font-weight:700}
+.pill.good{color:#9cf0ce;background:#16392f}
+.pill.bad{color:#ffc1c5;background:#43232a}
+.amount{font-size:25px;font-weight:800;margin:13px 0}
+.detail{display:grid;grid-template-columns:minmax(95px,.8fr) minmax(0,1.2fr);gap:12px;padding:9px 0;border-bottom:1px solid #24334a;font-size:12px;line-height:1.5}
+.detail span:first-child{color:var(--muted)}
+.detail span:last-child{text-align:right;overflow-wrap:anywhere}
+.error-box,.warning-box{padding:11px;border-radius:8px;font-size:12px;line-height:1.5;overflow-wrap:anywhere;margin-top:12px}
+.error-box{border:1px solid #713843;background:#291923;color:#ffb7bf}
+.warning-box{border:1px solid #75602e;background:#302919;color:#ffe2a0}
+.empty{border:1px dashed var(--border);color:var(--muted);border-radius:10px;padding:25px 15px;text-align:center;line-height:1.6}
+table{border-collapse:collapse;width:100%;min-width:600px}
+th,td{text-align:left;vertical-align:top;padding:12px;border-bottom:1px solid var(--border);font-size:12px;overflow-wrap:anywhere}
+th{color:var(--muted)}
+.table-wrap{overflow-x:auto}
+footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid var(--border);font-size:12px}
+@media(max-width:750px){header{padding:18px 5%}h1{font-size:20px}main{padding-top:20px}.stats,.rate-grid{grid-template-columns:1fr}.panel{padding:15px}.actions{width:100%}.actions button{flex:1}.search{max-width:100%}}
 </style>
 </head>
-
 <body>
 <header>
   <div class="brand">
@@ -237,9 +90,8 @@ footer {
   </section>
 
   <div class="notice">
-    <strong>Secure connection:</strong> This dashboard calls the Cloudflare Pages
-    API. Your backend API key is not included in this HTML file. PDF analysis
-    is performed by your backend and Gemini.
+    <strong>Secure connection:</strong>
+    This dashboard calls the Cloudflare Pages API. Your backend API key is not included in this HTML file. PDF analysis is performed by your backend and Gemini.
   </div>
 
   <div class="status" id="status" role="status" aria-live="polite">
@@ -252,8 +104,9 @@ footer {
       <div class="stat-number" id="pdfCount">—</div>
     </div>
     <div class="stat">
-      <div class="stat-label">Verified Rate Total (USD)</div>
+      <div class="stat-label">Verified Rate Total (USD, unique loads)</div>
       <div class="stat-number" id="rateTotal">—</div>
+      <div class="muted" id="dedupeNote" style="font-size:12px;margin-top:6px"></div>
     </div>
     <div class="stat">
       <div class="stat-label">Last Updated</div>
@@ -264,9 +117,7 @@ footer {
   <section class="panel">
     <div class="panel-heading">
       <h3>Rate Confirmations</h3>
-      <input id="search" class="search" type="search"
-        placeholder="Search broker, load, pickup, delivery..."
-        aria-label="Search rate confirmations">
+      <input id="search" class="search" type="search" placeholder="Search broker, load, pickup, delivery..." aria-label="Search rate confirmations">
     </div>
     <div id="rates">
       <div class="empty">Your analyzed PDF Rate Confirmations will appear here.</div>
@@ -274,9 +125,7 @@ footer {
   </section>
 
   <section class="panel">
-    <div class="panel-heading">
-      <h3>Source Gmail Messages</h3>
-    </div>
+    <div class="panel-heading"><h3>Source Gmail Messages</h3></div>
     <div id="emails">
       <div class="empty">Email information will appear after analysis.</div>
     </div>
@@ -286,321 +135,334 @@ footer {
 <footer>CLST Trucking LLC · CLST Trucking AI</footer>
 
 <script>
-"use strict";
+'use strict';
 
 const $ = id => document.getElementById(id);
 let pdfRecords = [];
 let emailRecords = [];
 
-function escapeHtml(value) {
-  return String(value ?? "—").replace(/[&<>"']/g, c => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;",
-    '"':"&quot;", "'":"&#39;"
-  })[c]);
+function esc(v) {
+  return String(v ?? '—').replace(/[&<>"']/g, c => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[c]));
 }
 
-function get(obj, keys, fallback = "—") {
-  for (const key of keys) {
-    const value = obj?.[key];
-    if (value !== null && value !== undefined && value !== "") {
-      return value;
-    }
+function get(o, keys, fallback='—') {
+  for (const k of keys) {
+    const v = o?.[k];
+    if (v !== null && v !== undefined && v !== '') return v;
   }
   return fallback;
 }
 
-function setStatus(message, type = "") {
-  $("status").textContent = message;
-  $("status").className = "status" + (type ? " " + type : "");
+function status(msg, type='') {
+  $('status').textContent = msg;
+  $('status').className = 'status' + (type ? ' ' + type : '');
 }
 
-function setConnection(message, color = "var(--yellow)") {
-  $("connectionText").textContent = message;
-  $("dot").style.background = color;
+function connection(msg, color='var(--yellow)') {
+  $('connectionText').textContent = msg;
+  $('dot').style.background = color;
 }
 
-function money(value, currency = "USD") {
-  if (value === null || value === undefined || value === "") return "Not provided";
-  const number = typeof value === "number"
-    ? value
-    : Number(String(value).replace(/[$,\s]/g, ""));
-  if (!Number.isFinite(number)) return String(value);
+function amount(a) {
+  const raw = get(a, ['rate_amount','rateAmount','total_rate'], null);
+  if (raw === null) return null;
+  const n = typeof raw === 'number'
+    ? raw
+    : Number(String(raw).replace(/[$,\s]/g,''));
+  return Number.isFinite(n) ? n : null;
+}
+
+function money(n, currency='USD') {
+  if (n === null || n === undefined || n === '') return 'Rate unavailable';
   try {
-    return new Intl.NumberFormat("en-US", {
-      style:"currency", currency:currency || "USD"
-    }).format(number);
+    return new Intl.NumberFormat('en-US', {
+      style:'currency',
+      currency:currency || 'USD'
+    }).format(n);
   } catch {
-    return String(value);
+    return String(n);
   }
 }
 
-function parseAmount(analysis) {
-  const raw = get(analysis, ["rate_amount", "rateAmount", "total_rate"], null);
-  if (raw === null) return null;
-  const value = typeof raw === "number"
-    ? raw
-    : Number(String(raw).replace(/[$,\s]/g, ""));
-  return Number.isFinite(value) ? value : null;
-}
-
-function flattenResults(data) {
-  const output = [];
-  const emails = Array.isArray(data.rates) ? data.rates : [];
-
-  for (const emailRecord of emails) {
-    const email = emailRecord.email || {};
-    const pdfs = Array.isArray(emailRecord.pdfs) ? emailRecord.pdfs : [];
-
-    for (const pdf of pdfs) {
-      output.push({
+function flatten(data) {
+  const out = [];
+  for (const item of (Array.isArray(data.rates) ? data.rates : [])) {
+    const email = item.email || {};
+    for (const pdf of (Array.isArray(item.pdfs) ? item.pdfs : [])) {
+      out.push({
         email,
-        filename: pdf.filename || "attachment.pdf",
-        analysis: pdf.analysis || null,
-        error: pdf.error || null
+        filename:pdf.filename || 'attachment.pdf',
+        analysis:pdf.analysis || null,
+        error:pdf.error || null
       });
     }
   }
+  return out;
+}
 
-  return output;
+function loadKey(r) {
+  const a = r.analysis || {};
+  const id = String(get(a, ['load_number'], '')).trim().toLowerCase();
+  if (id && id !== '—') return 'load:' + id;
+  return 'file:' + String(r.filename || '').trim().toLowerCase();
+}
+
+/*
+ * Count each load number once in the total.
+ * If duplicate PDFs have different verified rates, do not silently
+ * choose one: flag the conflict and exclude that load from the total.
+ */
+function uniqueVerifiedLoads() {
+  const seen = new Map();
+
+  for (const r of pdfRecords) {
+    const a = r.analysis;
+    if (!a || a.rate_verified !== true) continue;
+
+    const n = amount(a);
+    if (n === null) continue;
+
+    const key = loadKey(r);
+
+    if (!seen.has(key)) {
+      seen.set(key, {
+        amount:n,
+        record:r,
+        conflict:false
+      });
+    } else {
+      const prev = seen.get(key);
+      if (prev.amount !== n) {
+        prev.conflict = true;
+        prev.otherAmount = n;
+      }
+    }
+  }
+
+  return [...seen.values()];
 }
 
 function renderStats() {
-  $("pdfCount").textContent = pdfRecords.length;
+  $('pdfCount').textContent = pdfRecords.length;
 
-  const verifiedAmounts = pdfRecords
-    .filter(record => record.analysis?.rate_verified === true)
-    .map(record => parseAmount(record.analysis))
-    .filter(amount => amount !== null);
+  const unique = uniqueVerifiedLoads();
+  const total = unique
+    .filter(x => !x.conflict)
+    .reduce((sum, x) => sum + x.amount, 0);
 
-  $("rateTotal").textContent = verifiedAmounts.length
-    ? money(verifiedAmounts.reduce((sum, amount) => sum + amount, 0))
-    : "—";
+  const countable = unique.filter(x => !x.conflict).length;
+  $('rateTotal').textContent = countable ? money(total) : '—';
 
-  $("updated").textContent = new Date().toLocaleTimeString([], {
-    hour:"2-digit", minute:"2-digit"
+  const verifiedRows = pdfRecords.filter(
+    r => r.analysis?.rate_verified === true && amount(r.analysis) !== null
+  ).length;
+
+  const duplicates = Math.max(0, verifiedRows - unique.length);
+  const conflicts = unique.filter(x => x.conflict).length;
+
+  let note = `${duplicates} duplicate record(s) excluded from the total.`;
+  if (!duplicates) note = 'Each load counted once where a load number is available.';
+  if (conflicts) note += ` ${conflicts} load(s) have conflicting rates and are excluded pending review.`;
+
+  $('dedupeNote').textContent = note;
+  $('updated').textContent = new Date().toLocaleTimeString([], {
+    hour:'2-digit',
+    minute:'2-digit'
   });
 }
 
 function renderRates() {
-  const query = $("search").value.trim().toLowerCase();
+  const q = $('search').value.trim().toLowerCase();
+  const rows = pdfRecords.filter(r => JSON.stringify(r).toLowerCase().includes(q));
 
-  const filtered = pdfRecords.filter(record =>
-    JSON.stringify(record).toLowerCase().includes(query)
-  );
-
-  if (!filtered.length) {
-    $("rates").innerHTML = `<div class="empty">${
+  if (!rows.length) {
+    $('rates').innerHTML = `<div class="empty">${
       pdfRecords.length
-        ? "No records match your search."
-        : "No PDF records were returned. Check Gmail attachments and backend errors."
+        ? 'No records match your search.'
+        : 'No PDF records returned. Check Gmail attachments and backend errors.'
     }</div>`;
     return;
   }
 
-  $("rates").innerHTML = `<div class="rate-grid">${
-    filtered.map(record => {
-      const a = record.analysis;
-      const email = record.email;
-      const amount = a ? parseAmount(a) : null;
-      const verified = a?.rate_verified === true;
-      const isRateConfirmation = a?.document_type === "rate_confirmation";
+  $('rates').innerHTML = '<div class="rate-grid">' + rows.map(r => {
+    const a = r.analysis;
+    const e = r.email || {};
+    const n = a ? amount(a) : null;
+    const verified = a?.rate_verified === true;
 
-      let details = "";
-      if (a) {
-        const fields = [
-          ["Load number", get(a, ["load_number"])],
-          ["Broker", get(a, ["broker_company"])],
-          ["Contact", get(a, ["broker_contact"])],
-          ["Broker phone", get(a, ["broker_phone"])],
-          ["Broker email", get(a, ["broker_email"])],
-          ["Pickup date", get(a, ["pickup_date"])],
-          ["Pickup time", get(a, ["pickup_time"])],
-          ["Pickup location", get(a, ["pickup_location"])],
-          ["Delivery date", get(a, ["delivery_date"])],
-          ["Delivery time", get(a, ["delivery_time"])],
-          ["Delivery location", get(a, ["delivery_location"])],
-          ["Commodity", get(a, ["commodity"])],
-          ["Weight", get(a, ["weight"])],
-          ["Equipment", get(a, ["equipment"])],
-          ["Miles", get(a, ["miles"])],
-          ["Detention terms", get(a, ["detention_terms"])],
-          ["TONU terms", get(a, ["tonu_terms"])],
-          ["Payment terms", get(a, ["payment_terms"])],
-          ["Special instructions", get(a, ["special_instructions"])],
-          ["Rate verification", verified ? "Verified in PDF" : "Not verified"],
-          ["Verification notes", get(a, ["verification_notes"])]
-        ];
+    const fields = a ? [
+      ['Load number',get(a,['load_number'])],
+      ['Broker',get(a,['broker_company'])],
+      ['Contact',get(a,['broker_contact'])],
+      ['Broker phone',get(a,['broker_phone'])],
+      ['Broker email',get(a,['broker_email'])],
+      ['Pickup date',get(a,['pickup_date'])],
+      ['Pickup time',get(a,['pickup_time'])],
+      ['Pickup location',get(a,['pickup_location'])],
+      ['Delivery date',get(a,['delivery_date'])],
+      ['Delivery time',get(a,['delivery_time'])],
+      ['Delivery location',get(a,['delivery_location'])],
+      ['Commodity',get(a,['commodity'])],
+      ['Weight',get(a,['weight'])],
+      ['Equipment',get(a,['equipment'])],
+      ['Miles',get(a,['miles'])],
+      ['Detention terms',get(a,['detention_terms'])],
+      ['TONU terms',get(a,['tonu_terms'])],
+      ['Payment terms',get(a,['payment_terms'])],
+      ['Special instructions',get(a,['special_instructions'])],
+      ['Rate verification',verified ? 'Verified in PDF' : 'Not verified'],
+      ['Verification notes',get(a,['verification_notes'])]
+    ] : [];
 
-        details = fields.map(([label, value]) => `
-          <div class="detail">
-            <span>${escapeHtml(label)}</span>
-            <span>${escapeHtml(value)}</span>
-          </div>
-        `).join("");
-      }
+    const detail = fields.map(([k,v]) =>
+      `<div class="detail"><span>${esc(k)}</span><span>${esc(v)}</span></div>`
+    ).join('');
 
-      const title = a
-        ? get(a, ["load_number"], record.filename)
-        : record.filename;
+    const title = a ? get(a,['load_number'],r.filename) : r.filename;
+    const label = r.error
+      ? 'Analysis failed'
+      : a?.document_type === 'rate_confirmation'
+        ? (verified ? 'Rate confirmation · verified' : 'Rate confirmation · unverified')
+        : get(a,['document_type'],'Document analyzed');
 
-      const rateLabel = amount !== null
-        ? money(amount, get(a, ["rate_currency"], "USD"))
-        : "Rate unavailable";
+    const duplicateCount = pdfRecords.filter(x =>
+      x !== r &&
+      loadKey(x) === loadKey(r) &&
+      x.analysis?.rate_verified === true &&
+      r.analysis?.rate_verified === true
+    ).length;
 
-      return `
-        <article class="rate-card">
-          <h4>${escapeHtml(title)}</h4>
-          <div class="pill">${
-            escapeHtml(record.error
-              ? "Analysis failed"
-              : isRateConfirmation
-                ? (verified ? "Rate confirmation · verified" : "Rate confirmation · unverified")
-                : get(a, ["document_type"], "Document analyzed"))
-          }</div>
-          <div class="amount">${escapeHtml(rateLabel)}</div>
-          <div class="detail">
-            <span>PDF file</span>
-            <span>${escapeHtml(record.filename)}</span>
-          </div>
-          <div class="detail">
-            <span>Email subject</span>
-            <span>${escapeHtml(get(email, ["subject"]))}</span>
-          </div>
-          <div class="detail">
-            <span>Email sender</span>
-            <span>${escapeHtml(get(email, ["from"]))}</span>
-          </div>
-          <div class="detail">
-            <span>Email date</span>
-            <span>${escapeHtml(get(email, ["date"]))}</span>
-          </div>
-          ${details}
-          ${record.error ? `<div class="error-box">PDF analysis error: ${escapeHtml(record.error)}</div>` : ""}
-          ${!record.error && !a ? `<div class="error-box">The backend returned no analysis for this PDF.</div>` : ""}
-        </article>`;
-    }).join("")
-  }</div>`;
+    const errorText = r.error || '';
+    const quotaProblem = /quota|rate.?limit|high demand|503|429/i.test(errorText);
+
+    return `<article class="rate-card">
+      <h4>${esc(title)}</h4>
+      <span class="pill ${r.error ? 'bad' : verified ? 'good' : ''}">${esc(label)}</span>
+      <div class="amount">${esc(n !== null ? money(n,get(a,['rate_currency'],'USD')) : 'Rate unavailable')}</div>
+      <div class="detail"><span>PDF file</span><span>${esc(r.filename)}</span></div>
+      <div class="detail"><span>Email subject</span><span>${esc(get(e,['subject']))}</span></div>
+      <div class="detail"><span>Email sender</span><span>${esc(get(e,['from']))}</span></div>
+      <div class="detail"><span>Email date</span><span>${esc(get(e,['date']))}</span></div>
+      ${detail}
+      ${duplicateCount ? '<div class="warning-box">Another verified attachment with the same load number exists. It is counted only once in the total.</div>' : ''}
+      ${r.error ? `<div class="error-box">PDF analysis error: ${esc(errorText)}${quotaProblem ? '<br><br>Gemini is temporarily busy or the API quota is exhausted. The HTML cannot remove a Gemini quota restriction; the backend/model configuration must be checked.' : ''}</div>` : ''}
+      ${!r.error && !a ? '<div class="error-box">The backend returned no analysis for this PDF.</div>' : ''}
+    </article>`;
+  }).join('') + '</div>';
 }
 
 function renderEmails() {
   if (!emailRecords.length) {
-    $("emails").innerHTML = `<div class="empty">No Gmail messages returned.</div>`;
+    $('emails').innerHTML = '<div class="empty">No Gmail messages returned.</div>';
     return;
   }
 
-  $("emails").innerHTML = `
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>Subject</th><th>From</th><th>Date</th><th>PDFs</th></tr>
-        </thead>
-        <tbody>
-          ${emailRecords.map(item => {
-            const email = item.email || {};
-            const pdfs = Array.isArray(item.pdfs) ? item.pdfs : [];
-            return `<tr>
-              <td>${escapeHtml(get(email, ["subject"]))}</td>
-              <td>${escapeHtml(get(email, ["from"]))}</td>
-              <td>${escapeHtml(get(email, ["date"]))}</td>
-              <td>${pdfs.length}</td>
-            </tr>`;
-          }).join("")}
-        </tbody>
-      </table>
-    </div>`;
+  $('emails').innerHTML = '<div class="table-wrap"><table><thead><tr><th>Subject</th><th>From</th><th>Date</th><th>PDFs</th></tr></thead><tbody>' +
+    emailRecords.map(x => {
+      const e = x.email || {};
+      const p = Array.isArray(x.pdfs) ? x.pdfs : [];
+      return `<tr>
+        <td>${esc(get(e,['subject']))}</td>
+        <td>${esc(get(e,['from']))}</td>
+        <td>${esc(get(e,['date']))}</td>
+        <td>${p.length}</td>
+      </tr>`;
+    }).join('') +
+    '</tbody></table></div>';
 }
 
-async function analyzeGmail() {
-  const button = $("analyzeBtn");
-  button.disabled = true;
-  button.textContent = "Analyzing PDFs...";
-  setStatus("Searching Gmail for PDF attachments and analyzing them with the backend.");
-  setConnection("Connecting...", "var(--yellow)");
+async function analyze() {
+  const b = $('analyzeBtn');
+  b.disabled = true;
+  b.textContent = 'Analyzing PDFs...';
+  status('Searching Gmail for PDF attachments and analyzing them with the backend.');
+  connection('Connecting...');
 
   try {
-    const response = await fetch("/api/rates?maxResults=10", {
-      method:"GET",
-      headers:{ "Accept":"application/json" },
-      cache:"no-store"
+    const res = await fetch('/api/rates?maxResults=10', {
+      headers:{Accept:'application/json'},
+      cache:'no-store'
     });
 
-    const raw = await response.text();
+    const raw = await res.text();
     let data;
 
     try {
       data = JSON.parse(raw);
     } catch {
-      throw new Error("The API did not return JSON. Check the Pages deployment and /api/rates function.");
+      throw new Error('API did not return JSON. Check the Pages deployment and /api/rates function.');
     }
 
-    if (!response.ok) {
-      throw new Error("API error " + response.status + ": " +
-        String(data.error || data.message || raw).slice(0, 500));
+    if (!res.ok) {
+      throw new Error('API error ' + res.status + ': ' +
+        String(data.error || data.message || raw).slice(0,500));
     }
 
     if (data.success === false || data.error) {
-      throw new Error(data.error || "The backend reported an error.");
+      throw new Error(data.error || 'Backend reported an error.');
     }
 
     if (!Array.isArray(data.rates)) {
-      throw new Error("Unexpected backend response: the rates array is missing.");
+      throw new Error('Unexpected backend response: missing rates array.');
     }
 
     emailRecords = data.rates;
-    pdfRecords = flattenResults(data);
+    pdfRecords = flatten(data);
 
     renderStats();
     renderRates();
     renderEmails();
 
-    const failures = pdfRecords.filter(record => record.error).length;
-    const analyzed = pdfRecords.filter(record => record.analysis).length;
+    const failed = pdfRecords.filter(r => r.error).length;
+    const done = pdfRecords.filter(r => r.analysis).length;
 
-    setConnection("Backend connected", "var(--green)");
+    connection('Backend connected','var(--green)');
 
     if (!pdfRecords.length) {
-      setStatus(
-        "Gmail was queried, but no PDF attachments were returned. Check whether the connected mailbox contains PDF attachments.",
-        ""
-      );
-    } else if (failures) {
-      setStatus(
-        `Found ${pdfRecords.length} PDF attachment(s). ${analyzed} analyzed; ${failures} failed. Open the cards to see individual errors.`,
-        "error"
+      status('Gmail was queried, but no PDF attachments were returned.');
+    } else if (failed) {
+      status(
+        `Found ${pdfRecords.length} PDF attachment(s). ${done} analyzed; ${failed} failed. The total counts each load once. Open failed cards for details.`,
+        'error'
       );
     } else {
-      setStatus(
-        `Finished: found ${pdfRecords.length} PDF attachment(s); ${analyzed} have analysis results.`,
-        "success"
+      status(
+        `Finished: ${pdfRecords.length} PDF attachment(s); ${done} analyzed. The total counts each load once.`,
+        'success'
       );
     }
-  } catch (error) {
-    console.error("CLST Trucking AI:", error);
-    setConnection("Connection error", "var(--red)");
-    setStatus(error.message || "Could not retrieve PDF data.", "error");
+  } catch (err) {
+    console.error('CLST Trucking AI:',err);
+    connection('Connection error','var(--red)');
+    status(err.message || 'Could not retrieve PDF data.','error');
   } finally {
-    button.disabled = false;
-    button.textContent = "Analyze Gmail PDFs";
+    b.disabled = false;
+    b.textContent = 'Analyze Gmail PDFs';
   }
 }
 
-function connectGmail() {
+function connect() {
   window.location.href =
-    "https://clst-gmail-backend.clsttruckingllc.workers.dev/auth/start";
+    'https://clst-gmail-backend.clsttruckingllc.workers.dev/auth/start';
 }
 
-$("analyzeBtn").addEventListener("click", analyzeGmail);
-$("connectBtn").addEventListener("click", connectGmail);
-$("search").addEventListener("input", renderRates);
+$('analyzeBtn').addEventListener('click',analyze);
+$('connectBtn').addEventListener('click',connect);
+$('search').addEventListener('input',renderRates);
 
-const params = new URLSearchParams(window.location.search);
-if (params.get("gmail") === "connected") {
-  setStatus("Gmail authorization completed. Click Analyze Gmail PDFs to retrieve your documents.", "success");
-  window.history.replaceState({}, document.title, window.location.pathname);
+const params = new URLSearchParams(location.search);
+if (params.get('gmail') === 'connected') {
+  status('Gmail authorization completed. Click Analyze Gmail PDFs to retrieve your documents.','success');
+  history.replaceState({},document.title,location.pathname);
 }
 
-setConnection("Ready", "var(--yellow)");
+connection('Ready');
 </script>
 </body>
 </html>
-```
