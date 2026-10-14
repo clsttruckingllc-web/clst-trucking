@@ -1,906 +1,606 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#102b50">
-  <title>CLST Trucking AI</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<title>CLST Trucking AI</title>
 
-  <style>
-    :root {
-      --navy: #102b50;
-      --blue: #2563eb;
-      --bg: #f3f6fa;
-      --border: #dfe6ef;
-      --muted: #64748b;
-      --text: #172334;
-      --green: #166534;
-      --red: #991b1b;
-      --amber: #92400e;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font: 15px/1.5 Arial, Helvetica, sans-serif;
-    }
-
-    header {
-      background: linear-gradient(120deg, #102b50, #174477);
-      color: white;
-      padding: 22px 18px;
-    }
-
-    .wrap {
-      max-width: 1200px;
-      margin: auto;
-      padding: 0 18px;
-    }
-
-    .head {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .logo {
-      display: grid;
-      place-items: center;
-      width: 54px;
-      height: 54px;
-      background: white;
-      color: var(--navy);
-      border-radius: 12px;
-      font-weight: 900;
-    }
-
-    h1 { margin: 0; font-size: 24px; }
-    header p { margin: 4px 0 0; color: #dbeafe; }
-    main { padding-top: 24px; padding-bottom: 30px; }
-
-    .card {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 18px;
-      box-shadow: 0 4px 14px #0f172a08;
-    }
-
-    .top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    h2 { margin: 0; font-size: 22px; }
-    h3 { margin: 0 0 8px; font-size: 17px; }
-    p { margin: 7px 0; }
-    .muted { color: var(--muted); }
-
-    button, .button {
-      cursor: pointer;
-      border: 0;
-      border-radius: 9px;
-      padding: 11px 15px;
-      font-weight: bold;
-      font-size: 14px;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-    }
-
-    button:disabled {
-      opacity: .55;
-      cursor: wait;
-    }
-
-    .primary { background: var(--blue); color: white; }
-    .primary:hover { background: #1d4ed8; }
-    .secondary { background: #eaf0f8; color: var(--navy); }
-    .outline {
-      background: white;
-      border: 1px solid var(--border);
-      color: var(--navy);
-    }
-
-    .status {
-      padding: 12px 14px;
-      margin-top: 15px;
-      background: #f1f5f9;
-      border-radius: 9px;
-      overflow-wrap: anywhere;
-    }
-
-    .status.good { background: #f0fdf4; color: var(--green); }
-    .status.bad { background: #fef2f2; color: var(--red); }
-    .status.warn { background: #fffbeb; color: var(--amber); }
-
-    .settings {
-      display: grid;
-      grid-template-columns: minmax(200px, 1fr) auto;
-      gap: 10px;
-      align-items: end;
-      margin-top: 14px;
-    }
-
-    label {
-      display: block;
-      font-size: 12px;
-      font-weight: bold;
-      color: #475569;
-      margin-bottom: 5px;
-    }
-
-    input {
-      width: 100%;
-      padding: 11px 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 9px;
-      font-size: 14px;
-      background: white;
-      color: var(--text);
-    }
-
-    input:focus {
-      outline: 2px solid #93c5fd;
-      border-color: var(--blue);
-    }
-
-    .small { font-size: 12px; }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-
-    .stat {
-      background: white;
-      border: 1px solid var(--border);
-      padding: 17px;
-      border-radius: 12px;
-    }
-
-    .stat strong {
-      display: block;
-      font-size: 27px;
-      line-height: 1.2;
-    }
-
-    .stat span { color: var(--muted); font-size: 12px; }
-
-    .table-wrap { overflow-x: auto; }
-
-    table {
-      width: 100%;
-      min-width: 650px;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 12px 10px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      vertical-align: top;
-    }
-
-    th {
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-    }
-
-    td { font-size: 13px; }
-
-    .results {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .rate-card {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 15px;
-      min-width: 0;
-    }
-
-    .rate-card h4 {
-      font-size: 16px;
-      margin: 0 0 6px;
-      overflow-wrap: anywhere;
-    }
-
-    .rate-price {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--navy);
-      margin: 10px 0;
-    }
-
-    .fields {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 9px;
-    }
-
-    .field {
-      padding: 9px;
-      background: #f8fafc;
-      border-radius: 8px;
-      min-width: 0;
-    }
-
-    .field span {
-      display: block;
-      color: var(--muted);
-      font-size: 11px;
-      margin-bottom: 3px;
-    }
-
-    .field strong {
-      font-size: 13px;
-      overflow-wrap: anywhere;
-      white-space: pre-line;
-    }
-
-    .empty {
-      padding: 24px;
-      text-align: center;
-      color: var(--muted);
-    }
-
-    .pill {
-      display: inline-block;
-      padding: 3px 7px;
-      border-radius: 6px;
-      background: #eaf0f8;
-      color: #1e3a5f;
-      font-size: 11px;
-      margin: 2px;
-      overflow-wrap: anywhere;
-    }
-
-    .chat-history {
-      min-height: 80px;
-      max-height: 360px;
-      overflow: auto;
-      padding: 12px;
-      background: #f5f8fc;
-      border-radius: 9px;
-      margin: 12px 0;
-      overflow-wrap: anywhere;
-    }
-
-    .chat-entry {
-      padding: 10px 0;
-      border-bottom: 1px solid #dbe3ed;
-      white-space: pre-line;
-    }
-
-    .chat-entry strong {
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .chat-form {
-      display: flex;
-      gap: 8px;
-    }
-
-    .chat-form input { flex: 1; min-width: 0; }
-
-    footer {
-      color: var(--muted);
-      font-size: 12px;
-      padding: 8px 0 22px;
-    }
-
-    @media (max-width: 650px) {
-      .stats { grid-template-columns: 1fr; }
-      .settings { grid-template-columns: 1fr; }
-      .chat-form { flex-direction: column; }
-      .chat-form button { width: 100%; }
-      .card { padding: 15px; }
-      h1 { font-size: 20px; }
-      .fields { grid-template-columns: 1fr 1fr; }
-    }
-  </style>
+<style>
+:root {
+  --bg:#0b1220;
+  --panel:#111c2e;
+  --panel2:#17263c;
+  --border:#293a53;
+  --text:#f3f6fc;
+  --muted:#9aabc2;
+  --blue:#428cff;
+  --green:#36d99a;
+  --red:#ff727e;
+  --yellow:#ffd166;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}
+button,input { font:inherit; }
+button {
+  border:0;
+  border-radius:9px;
+  padding:12px 16px;
+  font-weight:700;
+  cursor:pointer;
+}
+button:disabled { opacity:.6; cursor:wait; }
+.primary { background:var(--blue); color:white; }
+.secondary {
+  background:var(--panel2);
+  color:white;
+  border:1px solid var(--border);
+}
+header {
+  padding:22px 5%;
+  background:#0e1829;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.brand { display:flex; align-items:center; gap:13px; }
+.logo {
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  background:var(--blue);
+  border-radius:12px;
+  font-size:23px;
+  font-weight:900;
+}
+h1 { margin:0 0 5px; font-size:24px; }
+h2 { margin:0 0 8px; font-size:24px; }
+h3 { margin:0; font-size:18px; }
+.subtitle,.muted { color:var(--muted); }
+.subtitle { font-size:13px; }
+.connection { font-size:13px; color:var(--muted); }
+.dot {
+  display:inline-block;
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--yellow);
+  margin-right:7px;
+}
+main { max-width:1400px; margin:auto; padding:28px 5% 50px; }
+.welcome,.panel-heading {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.welcome { margin-bottom:22px; }
+.actions { display:flex; gap:10px; flex-wrap:wrap; }
+.notice,.status {
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px;
+  font-size:13px;
+  line-height:1.55;
+  overflow-wrap:anywhere;
+}
+.notice { background:var(--panel2); color:var(--muted); margin-bottom:15px; }
+.status { background:var(--panel); margin-bottom:22px; }
+.status.success { color:var(--green); }
+.status.error { color:var(--red); }
+.stats {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:15px;
+  margin-bottom:22px;
+}
+.stat,.panel {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:13px;
+}
+.stat { padding:20px; }
+.stat-label { color:var(--muted); font-size:13px; }
+.stat-number { font-size:27px; font-weight:800; margin-top:10px; overflow-wrap:anywhere; }
+.panel { padding:20px; margin-bottom:22px; }
+.panel-heading { margin-bottom:17px; }
+.search {
+  width:100%;
+  max-width:350px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:11px;
+  color:var(--text);
+}
+.rate-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:15px;
+}
+.rate-card {
+  background:#101a2a;
+  border:1px solid var(--border);
+  border-radius:11px;
+  padding:17px;
+  min-width:0;
+}
+.rate-card h4 { margin:0 0 10px; font-size:16px; overflow-wrap:anywhere; }
+.pill {
+  display:inline-block;
+  border-radius:20px;
+  padding:5px 9px;
+  background:#24354d;
+  color:#c5d7f1;
+  font-size:11px;
+  font-weight:700;
+}
+.amount { font-size:25px; font-weight:800; margin:13px 0; }
+.detail {
+  display:grid;
+  grid-template-columns:minmax(95px, .8fr) minmax(0,1.2fr);
+  gap:12px;
+  padding:9px 0;
+  border-bottom:1px solid #24334a;
+  font-size:12px;
+  line-height:1.5;
+}
+.detail span:first-child { color:var(--muted); }
+.detail span:last-child { text-align:right; overflow-wrap:anywhere; }
+.error-box {
+  border:1px solid #713843;
+  background:#291923;
+  color:#ffb7bf;
+  padding:11px;
+  border-radius:8px;
+  font-size:12px;
+  line-height:1.5;
+  overflow-wrap:anywhere;
+  margin-top:12px;
+}
+.empty {
+  border:1px dashed var(--border);
+  color:var(--muted);
+  border-radius:10px;
+  padding:25px 15px;
+  text-align:center;
+  line-height:1.6;
+}
+table { border-collapse:collapse; width:100%; min-width:600px; }
+th,td {
+  text-align:left;
+  vertical-align:top;
+  padding:12px;
+  border-bottom:1px solid var(--border);
+  font-size:12px;
+  overflow-wrap:anywhere;
+}
+th { color:var(--muted); }
+.table-wrap { overflow-x:auto; }
+footer {
+  text-align:center;
+  color:var(--muted);
+  padding:22px;
+  border-top:1px solid var(--border);
+  font-size:12px;
+}
+@media(max-width:750px) {
+  header { padding:18px 5%; }
+  h1 { font-size:20px; }
+  main { padding-top:20px; }
+  .stats { grid-template-columns:1fr; }
+  .rate-grid { grid-template-columns:1fr; }
+  .panel { padding:15px; }
+  .actions { width:100%; }
+  .actions button { flex:1; }
+  .search { max-width:100%; }
+}
+</style>
 </head>
 
 <body>
 <header>
-  <div class="wrap head">
-    <div class="logo">CLST</div>
+  <div class="brand">
+    <div class="logo">C</div>
     <div>
-      <h1>CLST Trucking LLC</h1>
-      <p>AI Operations Center · Rate Confirmation Reader</p>
+      <h1>CLST Trucking AI</h1>
+      <div class="subtitle">Intelligent trucking operations assistant</div>
     </div>
+  </div>
+  <div class="connection">
+    <span class="dot" id="dot"></span>
+    <span id="connectionText">Ready</span>
   </div>
 </header>
 
-<main class="wrap">
-
-  <section class="card">
-    <div class="top">
-      <div>
-        <h2>Rate Confirmations</h2>
-        <p class="muted">
-          Search Gmail and analyze PDF rate confirmations.
-        </p>
-      </div>
-
-      <div class="top">
-        <a
-          class="button secondary"
-          href="https://clst-gmail-backend.clsttruckingllc.workers.dev/auth/start"
-        >Connect / Reconnect Gmail</a>
-
-        <button class="primary" id="analyzeBtn" type="button">
-          Analyze Gmail PDFs
-        </button>
-      </div>
+<main>
+  <section class="welcome">
+    <div>
+      <h2>Operations Dashboard</h2>
+      <div class="muted">Gmail Rate Confirmations and PDF analysis</div>
     </div>
-
-    <div id="status" class="status" role="status" aria-live="polite">
-      Enter your existing backend API key, then click Analyze Gmail PDFs.
+    <div class="actions">
+      <button class="secondary" id="connectBtn">Connect Gmail</button>
+      <button class="primary" id="analyzeBtn">Analyze Gmail PDFs</button>
     </div>
-
-    <div class="settings">
-      <div>
-        <label for="apiKey">Cloudflare API_KEY</label>
-        <input
-          id="apiKey"
-          type="password"
-          autocomplete="off"
-          placeholder="Enter your existing API_KEY"
-        >
-      </div>
-      <button class="outline" id="toggleKey" type="button">
-        Show key
-      </button>
-    </div>
-
-    <p class="muted small">
-      Enter the value of the Cloudflare secret named API_KEY.
-      Do not enter GEMINI_API_KEY or GOOGLE_CLIENT_SECRET.
-      This page does not save the key in browser storage.
-    </p>
   </section>
+
+  <div class="notice">
+    <strong>Secure connection:</strong> This dashboard calls the Cloudflare Pages
+    API. Your backend API key is not included in this HTML file. PDF analysis
+    is performed by your backend and Gemini.
+  </div>
+
+  <div class="status" id="status" role="status" aria-live="polite">
+    Ready. Click Analyze Gmail PDFs to retrieve and analyze PDF attachments.
+  </div>
 
   <section class="stats">
     <div class="stat">
-      <strong id="total">—</strong>
-      <span>Emails checked</span>
+      <div class="stat-label">PDF Attachments</div>
+      <div class="stat-number" id="pdfCount">—</div>
     </div>
     <div class="stat">
-      <strong id="withPdf">—</strong>
-      <span>PDF attachments found</span>
+      <div class="stat-label">Verified Rate Total (USD)</div>
+      <div class="stat-number" id="rateTotal">—</div>
     </div>
     <div class="stat">
-      <strong id="loads">—</strong>
-      <span>PDFs analyzed</span>
+      <div class="stat-label">Last Updated</div>
+      <div class="stat-number" id="updated" style="font-size:19px">Not yet</div>
     </div>
   </section>
 
-  <section class="card">
-    <div class="top">
-      <div>
-        <h3>Analyzed Rate Confirmations</h3>
-        <p class="muted small">
-          Always verify extracted details against the original PDF.
-        </p>
-      </div>
-      <input
-        id="search"
-        type="search"
-        placeholder="Search load, broker, route..."
-        aria-label="Search analyzed rates"
-        style="max-width:340px"
-      >
+  <section class="panel">
+    <div class="panel-heading">
+      <h3>Rate Confirmations</h3>
+      <input id="search" class="search" type="search"
+        placeholder="Search broker, load, pickup, delivery..."
+        aria-label="Search rate confirmations">
     </div>
-
-    <div id="rateResults" class="results">
-      <div class="empty">
-        No PDFs analyzed yet. Click Analyze Gmail PDFs.
-      </div>
+    <div id="rates">
+      <div class="empty">Your analyzed PDF Rate Confirmations will appear here.</div>
     </div>
   </section>
 
-  <section class="card">
-    <h3>Gmail Messages</h3>
+  <section class="panel">
+    <div class="panel-heading">
+      <h3>Source Gmail Messages</h3>
+    </div>
+    <div id="emails">
+      <div class="empty">Email information will appear after analysis.</div>
+    </div>
+  </section>
+</main>
+
+<footer>CLST Trucking LLC · CLST Trucking AI</footer>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+let pdfRecords = [];
+let emailRecords = [];
+
+function escapeHtml(value) {
+  return String(value ?? "—").replace(/[&<>"']/g, c => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;",
+    '"':"&quot;", "'":"&#39;"
+  })[c]);
+}
+
+function get(obj, keys, fallback = "—") {
+  for (const key of keys) {
+    const value = obj?.[key];
+    if (value !== null && value !== undefined && value !== "") {
+      return value;
+    }
+  }
+  return fallback;
+}
+
+function setStatus(message, type = "") {
+  $("status").textContent = message;
+  $("status").className = "status" + (type ? " " + type : "");
+}
+
+function setConnection(message, color = "var(--yellow)") {
+  $("connectionText").textContent = message;
+  $("dot").style.background = color;
+}
+
+function money(value, currency = "USD") {
+  if (value === null || value === undefined || value === "") return "Not provided";
+  const number = typeof value === "number"
+    ? value
+    : Number(String(value).replace(/[$,\s]/g, ""));
+  if (!Number.isFinite(number)) return String(value);
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style:"currency", currency:currency || "USD"
+    }).format(number);
+  } catch {
+    return String(value);
+  }
+}
+
+function parseAmount(analysis) {
+  const raw = get(analysis, ["rate_amount", "rateAmount", "total_rate"], null);
+  if (raw === null) return null;
+  const value = typeof raw === "number"
+    ? raw
+    : Number(String(raw).replace(/[$,\s]/g, ""));
+  return Number.isFinite(value) ? value : null;
+}
+
+function flattenResults(data) {
+  const output = [];
+  const emails = Array.isArray(data.rates) ? data.rates : [];
+
+  for (const emailRecord of emails) {
+    const email = emailRecord.email || {};
+    const pdfs = Array.isArray(emailRecord.pdfs) ? emailRecord.pdfs : [];
+
+    for (const pdf of pdfs) {
+      output.push({
+        email,
+        filename: pdf.filename || "attachment.pdf",
+        analysis: pdf.analysis || null,
+        error: pdf.error || null
+      });
+    }
+  }
+
+  return output;
+}
+
+function renderStats() {
+  $("pdfCount").textContent = pdfRecords.length;
+
+  const verifiedAmounts = pdfRecords
+    .filter(record => record.analysis?.rate_verified === true)
+    .map(record => parseAmount(record.analysis))
+    .filter(amount => amount !== null);
+
+  $("rateTotal").textContent = verifiedAmounts.length
+    ? money(verifiedAmounts.reduce((sum, amount) => sum + amount, 0))
+    : "—";
+
+  $("updated").textContent = new Date().toLocaleTimeString([], {
+    hour:"2-digit", minute:"2-digit"
+  });
+}
+
+function renderRates() {
+  const query = $("search").value.trim().toLowerCase();
+
+  const filtered = pdfRecords.filter(record =>
+    JSON.stringify(record).toLowerCase().includes(query)
+  );
+
+  if (!filtered.length) {
+    $("rates").innerHTML = `<div class="empty">${
+      pdfRecords.length
+        ? "No records match your search."
+        : "No PDF records were returned. Check Gmail attachments and backend errors."
+    }</div>`;
+    return;
+  }
+
+  $("rates").innerHTML = `<div class="rate-grid">${
+    filtered.map(record => {
+      const a = record.analysis;
+      const email = record.email;
+      const amount = a ? parseAmount(a) : null;
+      const verified = a?.rate_verified === true;
+      const isRateConfirmation = a?.document_type === "rate_confirmation";
+
+      let details = "";
+      if (a) {
+        const fields = [
+          ["Load number", get(a, ["load_number"])],
+          ["Broker", get(a, ["broker_company"])],
+          ["Contact", get(a, ["broker_contact"])],
+          ["Broker phone", get(a, ["broker_phone"])],
+          ["Broker email", get(a, ["broker_email"])],
+          ["Pickup date", get(a, ["pickup_date"])],
+          ["Pickup time", get(a, ["pickup_time"])],
+          ["Pickup location", get(a, ["pickup_location"])],
+          ["Delivery date", get(a, ["delivery_date"])],
+          ["Delivery time", get(a, ["delivery_time"])],
+          ["Delivery location", get(a, ["delivery_location"])],
+          ["Commodity", get(a, ["commodity"])],
+          ["Weight", get(a, ["weight"])],
+          ["Equipment", get(a, ["equipment"])],
+          ["Miles", get(a, ["miles"])],
+          ["Detention terms", get(a, ["detention_terms"])],
+          ["TONU terms", get(a, ["tonu_terms"])],
+          ["Payment terms", get(a, ["payment_terms"])],
+          ["Special instructions", get(a, ["special_instructions"])],
+          ["Rate verification", verified ? "Verified in PDF" : "Not verified"],
+          ["Verification notes", get(a, ["verification_notes"])]
+        ];
+
+        details = fields.map(([label, value]) => `
+          <div class="detail">
+            <span>${escapeHtml(label)}</span>
+            <span>${escapeHtml(value)}</span>
+          </div>
+        `).join("");
+      }
+
+      const title = a
+        ? get(a, ["load_number"], record.filename)
+        : record.filename;
+
+      const rateLabel = amount !== null
+        ? money(amount, get(a, ["rate_currency"], "USD"))
+        : "Rate unavailable";
+
+      return `
+        <article class="rate-card">
+          <h4>${escapeHtml(title)}</h4>
+          <div class="pill">${
+            escapeHtml(record.error
+              ? "Analysis failed"
+              : isRateConfirmation
+                ? (verified ? "Rate confirmation · verified" : "Rate confirmation · unverified")
+                : get(a, ["document_type"], "Document analyzed"))
+          }</div>
+          <div class="amount">${escapeHtml(rateLabel)}</div>
+          <div class="detail">
+            <span>PDF file</span>
+            <span>${escapeHtml(record.filename)}</span>
+          </div>
+          <div class="detail">
+            <span>Email subject</span>
+            <span>${escapeHtml(get(email, ["subject"]))}</span>
+          </div>
+          <div class="detail">
+            <span>Email sender</span>
+            <span>${escapeHtml(get(email, ["from"]))}</span>
+          </div>
+          <div class="detail">
+            <span>Email date</span>
+            <span>${escapeHtml(get(email, ["date"]))}</span>
+          </div>
+          ${details}
+          ${record.error ? `<div class="error-box">PDF analysis error: ${escapeHtml(record.error)}</div>` : ""}
+          ${!record.error && !a ? `<div class="error-box">The backend returned no analysis for this PDF.</div>` : ""}
+        </article>`;
+    }).join("")
+  }</div>`;
+}
+
+function renderEmails() {
+  if (!emailRecords.length) {
+    $("emails").innerHTML = `<div class="empty">No Gmail messages returned.</div>`;
+    return;
+  }
+
+  $("emails").innerHTML = `
     <div class="table-wrap">
       <table>
         <thead>
-          <tr>
-            <th>Date</th>
-            <th>Subject</th>
-            <th>Sender</th>
-            <th>PDF attachments</th>
-          </tr>
+          <tr><th>Subject</th><th>From</th><th>Date</th><th>PDFs</th></tr>
         </thead>
-        <tbody id="messages">
-          <tr>
-            <td colspan="4" class="empty">No messages loaded yet.</td>
-          </tr>
+        <tbody>
+          ${emailRecords.map(item => {
+            const email = item.email || {};
+            const pdfs = Array.isArray(item.pdfs) ? item.pdfs : [];
+            return `<tr>
+              <td>${escapeHtml(get(email, ["subject"]))}</td>
+              <td>${escapeHtml(get(email, ["from"]))}</td>
+              <td>${escapeHtml(get(email, ["date"]))}</td>
+              <td>${pdfs.length}</td>
+            </tr>`;
+          }).join("")}
         </tbody>
       </table>
-    </div>
-  </section>
+    </div>`;
+}
 
-  <section class="card">
-    <h3>Ask CLST Trucking AI</h3>
-    <p class="muted">
-      Ask about loads, rates, brokers, pickup and delivery.
-    </p>
+async function analyzeGmail() {
+  const button = $("analyzeBtn");
+  button.disabled = true;
+  button.textContent = "Analyzing PDFs...";
+  setStatus("Searching Gmail for PDF attachments and analyzing them with the backend.");
+  setConnection("Connecting...", "var(--yellow)");
 
-    <div id="chatHistory" class="chat-history" aria-live="polite">
-      Welcome! Analyze Gmail PDFs first, then ask about a load.
-    </div>
-
-    <form id="chatForm" class="chat-form">
-      <input
-        id="question"
-        required
-        placeholder="Example: What is the rate for load 12345?"
-        aria-label="Ask about a load"
-      >
-      <button class="primary" type="submit">Ask</button>
-    </form>
-
-    <p class="muted small">
-      Answers are based on the PDF analyses loaded on this page.
-      This chat searches the extracted information; it does not independently
-      contact Gemini for every question.
-    </p>
-  </section>
-
-  <footer>
-    CLST Trucking AI · Phase 1 · Gmail Rate Confirmations
-  </footer>
-</main>
-
-<script>
-(() => {
-  "use strict";
-
-  const WORKER_URL =
-    "https://clst-gmail-backend.clsttruckingllc.workers.dev";
-
-  const $ = id => document.getElementById(id);
-
-  let emailRecords = [];
-  let isBusy = false;
-
-  function setStatus(message, type = "") {
-    const el = $("status");
-    el.textContent = message;
-    el.className = "status" + (type ? " " + type : "");
-  }
-
-  function text(value) {
-    if (value === undefined || value === null || value === "") {
-      return "Not provided";
-    }
-    return String(value);
-  }
-
-  function getEmail(record) {
-    return record && record.email ? record.email : {};
-  }
-
-  function getPdfs(record) {
-    return Array.isArray(record && record.pdfs) ? record.pdfs : [];
-  }
-
-  function getAnalysis(pdf) {
-    return pdf && pdf.analysis && typeof pdf.analysis === "object"
-      ? pdf.analysis
-      : {};
-  }
-
-  function field(obj, ...names) {
-    for (const name of names) {
-      const value = obj && obj[name];
-      if (value !== undefined && value !== null &&
-          String(value).trim() !== "") {
-        return String(value);
-      }
-    }
-    return "";
-  }
-
-  function dateText(value) {
-    if (!value) return "—";
-    const date = new Date(value);
-    return Number.isNaN(date.getTime())
-      ? String(value)
-      : date.toLocaleString();
-  }
-
-  function pdfName(pdf) {
-    return pdf && pdf.filename ? pdf.filename : "Rate confirmation PDF";
-  }
-
-  function rateText(a) {
-    const rate = field(a, "rate_total", "total_rate", "rate", "total");
-    const currency = field(a, "currency");
-
-    if (!rate) return "Rate not found";
-
-    if (currency && !rate.toUpperCase().includes(currency.toUpperCase())) {
-      return currency + " " + rate;
-    }
-
-    return rate;
-  }
-
-  function allPdfItems() {
-    const items = [];
-
-    for (const record of emailRecords) {
-      for (const pdf of getPdfs(record)) {
-        items.push({ record, pdf });
-      }
-    }
-
-    return items;
-  }
-
-  function createField(label, value) {
-    const box = document.createElement("div");
-    box.className = "field";
-
-    const caption = document.createElement("span");
-    caption.textContent = label;
-
-    const content = document.createElement("strong");
-    content.textContent = text(value);
-
-    box.append(caption, content);
-    return box;
-  }
-
-  function renderRates() {
-    const root = $("rateResults");
-    const query = $("search").value.trim().toLowerCase();
-
-    root.replaceChildren();
-
-    const items = allPdfItems().filter(item => {
-      return !query ||
-        JSON.stringify(item).toLowerCase().includes(query);
+  try {
+    const response = await fetch("/api/rates?maxResults=10", {
+      method:"GET",
+      headers:{ "Accept":"application/json" },
+      cache:"no-store"
     });
 
-    if (!items.length) {
-      const empty = document.createElement("div");
-      empty.className = "empty";
-      empty.textContent = emailRecords.length
-        ? "No PDF results match your search."
-        : "No PDFs analyzed yet. Click Analyze Gmail PDFs.";
-      root.appendChild(empty);
-      return;
-    }
-
-    for (const item of items) {
-      const record = item.record;
-      const pdf = item.pdf;
-      const email = getEmail(record);
-      const a = getAnalysis(pdf);
-
-      const card = document.createElement("article");
-      card.className = "rate-card";
-
-      const title = document.createElement("h4");
-      title.textContent =
-        field(a, "load_number", "load_id", "loadNumber") ||
-        pdfName(pdf);
-
-      const meta = document.createElement("p");
-      meta.className = "muted small";
-      meta.textContent =
-        (field(a, "broker") || email.from || "Broker not identified") +
-        " · " + dateText(email.date);
-
-      const price = document.createElement("div");
-      price.className = "rate-price";
-      price.textContent = rateText(a);
-
-      const fields = document.createElement("div");
-      fields.className = "fields";
-
-      fields.append(
-        createField("Pickup", [
-          field(a, "pickup_date"),
-          field(a, "pickup_time"),
-          field(a, "pickup_location")
-        ].filter(Boolean).join(" · ")),
-
-        createField("Delivery", [
-          field(a, "delivery_date"),
-          field(a, "delivery_time"),
-          field(a, "delivery_location")
-        ].filter(Boolean).join(" · ")),
-
-        createField("Broker phone", field(a, "broker_phone")),
-        createField("Broker email", field(a, "broker_email")),
-
-        createField("Commodity / weight", [
-          field(a, "commodity"),
-          field(a, "weight")
-        ].filter(Boolean).join(" · ")),
-
-        createField("Equipment", field(a, "equipment")),
-        createField("Detention terms", field(a, "detention_terms")),
-        createField("TONU terms", field(a, "tonu_terms"))
-      );
-
-      card.append(title, meta, price, fields);
-
-      if (a.special_instructions) {
-        const note = document.createElement("p");
-        note.className = "small";
-        note.textContent = "Instructions: " + a.special_instructions;
-        card.appendChild(note);
-      }
-
-      if (Array.isArray(a.missing_or_unclear) &&
-          a.missing_or_unclear.length) {
-        const missing = document.createElement("p");
-        missing.className = "muted small";
-        missing.textContent =
-          "Missing or unclear: " + a.missing_or_unclear.join(", ");
-        card.appendChild(missing);
-      }
-
-      if (pdf.error) {
-        const error = document.createElement("p");
-        error.className = "small";
-        error.style.color = "var(--red)";
-        error.textContent = "PDF analysis error: " + pdf.error;
-        card.appendChild(error);
-      }
-
-      const mail = document.createElement("p");
-      mail.className = "muted small";
-      mail.textContent =
-        "Email: " + (email.subject || "(No subject)") +
-        " · PDF: " + pdfName(pdf);
-      card.appendChild(mail);
-
-      root.appendChild(card);
-    }
-  }
-
-  function renderEmails() {
-    const root = $("messages");
-    root.replaceChildren();
-
-    if (!emailRecords.length) {
-      const row = document.createElement("tr");
-      const cell = document.createElement("td");
-      cell.colSpan = 4;
-      cell.className = "empty";
-      cell.textContent = "No messages loaded.";
-      row.appendChild(cell);
-      root.appendChild(row);
-      return;
-    }
-
-    for (const record of emailRecords) {
-      const email = getEmail(record);
-      const pdfs = getPdfs(record);
-      const row = document.createElement("tr");
-
-      for (const value of [
-        dateText(email.date),
-        email.subject || "(No subject)",
-        email.from || "—"
-      ]) {
-        const cell = document.createElement("td");
-        cell.textContent = value;
-        row.appendChild(cell);
-      }
-
-      const attachmentCell = document.createElement("td");
-
-      if (!pdfs.length) {
-        attachmentCell.textContent = "No PDF attachment detected";
-      } else {
-        for (const pdf of pdfs) {
-          const pill = document.createElement("span");
-          pill.className = "pill";
-          pill.textContent =
-            pdfName(pdf) +
-            (pdf.error ? " · Error" : pdf.analysis ? " · Analyzed" : "");
-          attachmentCell.appendChild(pill);
-        }
-      }
-
-      row.appendChild(attachmentCell);
-      root.appendChild(row);
-    }
-  }
-
-  async function analyzeGmail() {
-    if (isBusy) return;
-
-    const apiKey = $("apiKey").value.trim();
-
-    if (!apiKey) {
-      setStatus(
-        "Enter the existing Cloudflare API_KEY value. Do not use your Gemini key or Google Client Secret.",
-        "warn"
-      );
-      $("apiKey").focus();
-      return;
-    }
-
-    isBusy = true;
-    $("analyzeBtn").disabled = true;
-
-    setStatus("Searching Gmail and analyzing PDF attachments. Please wait...");
+    const raw = await response.text();
+    let data;
 
     try {
-      const response = await fetch(
-        WORKER_URL + "/api/rates?maxResults=10",
-        {
-          method: "GET",
-          headers: {
-            "Accept": "application/json",
-            "Authorization": "Bearer " + apiKey
-          },
-          cache: "no-store"
-        }
-      );
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok || data.error || data.success === false) {
-        if (response.status === 401) {
-          throw new Error(
-            "Unauthorized. The entered key does not match the Cloudflare API_KEY secret."
-          );
-        }
-
-        throw new Error(
-          data.error || data.message || "Request failed: " + response.status
-        );
-      }
-
-      emailRecords = Array.isArray(data.rates) ? data.rates : [];
-
-      const pdfs = allPdfItems();
-
-      $("total").textContent = emailRecords.length;
-      $("withPdf").textContent = pdfs.length;
-      $("loads").textContent = pdfs.filter(item =>
-        item.pdf &&
-        item.pdf.analysis &&
-        !item.pdf.error
-      ).length;
-
-      renderEmails();
-      renderRates();
-
-      const successCount = pdfs.filter(item =>
-        item.pdf && item.pdf.analysis && !item.pdf.error
-      ).length;
-
-      const errorCount = pdfs.filter(item => item.pdf && item.pdf.error).length;
-
-      setStatus(
-        "Finished. Checked " + emailRecords.length +
-        " emails; found " + pdfs.length +
-        " PDF attachments; successfully analyzed " + successCount +
-        (errorCount ? "; " + errorCount + " attachment(s) had errors." : "."),
-        errorCount ? "warn" : "good"
-      );
-
-    } catch (error) {
-      setStatus(
-        "Could not analyze Gmail PDFs: " +
-        (error && error.message ? error.message : String(error)),
-        "bad"
-      );
-    } finally {
-      isBusy = false;
-      $("analyzeBtn").disabled = false;
+      data = JSON.parse(raw);
+    } catch {
+      throw new Error("The API did not return JSON. Check the Pages deployment and /api/rates function.");
     }
-  }
 
-  function askQuestion(question) {
-    const cleaned = question.trim();
-    if (!cleaned) return;
+    if (!response.ok) {
+      throw new Error("API error " + response.status + ": " +
+        String(data.error || data.message || raw).slice(0, 500));
+    }
 
-    const entry = document.createElement("div");
-    entry.className = "chat-entry";
+    if (data.success === false || data.error) {
+      throw new Error(data.error || "The backend reported an error.");
+    }
 
-    const prompt = document.createElement("strong");
-    prompt.textContent = "You: " + cleaned;
+    if (!Array.isArray(data.rates)) {
+      throw new Error("Unexpected backend response: the rates array is missing.");
+    }
 
-    const answer = document.createElement("div");
-    const searchable = allPdfItems();
+    emailRecords = data.rates;
+    pdfRecords = flattenResults(data);
 
-    if (!emailRecords.length) {
-      answer.textContent =
-        "First click Analyze Gmail PDFs to load the rate confirmations.";
+    renderStats();
+    renderRates();
+    renderEmails();
+
+    const failures = pdfRecords.filter(record => record.error).length;
+    const analyzed = pdfRecords.filter(record => record.analysis).length;
+
+    setConnection("Backend connected", "var(--green)");
+
+    if (!pdfRecords.length) {
+      setStatus(
+        "Gmail was queried, but no PDF attachments were returned. Check whether the connected mailbox contains PDF attachments.",
+        ""
+      );
+    } else if (failures) {
+      setStatus(
+        `Found ${pdfRecords.length} PDF attachment(s). ${analyzed} analyzed; ${failures} failed. Open the cards to see individual errors.`,
+        "error"
+      );
     } else {
-      const terms = cleaned.toLowerCase()
-        .split(/\s+/)
-        .filter(term => term.length > 2);
-
-      const matches = searchable.filter(item => {
-        const fullText = JSON.stringify(item).toLowerCase();
-        return terms.some(term => fullText.includes(term));
-      });
-
-      if (!matches.length) {
-        answer.textContent =
-          "I could not find matching information in the loaded PDF analyses. " +
-          "Try a load number, broker name, or refresh the Gmail results.";
-      } else {
-        answer.textContent = matches.slice(0, 5).map(item => {
-          const email = getEmail(item.record);
-          const a = getAnalysis(item.pdf);
-
-          return [
-            "Load: " + (field(a, "load_number") || "Not found"),
-            "Broker: " + (field(a, "broker") || email.from || "Not found"),
-            "Rate: " + rateText(a),
-            "Pickup: " + [
-              field(a, "pickup_date"),
-              field(a, "pickup_time"),
-              field(a, "pickup_location")
-            ].filter(Boolean).join(" · "),
-            "Delivery: " + [
-              field(a, "delivery_date"),
-              field(a, "delivery_time"),
-              field(a, "delivery_location")
-            ].filter(Boolean).join(" · "),
-            "PDF: " + pdfName(item.pdf),
-            "Email subject: " + (email.subject || "Not provided"),
-            "Instructions: " +
-              (field(a, "special_instructions") || "Not provided"),
-            "Verify the details against the original PDF."
-          ].join("\n");
-        }).join("\n\n--------------------\n\n");
-      }
+      setStatus(
+        `Finished: found ${pdfRecords.length} PDF attachment(s); ${analyzed} have analysis results.`,
+        "success"
+      );
     }
-
-    entry.append(prompt, answer);
-    $("chatHistory").appendChild(entry);
-    $("chatHistory").scrollTop = $("chatHistory").scrollHeight;
+  } catch (error) {
+    console.error("CLST Trucking AI:", error);
+    setConnection("Connection error", "var(--red)");
+    setStatus(error.message || "Could not retrieve PDF data.", "error");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Analyze Gmail PDFs";
   }
+}
 
-  $("analyzeBtn").addEventListener("click", analyzeGmail);
+function connectGmail() {
+  window.location.href =
+    "https://clst-gmail-backend.clsttruckingllc.workers.dev/auth/start";
+}
 
-  $("toggleKey").addEventListener("click", () => {
-    const input = $("apiKey");
-    const show = input.type === "password";
-    input.type = show ? "text" : "password";
-    $("toggleKey").textContent = show ? "Hide key" : "Show key";
-  });
+$("analyzeBtn").addEventListener("click", analyzeGmail);
+$("connectBtn").addEventListener("click", connectGmail);
+$("search").addEventListener("input", renderRates);
 
-  $("search").addEventListener("input", renderRates);
+const params = new URLSearchParams(window.location.search);
+if (params.get("gmail") === "connected") {
+  setStatus("Gmail authorization completed. Click Analyze Gmail PDFs to retrieve your documents.", "success");
+  window.history.replaceState({}, document.title, window.location.pathname);
+}
 
-  $("chatForm").addEventListener("submit", event => {
-    event.preventDefault();
-    askQuestion($("question").value);
-    $("question").value = "";
-  });
-})();
+setConnection("Ready", "var(--yellow)");
 </script>
 </body>
 </html>
+```
