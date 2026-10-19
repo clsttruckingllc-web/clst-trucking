@@ -1,4 +1,6 @@
 
+ // Redeploy to apply RingCentral environment secrets
+
 export async function onRequest({ request, env }) {
   const headers = {
     "Content-Type": "application/json; charset=utf-8",
@@ -12,20 +14,27 @@ export async function onRequest({ request, env }) {
     );
   }
 
-  if (!env.RINGCENTRAL_TEST_KEY ||
-      request.headers.get("X-Test-Key") !== env.RINGCENTRAL_TEST_KEY) {
+  if (
+    !env.RINGCENTRAL_TEST_KEY ||
+    request.headers.get("X-Test-Key") !== env.RINGCENTRAL_TEST_KEY
+  ) {
     return Response.json(
       { error: "Unauthorized" },
       { status: 401, headers }
     );
   }
 
-  const { RINGCENTRAL_JWT, RINGCENTRAL_CLIENT_ID,
-          RINGCENTRAL_CLIENT_SECRET } = env;
+  const {
+    RINGCENTRAL_JWT,
+    RINGCENTRAL_CLIENT_ID,
+    RINGCENTRAL_CLIENT_SECRET
+  } = env;
 
-  if (!RINGCENTRAL_JWT ||
-      !RINGCENTRAL_CLIENT_ID ||
-      !RINGCENTRAL_CLIENT_SECRET) {
+  if (
+    !RINGCENTRAL_JWT ||
+    !RINGCENTRAL_CLIENT_ID ||
+    !RINGCENTRAL_CLIENT_SECRET
+  ) {
     return Response.json(
       { error: "Missing RingCentral environment secrets." },
       { status: 500, headers }
@@ -59,7 +68,8 @@ export async function onRequest({ request, env }) {
           service: "CLST Trucking AI - RingCentral",
           status: "authentication_failed",
           ringcentral_status: tokenResponse.status,
-          message: "RingCentral authentication failed. Check the configured credentials."
+          message:
+            "RingCentral authentication failed. Check the configured credentials."
         },
         { status: 502, headers }
       );
@@ -83,7 +93,8 @@ export async function onRequest({ request, env }) {
           service: "CLST Trucking AI - RingCentral",
           status: "api_test_failed",
           ringcentral_status: apiResponse.status,
-          message: "Authentication succeeded, but the API test failed."
+          message:
+            "Authentication succeeded, but the API test failed."
         },
         { status: 502, headers }
       );
