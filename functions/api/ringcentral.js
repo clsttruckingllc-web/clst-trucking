@@ -1,5 +1,5 @@
 
- // Redeploy to apply RingCentral environment secrets
+ // Redeploy after updating RingCentral test key
 
 export async function onRequest({ request, env }) {
   const headers = {
