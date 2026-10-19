@@ -67,55 +67,81 @@ export async function onRequest({ request, env }) {
     }
 
     const tokenData = await tokenResponse.json();
+    const accessToken = tokenData.access_token;
 
-    const apiResponse = await fetch(
+    const apiHeaders = {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: "application/json"
+    };
+
+    const extensionResponse = await fetch(
       "https://platform.ringcentral.com/restapi/v1.0/account/~/extension/~",
-      {
-        headers: {
-          Authorization: `Bearer ${tokenData.access_token}`,
-          Accept: "application/json"
-        }
-      }
+      { headers: apiHeaders }
     );
 
-    if (!apiResponse.ok) {
-      const errorText = await apiResponse.text();
-      let safeError;
+    if (!extensionResponse.ok) {
+      return reply({
+        service: "CLST Trucking AI - RingCentral",
+        status: "extension_lookup_failed",
+        ringcentral_status: extensionResponse.status,
+        message: "Could not retrieve the authorized extension."
+      }, 502);
+    }
+
+    const extension = await extensionResponse.json();
+
+    const devicesResponse = await fetch(
+      "https://platform.ringcentral.com/restapi/v1.0/account/~/extension/~/device?page=1&perPage=100",
+      { headers: apiHeaders }
+    );
+
+    if (!devicesResponse.ok) {
+      let errorCode = null;
+      let errorMessage = null;
 
       try {
-        const parsed = JSON.parse(errorText);
-        safeError = {
-          error: parsed.error || null,
-          errors: Array.isArray(parsed.errors)
-            ? parsed.errors.map(item => ({
-                errorCode: item.errorCode || null,
-                message: item.message || null
-              }))
-            : [],
-          message: parsed.message || null
-        };
+        const errorData = await devicesResponse.json();
+        errorCode = errorData.error || null;
+        errorMessage = errorData.message || null;
       } catch {
-        safeError = {
-          message: "RingCentral returned a non-JSON error response."
-        };
+        // Do not expose raw error responses.
       }
 
       return reply({
         service: "CLST Trucking AI - RingCentral",
-        status: "api_test_failed",
-        ringcentral_status: apiResponse.status,
-        ringcentral_error: safeError
-      }, 502);
+        status: "connected_devices_lookup_failed",
+        message: "RingCentral authentication succeeded, but the device list could not be retrieved.",
+        extension_id: extension.id,
+        extension_name: extension.name,
+        ringcentral_status: devicesResponse.status,
+        ringcentral_error: {
+          code: errorCode,
+          message: errorMessage
+        }
+      });
     }
 
-    const account = await apiResponse.json();
+    const deviceData = await devicesResponse.json();
+
+    const devices = (deviceData.records || []).map(device => ({
+      id: device.id ?? null,
+      name: device.name ?? device.model?.name ?? "Unnamed device",
+      type: device.type ?? "Unknown",
+      status: device.status ?? "Unknown",
+      extension_number: device.extension?.extensionNumber ?? null,
+      line_type: (device.phoneLines || [])
+        .map(line => line.lineType)
+        .filter(Boolean)
+    }));
 
     return reply({
       service: "CLST Trucking AI - RingCentral",
       status: "connected",
       message: "RingCentral API connection successful.",
-      extension_id: account.id,
-      extension_name: account.name
+      extension_id: extension.id,
+      extension_name: extension.name,
+      device_count: devices.length,
+      devices
     });
   } catch {
     return reply({
