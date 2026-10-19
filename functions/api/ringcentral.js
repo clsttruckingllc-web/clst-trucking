@@ -1,27 +1,22 @@
 
- // Redeploy after updating RingCentral test key
-
 export async function onRequest({ request, env }) {
   const headers = {
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store"
   };
 
+  const reply = (data, status = 200) =>
+    Response.json(data, { status, headers });
+
   if (request.method !== "POST") {
-    return Response.json(
-      { error: "Method not allowed. Use POST." },
-      { status: 405, headers }
-    );
+    return reply({ error: "Method not allowed. Use POST." }, 405);
   }
 
   if (
     !env.RINGCENTRAL_TEST_KEY ||
     request.headers.get("X-Test-Key") !== env.RINGCENTRAL_TEST_KEY
   ) {
-    return Response.json(
-      { error: "Unauthorized" },
-      { status: 401, headers }
-    );
+    return reply({ error: "Unauthorized" }, 401);
   }
 
   const {
@@ -35,10 +30,10 @@ export async function onRequest({ request, env }) {
     !RINGCENTRAL_CLIENT_ID ||
     !RINGCENTRAL_CLIENT_SECRET
   ) {
-    return Response.json(
-      { error: "Missing RingCentral environment secrets." },
-      { status: 500, headers }
-    );
+    return reply({
+      status: "configuration_error",
+      message: "Required RingCentral secrets are missing."
+    }, 500);
   }
 
   try {
@@ -51,7 +46,7 @@ export async function onRequest({ request, env }) {
       {
         method: "POST",
         headers: {
-          "Authorization": `Basic ${credentials}`,
+          Authorization: `Basic ${credentials}`,
           "Content-Type": "application/x-www-form-urlencoded"
         },
         body: new URLSearchParams({
@@ -63,16 +58,12 @@ export async function onRequest({ request, env }) {
     );
 
     if (!tokenResponse.ok) {
-      return Response.json(
-        {
-          service: "CLST Trucking AI - RingCentral",
-          status: "authentication_failed",
-          ringcentral_status: tokenResponse.status,
-          message:
-            "RingCentral authentication failed. Check the configured credentials."
-        },
-        { status: 502, headers }
-      );
+      return reply({
+        service: "CLST Trucking AI - RingCentral",
+        status: "authentication_failed",
+        ringcentral_status: tokenResponse.status,
+        message: "RingCentral token request failed."
+      }, 502);
     }
 
     const tokenData = await tokenResponse.json();
@@ -81,45 +72,56 @@ export async function onRequest({ request, env }) {
       "https://platform.ringcentral.com/restapi/v1.0/account/~/extension/~",
       {
         headers: {
-          "Authorization": `Bearer ${tokenData.access_token}`,
-          "Accept": "application/json"
+          Authorization: `Bearer ${tokenData.access_token}`,
+          Accept: "application/json"
         }
       }
     );
 
     if (!apiResponse.ok) {
-      return Response.json(
-        {
-          service: "CLST Trucking AI - RingCentral",
-          status: "api_test_failed",
-          ringcentral_status: apiResponse.status,
-          message:
-            "Authentication succeeded, but the API test failed."
-        },
-        { status: 502, headers }
-      );
+      const errorText = await apiResponse.text();
+      let safeError;
+
+      try {
+        const parsed = JSON.parse(errorText);
+        safeError = {
+          error: parsed.error || null,
+          errors: Array.isArray(parsed.errors)
+            ? parsed.errors.map(item => ({
+                errorCode: item.errorCode || null,
+                message: item.message || null
+              }))
+            : [],
+          message: parsed.message || null
+        };
+      } catch {
+        safeError = {
+          message: "RingCentral returned a non-JSON error response."
+        };
+      }
+
+      return reply({
+        service: "CLST Trucking AI - RingCentral",
+        status: "api_test_failed",
+        ringcentral_status: apiResponse.status,
+        ringcentral_error: safeError
+      }, 502);
     }
 
     const account = await apiResponse.json();
 
-    return Response.json(
-      {
-        service: "CLST Trucking AI - RingCentral",
-        status: "connected",
-        message: "RingCentral API connection successful.",
-        extension_id: account.id,
-        extension_name: account.name
-      },
-      { status: 200, headers }
-    );
+    return reply({
+      service: "CLST Trucking AI - RingCentral",
+      status: "connected",
+      message: "RingCentral API connection successful.",
+      extension_id: account.id,
+      extension_name: account.name
+    });
   } catch {
-    return Response.json(
-      {
-        service: "CLST Trucking AI - RingCentral",
-        status: "error",
-        message: "Could not connect to RingCentral."
-      },
-      { status: 502, headers }
-    );
+    return reply({
+      service: "CLST Trucking AI - RingCentral",
+      status: "error",
+      message: "Could not connect to RingCentral."
+    }, 502);
   }
 }
