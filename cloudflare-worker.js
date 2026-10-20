@@ -15,7 +15,7 @@ export default { async fetch(req, env) {
   try {
     let r;
     if (url.pathname === "/" && req.method === "GET") {
-      r = json({service:"CLST Trucking AI Gmail Backend",status:"running",gmailConnected:!!(await env.TOKENS.get("google_refresh_token")),pdfAnalysis:!!env.GEMINI_API_KEY,geminiModel:env.GEMINI_MODEL||MODEL,ringcentralConfigured:!!(env.RINGCENTRAL_CLIENT_ID&&env.RINGCENTRAL_CLIENT_SECRET&&env.RINGCENTRAL_JWT),endpoints:["/auth/start","/oauth/callback","/api/messages","/api/rates","/api/ask","/api/models","/api/ringcentral/test"]});
+      r = json({service:"CLST Trucking AI Gmail Backend",status:"running",gmailConnected:!!(await env.TOKENS.get("google_refresh_token")),pdfAnalysis:!!env.GEMINI_API_KEY,geminiModel:env.GEMINI_MODEL||MODEL,ringcentralConfigured:!!(env.RINGCENTRAL_CLIENT_ID&&env.RINGCENTRAL_CLIENT_SECRET&&env.RINGCENTRAL_JWT),endpoints:["/auth/start","/oauth/callback","/api/messages","/api/rates","/api/ask","/api/ringcentral/ask","/api/models","/api/ringcentral/test"]});
     } else if (url.pathname === "/auth/start" && req.method === "GET") r = await oauthStart(req,env);
     else if (url.pathname === "/oauth/callback" && req.method === "GET") r = await oauthFinish(req,env);
     else if (url.pathname.startsWith("/api/")) {
@@ -25,7 +25,7 @@ export default { async fetch(req, env) {
       else if (url.pathname === "/api/messages" && req.method === "GET") r=await messages(url,env);
       else if (url.pathname === "/api/rates" && req.method === "GET") r=await rates(url,env);
       else if (url.pathname === "/api/rates" && req.method === "POST") r=await oneRate(req,env);
-      else if (url.pathname === "/api/ask" && req.method === "POST") r=await ask(req,env);
+      else if ((url.pathname === "/api/ask" || url.pathname === "/api/ringcentral/ask") && req.method === "POST") r=await ask(req,env);
       else if (url.pathname === "/api/ringcentral/test" && req.method === "GET") r=await rcTest(env);
       else if (url.pathname === "/api/ringcentral/sip-check" && req.method === "POST") r=await rcDevices(env);
       else r=json({error:"Endpoint not found or method not allowed"},404);
