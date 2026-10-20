@@ -104,9 +104,17 @@ async function analyzePdf(env,bytes,name,subject){
  let a;try{a=JSON.parse(cleanJson(raw));}catch(e){throw Error("Gemini returned invalid JSON; retry this PDF.");}return normalize(a);
 }
 async function fullMessage(env,id,token){return gmail(env,"/messages/"+encodeURIComponent(id)+"?format=full",token);}
+// Cache successful PDF extraction results so repeat questions do not pay for another Gemini analysis.
+async function analyzePdfCached(env,msgId,pdf,bytes,name,subject){
+ const key="pdf_analysis_v1:"+String(msgId)+":"+String(pdf.id);
+ try{const cached=await env.TOKENS.get(key);if(cached){const parsed=JSON.parse(cached);if(parsed&&parsed.document_type)return parsed;}}catch(e){}
+ const result=await analyzePdf(env,bytes,name,subject);
+ try{await env.TOKENS.put(key,JSON.stringify(result),{expirationTtl:30*24*60*60});}catch(e){}
+ return result;
+}
 async function analyzeMessage(env,m,max=3,token){
  const e=meta(m),out=[];
- for(const p of pdfs(m.payload).slice(0,max)){try{out.push({filename:p.filename,analysis:await analyzePdf(env,await getPdf(env,m.id,p,token),p.filename,e.subject),error:null});}catch(err){out.push({filename:p.filename,analysis:null,error:errText(err)});}}
+ for(const p of pdfs(m.payload).slice(0,max)){try{out.push({filename:p.filename,analysis:await analyzePdfCached(env,m.id,p,await getPdf(env,m.id,p,token),p.filename,e.subject),error:null});}catch(err){out.push({filename:p.filename,analysis:null,error:errText(err)});}}
  return{email:e,pdfs:out};
 }
 async function rates(url,env){
@@ -126,8 +134,13 @@ function textParts(p,out=[]){
  for(const x of p.parts||[])textParts(x,out);return out;
 }
 function queryFor(q){
- const words=String(q||"").toLowerCase().match(/[a-z0-9@._-]+/g)||[],skip=["what","when","where","which","show","tell","find","rate","load","from","with","that","this","have","does","please","about","give","your","company"];
- const useful=words.filter(x=>x.length>=4&&!skip.includes(x)).slice(0,5);return useful.length?"newer_than:180d {"+useful.map(x=>'"'+x+'"').join(" ")+"}":"newer_than:90d";
+ const raw=String(q||"").trim();
+ // A numeric load number is the strongest search key; avoid broad Gmail scans.
+ const loadMatch=raw.match(/\\b(?:load\\s*(?:number|#)?\\s*)?(\\d{5,})\\b/i);
+ if(loadMatch)return 'newer_than:365d "'+loadMatch[1]+'"';
+ const words=raw.toLowerCase().match(/[a-z0-9@._-]+/g)||[],skip=["what","when","where","which","show","tell","find","rate","load","from","with","that","this","have","does","please","about","give","your","company","details","detail"];
+ const useful=words.filter(x=>x.length>=4&&!skip.includes(x)).slice(0,4);
+ return useful.length?"newer_than:180d {"+useful.map(x=>'"'+x+'"').join(" ")+"}":"newer_than:90d";
 }
 async function ask(req,env){
  let b;try{b=await req.json();}catch(e){return json({error:"Request body must be JSON."},400);}
@@ -138,7 +151,7 @@ async function ask(req,env){
   ctx.push("EMAIL: "+e.subject+"\nFROM: "+e.from+"\nDATE: "+e.date+"\nBODY: "+body);
   // Analyze attached PDFs for load-detail questions, not only rate questions.
   if(ps.length&&/rate|pay|paid|amount|load|confirmation|pickup|delivery|broker|detention|tonu|total|detail|details|weight|commodity|equipment|miles|instructions|where|when|appointment|shipper|receiver/i.test(question)){
-   for(const p of ps.slice(0,3)){try{ctx.push("PDF ANALYSIS "+p.filename+": "+JSON.stringify(await analyzePdf(env,await getPdf(env,m.id,p,token),p.filename,e.subject)));}catch(err){ctx.push("PDF analysis error "+p.filename+": "+errText(err));}}
+   for(const p of ps.slice(0,2)){try{ctx.push("PDF ANALYSIS "+p.filename+": "+JSON.stringify(await analyzePdfCached(env,m.id,p,await getPdf(env,m.id,p,token),p.filename,e.subject)));}catch(err){ctx.push("PDF analysis error "+p.filename+": "+errText(err));}}
   }
   sources.push({id:e.id,subject:e.subject,from:e.from,date:e.date,hasPdf:ps.length>0});
  }catch(e){}}
