@@ -58,12 +58,25 @@ export async function onRequest({ request, env }) {
 
     const activeData = await activeResponse.json().catch(() => ({}));
     if (!activeResponse.ok) {
+      // Return only safe diagnostic fields from RingCentral's error payload.
+      // Never return headers, access tokens, call records, phone numbers, or IDs.
+      const errors = Array.isArray(activeData.errors) ? activeData.errors : [];
+      const firstError = errors[0] && typeof errors[0] === "object" ? errors[0] : {};
+      const safeErrorCode = typeof firstError.errorCode === "string"
+        ? firstError.errorCode.slice(0, 120)
+        : (typeof activeData.errorCode === "string" ? activeData.errorCode.slice(0, 120) : null);
+      const safeErrorMessage = typeof firstError.message === "string"
+        ? firstError.message.slice(0, 300)
+        : (typeof activeData.message === "string" ? activeData.message.slice(0, 300) : null);
+
       return reply({
         service: "CLST Trucking AI - RingCentral",
         status: "active_calls_unavailable",
         ringcentral_status: activeResponse.status,
+        ringcentral_error_code: safeErrorCode,
+        ringcentral_error_message: safeErrorMessage,
         message: activeResponse.status === 403
-          ? "Authentication succeeded, but RingCentral denied access to active calls. Confirm Call Control is approved for this app and extension."
+          ? "RingCentral authenticated successfully but denied this endpoint. Check the Read Call Log app scope, app authorization, and the JWT user's extension/role permissions. The RingCentral error fields above should identify the exact cause."
           : "Could not retrieve active calls from RingCentral."
       }, 502);
     }
