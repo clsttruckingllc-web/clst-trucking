@@ -12,11 +12,11 @@ export async function onRequest({ request, env }) {
     return reply({ error: "Method not allowed. Use POST." }, 405);
   }
 
-  if (
-    !env.RINGCENTRAL_TEST_KEY ||
-    request.headers.get("X-Test-Key") !== env.RINGCENTRAL_TEST_KEY
-  ) {
-    return reply({ error: "Unauthorized" }, 401);
+  // Read-only diagnostic endpoint. Accept requests only from this Pages origin.
+  // RingCentral credentials stay server-side and are never returned to the browser.
+  const origin = request.headers.get("Origin");
+  if (!origin || origin !== new URL(request.url).origin) {
+    return reply({ error: "Forbidden: same-origin dashboard request required." }, 403);
   }
 
   const {
