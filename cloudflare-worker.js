@@ -136,8 +136,8 @@ function textParts(p,out=[]){
 function queryFor(q){
  const raw=String(q||"").trim();
  // A numeric load number is the strongest search key; avoid broad Gmail scans.
- const loadMatch=raw.match(/\\b(?:load\\s*(?:number|#)?\\s*)?(\\d{5,})\\b/i);
- if(loadMatch)return 'newer_than:365d "'+loadMatch[1]+'"';
+ const numberMatch=raw.match(/[0-9]{5,}/);
+ if(numberMatch)return 'newer_than:365d "'+numberMatch[0]+'"';
  const words=raw.toLowerCase().match(/[a-z0-9@._-]+/g)||[],skip=["what","when","where","which","show","tell","find","rate","load","from","with","that","this","have","does","please","about","give","your","company","details","detail"];
  const useful=words.filter(x=>x.length>=4&&!skip.includes(x)).slice(0,4);
  return useful.length?"newer_than:180d {"+useful.map(x=>'"'+x+'"').join(" ")+"}":"newer_than:90d";
