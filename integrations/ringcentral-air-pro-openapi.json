@@ -3,7 +3,7 @@
   "info": {
     "title": "CLST Trucking Gmail Load Lookup",
     "version": "1.0.0",
-    "description": "Looks up CLST Trucking LLC load information in connected Gmail messages and attached rate-confirmation PDFs. Use this tool when a caller asks about a specific load, carrier pay, pickup, delivery, broker, equipment, miles, or load instructions. Only report details returned by the API; never invent missing fields. Treat rate as verified only when the returned answer explicitly confirms it from the PDF."
+    "description": "Looks up CLST Trucking LLC load information in connected Gmail messages and attached rate-confirmation PDFs. Use this tool when a caller asks about a specific load, carrier pay, pickup, delivery, broker, equipment, miles, or load instructions. Only report details returned by the API; never invent missing fields. Treat rate as verified only when the returned answer explicitly confirms it from the PDF. The RingCentral adapter endpoint /api/ringcentral/ask forwards to the same Gmail/PDF analysis logic."
   },
   "servers": [
     {
@@ -16,9 +16,9 @@
     }
   ],
   "paths": {
-    "/api/ask": {
+    "/api/ringcentral/ask": {
       "post": {
-        "operationId": "lookupClstLoadInGmail",
+        "operationId": "ringCentralLookupClstLoadInGmail",
         "summary": "Find load details in CLST Trucking Gmail and rate-confirmation PDFs",
         "description": "Searches connected Gmail and analyzes matching PDF attachments to answer a load question. Ask one focused question per call. Include the exact load number or broker name when the caller provides it. Do not state a rate is verified unless the API answer says it is verified.",
         "requestBody": {
