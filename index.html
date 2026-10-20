@@ -86,6 +86,7 @@ footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid va
     </div>
     <div class="actions">
       <button class="secondary" id="connectBtn">Connect Gmail</button>
+      <button class="secondary" id="ringcentralTestBtn" type="button">Test RingCentral</button>
       <button class="primary" id="analyzeBtn">Analyze Gmail PDFs</button>
     </div>
   </section>
@@ -459,6 +460,49 @@ async function analyze() {
   }
 }
 
+async function testRingCentral() {
+  const btn = $('ringcentralTestBtn');
+  btn.disabled = true;
+  btn.textContent = 'Testing RingCentral...';
+  status('Checking RingCentral authentication and assigned extension/devices. This is a read-only test.');
+  try {
+    const res = await fetch('/api/ringcentral', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store'
+    });
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); }
+    catch { throw new Error('RingCentral test returned a non-JSON response. Check the Pages deployment.'); }
+
+    if (!res.ok) {
+      const message = data.message || data.error || ('HTTP ' + res.status);
+      status('RingCentral test failed: ' + message, 'error');
+      $('askAnswer').textContent = JSON.stringify(data, null, 2);
+      connection('RingCentral test failed', 'var(--red)');
+      return;
+    }
+
+    $('askAnswer').textContent = JSON.stringify(data, null, 2);
+    $('askSources').textContent = 'Read-only RingCentral diagnostic. No SIP credentials are displayed.';
+    const state = data.status || 'unknown';
+    if (state === 'sip_info_available' || state === 'connected_no_sip_device') {
+      status('RingCentral API authentication succeeded. Result: ' + state + '. See details in the answer panel.', 'success');
+      connection('RingCentral API connected', 'var(--green)');
+    } else {
+      status('RingCentral returned status: ' + state + '. See the answer panel for the next step.', 'error');
+      connection('RingCentral needs attention', 'var(--yellow)');
+    }
+  } catch (err) {
+    status(err.message || 'Could not test RingCentral.', 'error');
+    connection('RingCentral test failed', 'var(--red)');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Test RingCentral';
+  }
+}
+
 function connect() {
   window.location.href =
     'https://clst-gmail-backend.clsttruckingllc.workers.dev/auth/start';
@@ -498,6 +542,7 @@ async function askCLST(event) {
 }
 
 $('askForm').addEventListener('submit',askCLST);
+$('ringcentralTestBtn').addEventListener('click',testRingCentral);
 $('analyzeBtn').addEventListener('click',analyze);
 $('connectBtn').addEventListener('click',connect);
 $('search').addEventListener('input',renderRates);
