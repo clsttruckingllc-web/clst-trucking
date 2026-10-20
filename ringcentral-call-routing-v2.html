@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLST Trucking AI — RingCentral v2 Call Routing</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;max-width:900px;margin:36px auto;padding:0 18px;color:#172033}
+button{padding:12px 18px;border:0;border-radius:8px;background:#173b70;color:white;font-weight:700;cursor:pointer}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f5f8;border-radius:10px;padding:16px;min-height:80px}
+.note{color:#555}
+</style>
+</head>
+<body>
+<h1>RingCentral call-routing inspection (v2)</h1>
+<p>This is a read-only check of the current extension states, state-based rules, and custom interaction rules. It does not change or delete settings.</p>
+<button id="inspect">Inspect v2 call-routing rules</button>
+<p id="status" role="status"></p>
+<pre id="result">Click the button to inspect the rules.</pre>
+<script>
+const button = document.getElementById("inspect");
+button.addEventListener("click", async () => {
+  button.disabled = true;
+  document.getElementById("status").textContent = "Checking RingCentral…";
+  document.getElementById("result").textContent = "";
+  try {
+    const response = await fetch("/api/ringcentral-call-routing-v2", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}"
+    });
+    const data = await response.json();
+    document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+    document.getElementById("status").textContent = response.ok ? "Inspection complete." : "Inspection returned an error.";
+  } catch (error) {
+    document.getElementById("status").textContent = "Could not reach the diagnostic endpoint.";
+    document.getElementById("result").textContent = String(error);
+  } finally {
+    button.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
