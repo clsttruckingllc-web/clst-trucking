@@ -1,0 +1,123 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CLST Trucking Gmail Load Lookup",
+    "version": "1.0.0",
+    "description": "Looks up CLST Trucking LLC load information in connected Gmail messages and attached rate-confirmation PDFs. Use this tool when a caller asks about a specific load, carrier pay, pickup, delivery, broker, equipment, miles, or load instructions. Only report details returned by the API; never invent missing fields. Treat rate as verified only when the returned answer explicitly confirms it from the PDF."
+  },
+  "servers": [
+    {
+      "url": "https://clst-gmail-backend.clsttruckingllc.workers.dev"
+    }
+  ],
+  "security": [
+    {
+      "CLSTApiKey": []
+    }
+  ],
+  "paths": {
+    "/api/ask": {
+      "post": {
+        "operationId": "lookupClstLoadInGmail",
+        "summary": "Find load details in CLST Trucking Gmail and rate-confirmation PDFs",
+        "description": "Searches connected Gmail and analyzes matching PDF attachments to answer a load question. Ask one focused question per call. Include the exact load number or broker name when the caller provides it. Do not state a rate is verified unless the API answer says it is verified.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "question"
+                ],
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 1000,
+                    "description": "The caller's question about a CLST Trucking load. Example: What are the pickup, delivery, and carrier pay details for load 12345?"
+                  },
+                  "query": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "description": "Optional Gmail search query. Usually omit this so the backend builds a query from the question."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Answer based on matching Gmail messages and PDF attachments. An empty sources array means no matching messages were found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "answer": {
+                      "type": "string",
+                      "description": "Natural-language answer grounded in the available email/PDF data."
+                    },
+                    "query": {
+                      "type": "string"
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "subject": {
+                            "type": "string"
+                          },
+                          "from": {
+                            "type": "string"
+                          },
+                          "date": {
+                            "type": "string"
+                          },
+                          "hasPdf": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON or missing question."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "500": {
+            "description": "Backend error."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "CLSTApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Set the value to: Bearer YOUR_CLST_API_KEY. Configure the actual secret in the RingCentral integration's authentication settings; do not put the key into the OpenAPI file."
+      }
+    }
+  }
+}
