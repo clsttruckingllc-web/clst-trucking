@@ -68,27 +68,18 @@ export async function onRequest({ request, env }) {
       }, 502);
     }
 
-    const calls = (activeData.records || []).map(call => ({
-      id: call.id ?? null,
-      direction: call.direction ?? null,
-      from: call.from?.phoneNumber ?? call.from?.name ?? null,
-      to: call.to?.phoneNumber ?? call.to?.name ?? null,
-      result: call.result ?? null,
-      startTime: call.startTime ?? null,
-      duration: call.duration ?? null,
-      telephonyStatus: call.telephonyStatus ?? null,
-      sessionId: call.sessionId ?? null
-    }));
+    // Do not expose phone numbers, call IDs, session IDs, or call records from a public dashboard endpoint.
+    // Report only whether the account endpoint is reachable and the number of active calls.
+    const activeCallCount = Array.isArray(activeData.records) ? activeData.records.length : 0;
 
     return reply({
       service: "CLST Trucking AI - RingCentral",
       status: "active_calls_checked",
       success: true,
       read_only: true,
-      count: calls.length,
-      calls,
+      active_call_count: activeCallCount,
       audio_bridge_ready: false,
-      note: "This endpoint reads call metadata only. It does not access or stream call audio and does not answer or control calls."
+      note: "This is a read-only status check. It does not expose caller details, access or stream audio, answer calls, or control calls."
     });
   } catch {
     return reply({
