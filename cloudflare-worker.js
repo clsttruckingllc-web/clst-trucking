@@ -85,13 +85,13 @@ async function gemini(env,parts,instruction){
  if(!env.GEMINI_API_KEY)throw Error("GEMINI_API_KEY is not configured.");
  const model=env.GEMINI_MODEL||MODEL,url="https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(model)+":generateContent?key="+encodeURIComponent(env.GEMINI_API_KEY);let last="";
  for(let i=0;i<3;i++){
-  const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({systemInstruction:{parts:[{text:instruction}]},contents:[{role:"user",parts}],generationConfig:{temperature:0.1,maxOutputTokens:1800}})});
+  const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({systemInstruction:{parts:[{text:instruction}]},contents:[{role:"user",parts}],generationConfig:{temperature:0.1,maxOutputTokens:3000,responseMimeType:"application/json"}})});
   const d=await res.json().catch(()=>({}));
   if(res.ok){const p=d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts;const text=p?p.map(x=>x.text||"").join("\n"):"";if(!text)throw Error("Gemini returned an empty response.");return text;}
   last="Gemini API "+res.status+": "+String(d.error&&d.error.message||"request failed");if(![429,500,502,503,504].includes(res.status)||i===2)break;await new Promise(r=>setTimeout(r,650*(i+1)));
  }throw Error(last);
 }
-function cleanJson(s){return String(s||"").trim().replace(/^json\s*/i,"");}
+function cleanJson(s){ let t=String(s||"").trim().replace(/^```(?:json)?\s*/i,"").replace(/\s*```$/,"").trim(); const start=t.indexOf("{"); if(start<0)throw Error("No JSON object found."); let depth=0,inString=false,escaped=false; for(let i=start;i<t.length;i++){const ch=t[i];if(inString){if(escaped)escaped=false;else if(ch==="\\")escaped=true;else if(ch==='"')inString=false;continue;}if(ch==='"'){inString=true;continue;}if(ch==="{")depth++;else if(ch==="}"){depth--;if(depth===0)return t.slice(start,i+1);}} throw Error("Gemini JSON response was incomplete or truncated.");}
 function nullable(v){return v===null||v===undefined||v===""?null:String(v).slice(0,1200);}
 function normalize(a){
  const o={document_type:String(a.document_type||"unknown"),rate_verified:a.rate_verified===true,load_number:nullable(a.load_number),broker_company:nullable(a.broker_company),broker_contact:nullable(a.broker_contact),broker_phone:nullable(a.broker_phone),broker_email:nullable(a.broker_email),rate_amount:typeof a.rate_amount==="number"&&Number.isFinite(a.rate_amount)?a.rate_amount:null,rate_currency:String(a.rate_currency||"USD").toUpperCase(),pickup_date:nullable(a.pickup_date),pickup_time:nullable(a.pickup_time),pickup_location:nullable(a.pickup_location),delivery_date:nullable(a.delivery_date),delivery_time:nullable(a.delivery_time),delivery_location:nullable(a.delivery_location),commodity:nullable(a.commodity),weight:nullable(a.weight),equipment:nullable(a.equipment),miles:a.miles??null,detention_terms:nullable(a.detention_terms),tonu_terms:nullable(a.tonu_terms),payment_terms:nullable(a.payment_terms),special_instructions:nullable(a.special_instructions),verification_notes:nullable(a.verification_notes)};
