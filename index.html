@@ -41,6 +41,7 @@ main{max-width:1400px;margin:auto;padding:28px 5% 50px}
 .panel-heading{margin-bottom:17px}
 .search{width:100%;max-width:350px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px;color:var(--text)}
 .rate-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.ask-row{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}.ask-row input{flex:1;min-width:220px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text)}.ask-answer{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:15px;min-height:54px;margin-top:14px}.ask-sources{font-size:12px;color:var(--muted);margin-top:10px;overflow-wrap:anywhere}
 .rate-card{background:#101a2a;border:1px solid var(--border);border-radius:11px;padding:17px;min-width:0}
 .rate-card h4{margin:0 0 10px;font-size:16px;overflow-wrap:anywhere}
 .pill{display:inline-block;border-radius:20px;padding:5px 9px;background:#24354d;color:#c5d7f1;font-size:11px;font-weight:700}
@@ -112,6 +113,17 @@ footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid va
       <div class="stat-label">Last Updated</div>
       <div class="stat-number" id="updated" style="font-size:19px">Not yet</div>
     </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading"><h3>Ask CLST AI about Gmail & PDFs</h3></div>
+    <div class="muted" style="margin-bottom:12px">Ask about load numbers, broker names, rates, pickup/delivery, and terms found in connected Gmail messages and PDF attachments.</div>
+    <form id="askForm" class="ask-row">
+      <input id="askQuestion" type="text" maxlength="600" placeholder="Example: What is the rate for load 102190?" aria-label="Ask CLST AI a question" required>
+      <button class="primary" id="askBtn" type="submit">Ask CLST AI</button>
+    </form>
+    <div id="askAnswer" class="ask-answer" role="status" aria-live="polite">Your answer will appear here.</div>
+    <div id="askSources" class="ask-sources"></div>
   </section>
 
   <section class="panel">
@@ -452,6 +464,40 @@ function connect() {
     'https://clst-gmail-backend.clsttruckingllc.workers.dev/auth/start';
 }
 
+async function askCLST(event) {
+  event.preventDefault();
+  const question = $('askQuestion').value.trim();
+  if (!question) return;
+  const btn = $('askBtn');
+  btn.disabled = true;
+  btn.textContent = 'Searching...';
+  $('askAnswer').textContent = 'Searching connected Gmail messages and reading relevant PDFs...';
+  $('askSources').textContent = '';
+  try {
+    const res = await fetch('/api/ask', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({question}),
+      cache:'no-store'
+    });
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); } catch { throw new Error('API did not return JSON. Check the Pages /api/ask function and deployment.'); }
+    if (!res.ok || data.error) throw new Error('API error ' + res.status + ': ' + String(data.error || data.message || 'Request failed').slice(0,500));
+    $('askAnswer').textContent = data.answer || 'I could not find an answer in Gmail/PDF data.';
+    const sources = Array.isArray(data.sources) ? data.sources : [];
+    $('askSources').textContent = sources.length
+      ? 'Sources checked: ' + sources.map(s => [s.subject, s.from, s.hasPdf ? '(PDF attached)' : ''].filter(Boolean).join(' ')).join(' · ')
+      : 'No matching source emails were found.';
+  } catch (err) {
+    $('askAnswer').textContent = err.message || 'Could not query CLST AI.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Ask CLST AI';
+  }
+}
+
+$('askForm').addEventListener('submit',askCLST);
 $('analyzeBtn').addEventListener('click',analyze);
 $('connectBtn').addEventListener('click',connect);
 $('search').addEventListener('input',renderRates);
