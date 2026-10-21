@@ -9,7 +9,7 @@
 :root{color-scheme:dark;--bg:#0d141b;--panel:#151f29;--line:#2b3a47;--text:#f3f6f8;--muted:#aab7c3;--gold:#f4b942;--green:#63d6a2;--red:#ff8e8e}
 *{box-sizing:border-box}
 body{margin:0;background:radial-gradient(ellipse at top,#1b2b38 0,#0d141b 58%);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);min-height:100vh}
-main{width:min(900px,100%);margin:0 auto;padding:24px 16px 48px}
+main{width:min(980px,100%);margin:0 auto;padding:24px 16px 48px}
 header{display:flex;align-items:center;gap:14px;margin:4px 0 28px}
 .mark{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;background:var(--gold);color:#101820;font-weight:900;font-size:18px}
 .brand{font-size:13px;letter-spacing:.13em;color:var(--gold);font-weight:800}
@@ -22,11 +22,12 @@ p{color:var(--muted);margin:0}
 .card{background:rgba(21,31,41,.94);border:1px solid var(--line);border-radius:16px;padding:20px;min-width:0}
 .field{display:flex;flex-direction:column;gap:6px;margin:0 0 15px}
 label{font-size:13px;font-weight:700;color:#d9e2e9}
-input{width:100%;min-height:46px;border-radius:9px;border:1px solid #3b4d5c;background:#0e171f;color:var(--text);padding:10px 12px;font:inherit}
-input:focus{outline:2px solid var(--gold);outline-offset:1px}
+input,select{width:100%;min-height:46px;border-radius:9px;border:1px solid #3b4d5c;background:#0e171f;color:var(--text);padding:10px 12px;font:inherit}
+input:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
 .help{font-size:12px;color:var(--muted)}
-button{width:100%;min-height:48px;border:0;border-radius:10px;background:var(--gold);color:#151a20;font-weight:850;font-size:15px;cursor:pointer}
-button:focus-visible{outline:3px solid white;outline-offset:3px}
+button{width:100%;min-height:48px;border:0;border-radius:10px;background:var(--gold);color:#151a20;font-weight:850;font-size:15px;cursor:pointer;padding:10px}
+button:disabled{opacity:.65;cursor:wait}
+.secondary{background:#263746;color:var(--text);border:1px solid #486071;margin-bottom:10px}
 .result{border:1px solid var(--line);background:#0e171f;border-radius:12px;padding:16px;margin-top:14px}
 .result-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:800}
 .eta{font-size:clamp(25px,5vw,34px);font-weight:850;line-height:1.15;margin:8px 0;color:var(--green);overflow-wrap:anywhere}
@@ -34,30 +35,33 @@ button:focus-visible{outline:3px solid white;outline-offset:3px}
 .stat{border:1px solid var(--line);border-radius:10px;padding:12px}
 .stat strong{display:block;font-size:20px;margin-top:3px}
 .notice{border-left:3px solid var(--gold);padding:10px 12px;background:#211d13;border-radius:0 8px 8px 0;color:#f6e4b6;font-size:13px;margin-top:14px}
-.error{color:var(--red);font-size:13px;margin-top:12px}
+.status{font-size:13px;margin:10px 0;color:var(--muted);overflow-wrap:anywhere}
+.status.ok{color:var(--green)}.status.bad,.error{color:var(--red)}
+.error{font-size:13px;margin-top:12px}
 footer{color:var(--muted);font-size:12px;text-align:center;margin-top:22px}
+a{color:#ffdc8a}
 @media(max-width:680px){main{padding:18px 12px 32px}.layout{grid-template-columns:1fr}.card{padding:17px}.hero{margin-bottom:18px}}
 </style>
 </head>
 <body>
 <main>
-<header>
-  <div class="mark" aria-hidden="true">CLST</div>
-  <div><div class="brand">CLST TRUCKING LLC</div><p>Dispatch tools · Free prototype</p></div>
-</header>
+<header><div class="mark" aria-hidden="true">CLST</div><div><div class="brand">CLST TRUCKING LLC</div><p>Dispatch tools · Free prototype</p></div></header>
 <section class="hero">
-  <span class="pill">BETA · NO API COST</span>
+  <span class="pill">BETA · FREE ROUTE ESTIMATE</span>
   <h1>Load ETA Estimator</h1>
-  <p>Estimate a delivery arrival from dispatcher-confirmed remaining miles. This page runs in your browser and sends no data to an AI service.</p>
+  <p>Choose a Rate Confirmation, enter the truck’s current location, and estimate remaining road miles to delivery.</p>
 </section>
 <div class="layout">
 <section class="card">
   <h2>Trip details</h2>
   <form id="etaForm">
-    <div class="field"><label for="loadSelect">Load from Gmail Rate Confirmations</label><select id="loadSelect"><option value="">Loading saved loads…</option></select><span class="help" id="loadStatus">Loads will appear here if the Gmail dashboard API is available.</span></div>
+    <div class="field"><label for="loadSelect">Load from Gmail Rate Confirmations</label><select id="loadSelect"><option value="">Loading saved loads…</option></select><span class="help" id="loadStatus">Loading analyzed loads from the dashboard API…</span></div>
     <div class="field"><label for="load">Load number (optional)</label><input id="load" maxlength="80" placeholder="e.g. 102190"></div>
-    <div class="result" id="loadDetails" hidden><div class="result-label">Selected rate confirmation</div><div id="loadSummary" style="margin-top:8px;overflow-wrap:anywhere"></div><div class="help" id="totalMilesNote" style="margin-top:8px"></div></div>
-    <div class="field"><label for="miles">Remaining miles *</label><input id="miles" type="number" min="0" max="10000" step="1" required placeholder="Use remaining miles, not total route miles"><span class="help">Enter miles left from the truck’s known current location.</span></div>
+    <div class="field"><label for="currentLocation">Truck’s current location *</label><input id="currentLocation" maxlength="220" required placeholder="e.g. Dallas, TX or street address"><span class="help">Enter a city, ZIP code, or address confirmed by the driver. This page does not track GPS automatically.</span></div>
+    <div class="field"><label for="destination">Delivery location *</label><input id="destination" maxlength="220" required placeholder="Select a load or enter delivery city/address"></div>
+    <button type="button" id="routeButton" class="secondary">Find remaining road miles</button>
+    <div id="routeStatus" class="status" role="status">Enter both locations, then calculate the route.</div>
+    <div class="field"><label for="miles">Remaining road miles *</label><input id="miles" type="number" min="0" max="10000" step="0.1" required placeholder="Calculated above or enter confirmed miles manually"><span class="help">Route lookup fills this automatically. You can edit the result if dispatch has a more accurate figure.</span></div>
     <div class="field"><label for="start">Departure / current time *</label><input id="start" type="datetime-local" required></div>
     <div class="field"><label for="speed">Average driving speed (mph)</label><input id="speed" type="number" min="1" max="80" step="1" value="50" required></div>
     <div class="field"><label for="hours">Planned driving hours per day</label><input id="hours" type="number" min="1" max="14" step="0.5" value="10" required></div>
@@ -68,12 +72,9 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:22px}
   </form>
 </section>
 <section class="card" aria-live="polite">
-  <h2>Estimate</h2>
-  <p id="resultIntro">Enter the remaining miles to calculate a planning estimate.</p>
+  <h2>Estimate</h2><p id="resultIntro">Choose a load, enter the truck’s current location, and find remaining road miles.</p>
   <div class="result">
-    <div class="result-label">Estimated arrival</div>
-    <div id="arrival" class="eta">Not calculated</div>
-    <div id="loadLabel" class="help"></div>
+    <div class="result-label">Estimated arrival</div><div id="arrival" class="eta">Not calculated</div><div id="loadLabel" class="help"></div>
     <div class="stats">
       <div class="stat"><span class="help">Driving time</span><strong id="driveTime">—</strong></div>
       <div class="stat"><span class="help">Rest periods</span><strong id="restCount">—</strong></div>
@@ -81,144 +82,117 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:22px}
       <div class="stat"><span class="help">Appointment</span><strong id="appointmentStatus">—</strong></div>
     </div>
   </div>
-  <div class="notice">This is a rough planning estimate, not live GPS or traffic tracking. It excludes weather, congestion, loading delays and driver-specific hours-of-service status. Confirm ETA with the driver or dispatch before giving it to a broker.</div>
+  <div class="notice">Prototype limitation: route miles are calculated from the location you enter, not live truck GPS. ETA excludes live traffic, weather, loading delays, and the driver’s actual hours-of-service status. Confirm with the driver/dispatch before promising an arrival time.</div>
 </section>
 </div>
-<footer>CLST Trucking LLC · Free local calculation · No sign-in · No API request</footer>
+<footer>CLST Trucking LLC · OpenStreetMap / OSRM route estimate · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Map data attribution</a></footer>
 </main>
 <script>
 (function(){
   const $ = id => document.getElementById(id);
   let rateRecords = [];
   const pad = n => String(n).padStart(2,'0');
-  function localInputValue(date){
-    return date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+'T'+pad(date.getHours())+':'+pad(date.getMinutes());
-  }
+  function localInputValue(date){return date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+'T'+pad(date.getHours())+':'+pad(date.getMinutes());}
   $('start').value = localInputValue(new Date());
 
-  function flattenRates(data) {
-    const out = [];
-    for (const item of (Array.isArray(data?.rates) ? data.rates : [])) {
-      const email = item.email || {};
-      for (const pdf of (Array.isArray(item.pdfs) ? item.pdfs : [])) {
-        if (pdf.analysis && typeof pdf.analysis === 'object') {
-          out.push({ email, filename: pdf.filename || 'Rate Confirmation PDF', analysis: pdf.analysis, error: pdf.error || null });
-        }
+  function flattenRates(data){
+    const out=[];
+    for(const item of (Array.isArray(data?.rates)?data.rates:[])){
+      const email=item.email||{};
+      for(const pdf of (Array.isArray(item.pdfs)?item.pdfs:[])){
+        if(pdf.analysis&&typeof pdf.analysis==='object')out.push({email,filename:pdf.filename||'Rate Confirmation PDF',analysis:pdf.analysis,error:pdf.error||null});
       }
     }
     return out;
   }
-
-  function text(value) {
-    return value === null || value === undefined || value === '' ? 'Not available in PDF' : String(value);
-  }
-
-  function loadKey(record, index) {
-    const a = record.analysis || {};
-    const n = String(a.load_number || '').trim();
-    return n ? 'load:' + n.toLowerCase() : 'record:' + index;
-  }
-
-  function renderLoadOptions() {
-    const select = $('loadSelect');
-    select.innerHTML = '<option value="">Choose a load (optional)</option>';
-    const seen = new Set();
-    rateRecords.forEach((r, index) => {
-      const key = loadKey(r, index);
-      if (seen.has(key)) return;
-      seen.add(key);
-      const a = r.analysis || {};
-      const number = a.load_number ? 'Load ' + a.load_number : r.filename;
-      const broker = a.broker_company ? ' · ' + a.broker_company : '';
-      const destination = a.delivery_location ? ' · ' + a.delivery_location : '';
-      const option = document.createElement('option');
-      option.value = String(index);
-      option.textContent = number + broker + destination;
+  function text(value){return value===null||value===undefined||value===''?'Not available in PDF':String(value);}
+  function renderLoadOptions(){
+    const select=$('loadSelect');select.innerHTML='<option value="">Choose a load (optional)</option>';
+    const seen=new Set();
+    rateRecords.forEach((r,index)=>{
+      const a=r.analysis||{};const key=String(a.load_number||r.filename||index).toLowerCase();
+      if(seen.has(key))return;seen.add(key);
+      const option=document.createElement('option');option.value=String(index);
+      option.textContent=(a.load_number?'Load '+a.load_number:r.filename)+(a.broker_company?' · '+a.broker_company:'')+(a.delivery_location?' · '+a.delivery_location:'');
       select.appendChild(option);
     });
-    $('loadStatus').textContent = rateRecords.length
-      ? 'Loaded ' + rateRecords.length + ' analyzed PDF record(s) from Gmail. Select a load to view its details.'
-      : 'No analyzed rate confirmations were returned. You can still calculate manually.';
+    $('loadStatus').textContent=rateRecords.length?'Loaded '+rateRecords.length+' analyzed PDF record(s) from Gmail. Select a load to fill its delivery location.':'No analyzed rate confirmations were returned. You can enter a destination manually.';
   }
-
-  function showSelectedLoad(indexValue) {
-    const idx = Number(indexValue);
-    const r = rateRecords[idx];
-    if (!r) {
-      $('loadDetails').hidden = true;
-      $('load').value = '';
-      return;
+  function showSelectedLoad(indexValue){
+    const r=rateRecords[Number(indexValue)];
+    if(!r){$('load').value='';return;}
+    const a=r.analysis||{};
+    $('load').value=a.load_number||'';
+    if(a.delivery_location)$('destination').value=String(a.delivery_location);
+    if(a.delivery_date){
+      const parsed=new Date(a.delivery_date);
+      if(!Number.isNaN(parsed.getTime()))$('appointment').value=localInputValue(parsed);
     }
-    const a = r.analysis || {};
-    $('load').value = a.load_number || '';
-    $('loadSummary').textContent =
-      'Broker: ' + text(a.broker_company) +
-      ' · Pickup: ' + text(a.pickup_location) + ' (' + text(a.pickup_date) + ')' +
-      ' · Delivery: ' + text(a.delivery_location) + ' (' + text(a.delivery_date) + ')';
-    $('totalMilesNote').textContent = a.miles !== null && a.miles !== undefined && a.miles !== ''
-      ? 'Rate Confirmation total route miles: ' + a.miles + '. Enter the REMAINING miles separately below; total route miles are not remaining miles.'
-      : 'The PDF does not provide total route miles. Enter confirmed remaining miles separately below.';
-    $('loadDetails').hidden = false;
+    $('routeStatus').textContent=a.delivery_location?'Delivery location filled from the selected Rate Confirmation. Enter the truck’s current location and calculate remaining road miles.':'This Rate Confirmation did not include a delivery location. Enter it manually.';
+    $('routeStatus').className='status';
   }
-
-  async function loadRateConfirmations() {
-    const select = $('loadSelect');
-    try {
-      const response = await fetch('/api/rates?maxResults=10', { headers: { Accept: 'application/json' }, cache: 'no-store' });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || data.success === false || !Array.isArray(data.rates)) {
-        throw new Error(data.error || 'Gmail rate-confirmation API is unavailable.');
-      }
-      rateRecords = flattenRates(data);
-      renderLoadOptions();
-    } catch (error) {
-      select.innerHTML = '<option value="">Manual entry (Gmail unavailable)</option>';
-      $('loadStatus').textContent = 'Could not load Gmail records: ' + String(error.message || error) + ' You can still calculate manually.';
+  async function loadRateConfirmations(){
+    const select=$('loadSelect');
+    try{
+      const response=await fetch('/api/rates?maxResults=10',{headers:{Accept:'application/json'},cache:'no-store'});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok||data.success===false||!Array.isArray(data.rates))throw new Error(data.error||'Gmail rate-confirmation API is unavailable.');
+      rateRecords=flattenRates(data);renderLoadOptions();
+    }catch(error){
+      select.innerHTML='<option value="">Manual entry (Gmail unavailable)</option>';
+      $('loadStatus').textContent='Could not load Gmail records: '+String(error.message||error)+' You can still enter locations manually.';
     }
   }
+  $('loadSelect').addEventListener('change',()=>showSelectedLoad($('loadSelect').value));
 
-  $('loadSelect').addEventListener('change', () => showSelectedLoad($('loadSelect').value));
-  void loadRateConfirmations();
-  function fmtDate(date){
-    return new Intl.DateTimeFormat(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(date);
+  async function geocode(query){
+    const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us&q='+encodeURIComponent(query);
+    const response=await fetch(url,{headers:{Accept:'application/json'},cache:'no-store'});
+    if(!response.ok)throw new Error('Location lookup failed (HTTP '+response.status+').');
+    const results=await response.json();
+    if(!Array.isArray(results)||!results.length)throw new Error('Could not find location: '+query+'. Try a city, state, ZIP code, or full address.');
+    return {lat:Number(results[0].lat),lon:Number(results[0].lon),label:results[0].display_name};
   }
-  function fmtDuration(hours){
-    const whole = Math.floor(hours);
-    const mins = Math.round((hours-whole)*60);
-    return mins ? whole+' h '+mins+' min' : whole+' h';
+  async function findRoadMiles(){
+    const from=$('currentLocation').value.trim(),to=$('destination').value.trim();
+    if(!from||!to){$('routeStatus').textContent='Enter both the truck’s current location and delivery location first.';$('routeStatus').className='status bad';return;}
+    const button=$('routeButton');button.disabled=true;button.textContent='Finding route…';
+    $('routeStatus').textContent='Looking up both locations and calculating a driving route…';$('routeStatus').className='status';
+    try{
+      const origin=await geocode(from);
+      const destination=await geocode(to);
+      const url='https://router.project-osrm.org/route/v1/driving/'+origin.lon+','+origin.lat+';'+destination.lon+','+destination.lat+'?overview=false&steps=false';
+      const response=await fetch(url,{headers:{Accept:'application/json'},cache:'no-store'});
+      if(!response.ok)throw new Error('Route service failed (HTTP '+response.status+'). You can enter confirmed remaining miles manually.');
+      const data=await response.json();
+      if(data.code!=='Ok'||!data.routes||!data.routes.length)throw new Error('No driving route found. Check the locations or enter remaining miles manually.');
+      const miles=data.routes[0].distance/1609.344;
+      $('miles').value=miles.toFixed(1);
+      $('routeStatus').textContent='Estimated road distance: '+miles.toFixed(1)+' mi. From '+from+' to '+to+'. Review it before calculating ETA.';
+      $('routeStatus').className='status ok';
+    }catch(error){
+      $('routeStatus').textContent=String(error.message||error);$('routeStatus').className='status bad';
+    }finally{button.disabled=false;button.textContent='Find remaining road miles';}
   }
+  $('routeButton').addEventListener('click',findRoadMiles);
+  function fmtDate(date){return new Intl.DateTimeFormat(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(date);}
+  function fmtDuration(hours){const whole=Math.floor(hours);const mins=Math.round((hours-whole)*60);return mins?whole+' h '+mins+' min':whole+' h';}
   $('etaForm').addEventListener('submit',function(event){
-    event.preventDefault();
-    $('error').hidden = true;
-    const miles = Number($('miles').value);
-    const speed = Number($('speed').value);
-    const dailyHours = Number($('hours').value);
-    const restHours = Number($('rest').value);
-    const start = new Date($('start').value);
-    const appointmentRaw = $('appointment').value;
-    const appointment = appointmentRaw ? new Date(appointmentRaw) : null;
-    if (!Number.isFinite(miles) || miles < 0 || miles > 10000 ||
-        !Number.isFinite(speed) || speed <= 0 || speed > 80 ||
-        !Number.isFinite(dailyHours) || dailyHours <= 0 || dailyHours > 14 ||
-        !Number.isFinite(restHours) || restHours < 0 || restHours > 24 ||
-        Number.isNaN(start.getTime()) || (appointment && Number.isNaN(appointment.getTime()))) {
-      $('error').textContent = 'Check the values and enter a valid date, remaining miles, speed and rest schedule.';
-      $('error').hidden = false;
-      return;
+    event.preventDefault();$('error').hidden=true;
+    const miles=Number($('miles').value),speed=Number($('speed').value),dailyHours=Number($('hours').value),restHours=Number($('rest').value);
+    const start=new Date($('start').value),appointmentRaw=$('appointment').value,appointment=appointmentRaw?new Date(appointmentRaw):null;
+    if(!Number.isFinite(miles)||miles<0||miles>10000||!Number.isFinite(speed)||speed<=0||speed>80||!Number.isFinite(dailyHours)||dailyHours<=0||dailyHours>14||!Number.isFinite(restHours)||restHours<0||restHours>24||Number.isNaN(start.getTime())||(appointment&&Number.isNaN(appointment.getTime()))){
+      $('error').textContent='Check the values and enter a valid date, remaining miles, speed and rest schedule.';$('error').hidden=false;return;
     }
-    const drivingHours = miles / speed;
-    const rests = miles === 0 ? 0 : Math.max(0,Math.ceil(drivingHours/dailyHours)-1);
-    const elapsed = drivingHours + rests*restHours;
-    const arrival = new Date(start.getTime()+elapsed*3600000);
-    $('arrival').textContent = fmtDate(arrival);
-    $('loadLabel').textContent = $('load').value.trim() ? 'Load '+$('load').value.trim() : 'Load number not provided';
-    $('driveTime').textContent = fmtDuration(drivingHours);
-    $('restCount').textContent = String(rests);
-    $('elapsed').textContent = fmtDuration(elapsed);
-    $('appointmentStatus').textContent = !appointment ? 'Not provided' : arrival <= appointment ? 'On-time estimate' : 'May be late';
-    $('appointmentStatus').style.color = !appointment ? 'var(--text)' : arrival <= appointment ? 'var(--green)' : 'var(--red)';
-    $('resultIntro').textContent = 'Estimate calculated using the assumptions entered on the left. This is not live GPS or traffic data.';
+    const drivingHours=miles/speed,rests=miles===0?0:Math.max(0,Math.ceil(drivingHours/dailyHours)-1),elapsed=drivingHours+rests*restHours;
+    const arrival=new Date(start.getTime()+elapsed*3600000);
+    $('arrival').textContent=fmtDate(arrival);$('loadLabel').textContent=$('load').value.trim()?'Load '+$('load').value.trim():'Load number not provided';
+    $('driveTime').textContent=fmtDuration(drivingHours);$('restCount').textContent=String(rests);$('elapsed').textContent=fmtDuration(elapsed);
+    $('appointmentStatus').textContent=!appointment?'Not provided':arrival<=appointment?'On-time estimate':'May be late';
+    $('appointmentStatus').style.color=!appointment?'var(--text)':arrival<=appointment?'var(--green)':'var(--red)';
+    $('resultIntro').textContent='Estimate calculated from the entered road miles and planning assumptions, not live GPS or traffic data.';
   });
+  void loadRateConfirmations();
 })();
 </script>
 </body>
