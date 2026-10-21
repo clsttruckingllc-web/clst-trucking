@@ -1,0 +1,31 @@
+name: Voice service validation
+
+on:
+  push:
+    paths:
+      - "voice-service/**"
+      - ".github/workflows/voice-service-check.yml"
+  pull_request:
+    paths:
+      - "voice-service/**"
+      - ".github/workflows/voice-service-check.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install voice service dependencies
+        working-directory: voice-service
+        run: npm install --omit=dev
+      - name: Check JavaScript syntax
+        working-directory: voice-service
+        run: node --check server.js
+      - name: Verify Softphone SDK can be imported
+        working-directory: voice-service
+        run: node --input-type=module -e "import Softphone from 'ringcentral-softphone'; if (typeof Softphone !== 'function') process.exit(1); console.log('Softphone SDK import OK')"
