@@ -54,7 +54,9 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:22px}
 <section class="card">
   <h2>Trip details</h2>
   <form id="etaForm">
+    <div class="field"><label for="loadSelect">Load from Gmail Rate Confirmations</label><select id="loadSelect"><option value="">Loading saved loads…</option></select><span class="help" id="loadStatus">Loads will appear here if the Gmail dashboard API is available.</span></div>
     <div class="field"><label for="load">Load number (optional)</label><input id="load" maxlength="80" placeholder="e.g. 102190"></div>
+    <div class="result" id="loadDetails" hidden><div class="result-label">Selected rate confirmation</div><div id="loadSummary" style="margin-top:8px;overflow-wrap:anywhere"></div><div class="help" id="totalMilesNote" style="margin-top:8px"></div></div>
     <div class="field"><label for="miles">Remaining miles *</label><input id="miles" type="number" min="0" max="10000" step="1" required placeholder="Use remaining miles, not total route miles"><span class="help">Enter miles left from the truck’s known current location.</span></div>
     <div class="field"><label for="start">Departure / current time *</label><input id="start" type="datetime-local" required></div>
     <div class="field"><label for="speed">Average driving speed (mph)</label><input id="speed" type="number" min="1" max="80" step="1" value="50" required></div>
@@ -87,11 +89,96 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:22px}
 <script>
 (function(){
   const $ = id => document.getElementById(id);
+  let rateRecords = [];
   const pad = n => String(n).padStart(2,'0');
   function localInputValue(date){
     return date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+'T'+pad(date.getHours())+':'+pad(date.getMinutes());
   }
   $('start').value = localInputValue(new Date());
+
+  function flattenRates(data) {
+    const out = [];
+    for (const item of (Array.isArray(data?.rates) ? data.rates : [])) {
+      const email = item.email || {};
+      for (const pdf of (Array.isArray(item.pdfs) ? item.pdfs : [])) {
+        if (pdf.analysis && typeof pdf.analysis === 'object') {
+          out.push({ email, filename: pdf.filename || 'Rate Confirmation PDF', analysis: pdf.analysis, error: pdf.error || null });
+        }
+      }
+    }
+    return out;
+  }
+
+  function text(value) {
+    return value === null || value === undefined || value === '' ? 'Not available in PDF' : String(value);
+  }
+
+  function loadKey(record, index) {
+    const a = record.analysis || {};
+    const n = String(a.load_number || '').trim();
+    return n ? 'load:' + n.toLowerCase() : 'record:' + index;
+  }
+
+  function renderLoadOptions() {
+    const select = $('loadSelect');
+    select.innerHTML = '<option value="">Choose a load (optional)</option>';
+    const seen = new Set();
+    rateRecords.forEach((r, index) => {
+      const key = loadKey(r, index);
+      if (seen.has(key)) return;
+      seen.add(key);
+      const a = r.analysis || {};
+      const number = a.load_number ? 'Load ' + a.load_number : r.filename;
+      const broker = a.broker_company ? ' · ' + a.broker_company : '';
+      const destination = a.delivery_location ? ' · ' + a.delivery_location : '';
+      const option = document.createElement('option');
+      option.value = String(index);
+      option.textContent = number + broker + destination;
+      select.appendChild(option);
+    });
+    $('loadStatus').textContent = rateRecords.length
+      ? 'Loaded ' + rateRecords.length + ' analyzed PDF record(s) from Gmail. Select a load to view its details.'
+      : 'No analyzed rate confirmations were returned. You can still calculate manually.';
+  }
+
+  function showSelectedLoad(indexValue) {
+    const idx = Number(indexValue);
+    const r = rateRecords[idx];
+    if (!r) {
+      $('loadDetails').hidden = true;
+      $('load').value = '';
+      return;
+    }
+    const a = r.analysis || {};
+    $('load').value = a.load_number || '';
+    $('loadSummary').textContent =
+      'Broker: ' + text(a.broker_company) +
+      ' · Pickup: ' + text(a.pickup_location) + ' (' + text(a.pickup_date) + ')' +
+      ' · Delivery: ' + text(a.delivery_location) + ' (' + text(a.delivery_date) + ')';
+    $('totalMilesNote').textContent = a.miles !== null && a.miles !== undefined && a.miles !== ''
+      ? 'Rate Confirmation total route miles: ' + a.miles + '. Enter the REMAINING miles separately below; total route miles are not remaining miles.'
+      : 'The PDF does not provide total route miles. Enter confirmed remaining miles separately below.';
+    $('loadDetails').hidden = false;
+  }
+
+  async function loadRateConfirmations() {
+    const select = $('loadSelect');
+    try {
+      const response = await fetch('/api/rates?maxResults=10', { headers: { Accept: 'application/json' }, cache: 'no-store' });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success === false || !Array.isArray(data.rates)) {
+        throw new Error(data.error || 'Gmail rate-confirmation API is unavailable.');
+      }
+      rateRecords = flattenRates(data);
+      renderLoadOptions();
+    } catch (error) {
+      select.innerHTML = '<option value="">Manual entry (Gmail unavailable)</option>';
+      $('loadStatus').textContent = 'Could not load Gmail records: ' + String(error.message || error) + ' You can still calculate manually.';
+    }
+  }
+
+  $('loadSelect').addEventListener('change', () => showSelectedLoad($('loadSelect').value));
+  void loadRateConfirmations();
   function fmtDate(date){
     return new Intl.DateTimeFormat(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(date);
   }
@@ -130,7 +217,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:22px}
     $('elapsed').textContent = fmtDuration(elapsed);
     $('appointmentStatus').textContent = !appointment ? 'Not provided' : arrival <= appointment ? 'On-time estimate' : 'May be late';
     $('appointmentStatus').style.color = !appointment ? 'var(--text)' : arrival <= appointment ? 'var(--green)' : 'var(--red)';
-    $('resultIntro').textContent = 'Estimate calculated using the assumptions entered on the left.';
+    $('resultIntro').textContent = 'Estimate calculated using the assumptions entered on the left. This is not live GPS or traffic data.';
   });
 })();
 </script>
