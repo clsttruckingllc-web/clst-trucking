@@ -1,44 +1,51 @@
-# CLST Trucking AI — Voice Service (scaffold)
+# CLST Trucking AI — Voice Service
 
-This is a **separate Node.js service**, not a Cloudflare Pages Function. RingCentral SIP signaling and real-time audio need a long-running process; the existing Pages/Functions endpoints are read-only diagnostics and do not carry call audio.
+This is a long-running Node.js SIP voice service. It is separate from Cloudflare Pages because the RingCentral Softphone SDK needs persistent SIP signaling and real-time audio.
 
-## Current scope
+## What this version does
 
-- Registers a RingCentral Softphone SDK endpoint using SIP credentials.
-- Can answer an inbound invite when `AUTO_ANSWER=true`.
-- Can play a configured raw PCM greeting.
-- Logs whether inbound audio and DTMF events reach the service.
-- Does **not** yet perform speech-to-text, conversational reasoning, text-to-speech, or call transfer. Do not route the main company number to this service as a finished AI receptionist.
+- Registers an authorized RingCentral **Existing Phone / OtherPhone** SIP endpoint.
+- Exposes `GET /health` for a safe status check.
+- Exposes authenticated `POST /test-call` that calls only the preconfigured `TEST_CALL_TO` number.
+- Uses Gemini TTS to speak a short, professional female-voice CLST greeting, then ends the test call.
+- Does **not** change company-number routing and does not yet conduct a two-way AI conversation. This is a first outbound audio test.
 
-## Requirements
+## Required environment variables
 
-- Node.js 20 or newer.
-- A RingCentral **Existing Phone / OtherPhone** device that supports SIP credentials.
-- A server that stays running and allows outbound TLS SIP connectivity and the SDK's required WebRTC/media traffic.
-- The company's RingCentral admin must authorize the SIP endpoint and test routing safely.
+Set these in the hosting provider's private environment/secret settings. Never commit actual values.
 
-## Get SIP credentials
+- `SIP_INFO_DOMAIN`: usually `sip.ringcentral.com` (no port)
+- `SIP_INFO_OUTBOUND_PROXY`: the regional `proxyTLS` value from RingCentral SIP info, including port (often port 5096)
+- `SIP_INFO_USERNAME`
+- `SIP_INFO_PASSWORD`
+- `SIP_INFO_AUTHORIZATION_ID`
+- `GEMINI_API_KEY`: the Gemini API key already used by the project
+- `VOICE_API_KEY`: a new long random API key to protect `POST /test-call`
+- `TEST_CALL_TO`: the test recipient in E.164 format, e.g. `+17205550123` (use your own test phone)
+- `GEMINI_TTS_MODEL`: optional; defaults to `gemini-2.5-flash-preview-tts`
+- `TEST_GREETING`: optional greeting text
 
-In RingCentral, open the intended extension/device, then **Devices & Numbers → Existing Phone → Set Up and Provision → Set up manually using SIP**. Record the SIP domain, TLS outbound proxy, username, password, and authorization ID.
+Use a **separate AI Existing Phone/OtherPhone device**. Do not run the AI service with the same SIP credentials as the physical Yealink, because RingCentral delivers inbound calls to the most recently registered instance for shared credentials.
 
-Do not use the RingCentral desktop/mobile app's SoftPhone device type as SIP credentials. Never put SIP values in GitHub, browser code, a public Pages variable, or a chat message.
+## Deploy
 
-## Configure and run
+Build with the included `Dockerfile` or `voice-service/Dockerfile`. The host must support a persistent Node.js process, outbound TLS SIP signaling, and the UDP/SRTP media traffic required by RingCentral. Ordinary Cloudflare Pages Functions are not a substitute for this long-running SIP service.
 
-1. On the server, copy `.env.example` to `.env`.
-2. Enter the SIP values into `.env` locally on that server.
-3. Install dependencies with `npm install`.
-4. Initially set `AUTO_ANSWER=false` to verify registration without answering calls.
-5. After a controlled test extension is routed to the SIP endpoint, set `AUTO_ANSWER=true` and restart the service.
-6. Optionally create a raw greeting file in the format expected by the SDK's default `OPUS/16000` codec: signed 16-bit little-endian PCM, 16 kHz, mono. For example, convert a WAV file with FFmpeg:
-   `ffmpeg -i greeting.wav -f s16le -acodec pcm_s16le -ar 16000 -ac 1 greeting.raw`
+The service reports `"sipRegistered": true` at `/health` only after SIP registration succeeds.
 
-## Next implementation stage
+## First test call
 
-Connect inbound audio to a streaming speech recognition service and the chosen conversational AI, then stream generated 16 kHz PCM speech back to the call. Add timeouts, interruption/barge-in, call transfer, privacy announcements, structured logging without audio retention, and an end-to-end test suite before changing the production company-number route.
+After deployment and SIP registration, send an authenticated request from a private terminal or API client:
 
-## Security
+```bash
+curl -X POST "https://YOUR-VOICE-SERVICE.example/test-call" \
+  -H "Authorization: Bearer YOUR_VOICE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
 
-- Never commit `.env`, SIP passwords, JWTs, API keys, caller audio, or call transcripts.
-- Do not expose a public endpoint that can answer/control calls without authentication.
-- Keep production call routing unchanged until registration, audio in/out, and failover have been tested on a dedicated extension.
+The endpoint does not accept a destination in the request body; it calls only `TEST_CALL_TO` configured on the server. Do not put the API key in browser code or a public webpage.
+
+## Scope still to build
+
+This first test is one-way spoken audio. The next stage is streaming caller audio into speech recognition, conversational response generation, and speech output, with interruption handling, transfer to a human, privacy controls, and end-to-end tests. Do not route the main company number to this test service.
