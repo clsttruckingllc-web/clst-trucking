@@ -57,7 +57,7 @@ a{color:#ffdc8a}
   <form id="etaForm">
     <div class="field"><label for="loadSelect">Load from Gmail Rate Confirmations</label><select id="loadSelect"><option value="">Loading saved loads…</option></select><span class="help" id="loadStatus">Loading analyzed loads from the dashboard API…</span></div>
     <div class="field"><label for="load">Load number (optional)</label><input id="load" maxlength="80" placeholder="e.g. 102190"></div>
-    <div class="field"><label for="currentLocation">Truck’s current location *</label><input id="currentLocation" maxlength="220" required placeholder="e.g. Dallas, TX or street address"><span class="help">Enter a city, ZIP code, or address confirmed by the driver. This page does not track GPS automatically.</span></div>
+    <div class="field"><label for="currentLocation">Truck’s current location *</label><input id="currentLocation" maxlength="220" required placeholder="e.g. Dallas, TX or street address"><span class="help">Enter a city, ZIP code, or address confirmed by the driver. This page does not track GPS automatically. The location is sent to public OpenStreetMap-based lookup/routing services to calculate the route.</span></div>
     <div class="field"><label for="destination">Delivery location *</label><input id="destination" maxlength="220" required placeholder="Select a load or enter delivery city/address"></div>
     <button type="button" id="routeButton" class="secondary">Find remaining road miles</button>
     <div id="routeStatus" class="status" role="status">Enter both locations, then calculate the route.</div>
@@ -160,6 +160,8 @@ a{color:#ffdc8a}
     $('routeStatus').textContent='Looking up both locations and calculating a driving route…';$('routeStatus').className='status';
     try{
       const origin=await geocode(from);
+      // Respect the public Nominatim service limit of about one request per second.
+      await new Promise(resolve=>setTimeout(resolve,1100));
       const destination=await geocode(to);
       const url='https://router.project-osrm.org/route/v1/driving/'+origin.lon+','+origin.lat+';'+destination.lon+','+destination.lat+'?overview=false&steps=false';
       const response=await fetch(url,{headers:{Accept:'application/json'},cache:'no-store'});
