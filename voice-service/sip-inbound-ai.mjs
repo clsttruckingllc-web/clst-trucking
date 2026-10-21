@@ -30,7 +30,7 @@ const BYTES_PER_SAMPLE = 2;
 const SILENCE_MS = Number(process.env.SPEECH_END_SILENCE_MS || 850);
 const MIN_SPEECH_MS = Number(process.env.MIN_SPEECH_MS || 350);
 const MAX_TURN_MS = Number(process.env.MAX_TURN_MS || 12000);
-const VAD_RMS_THRESHOLD = Number(process.env.VAD_RMS_THRESHOLD || 420);
+const VAD_RMS_THRESHOLD = Number(process.env.VAD_RMS_THRESHOLD || 150);
 const MAX_HISTORY_TURNS = Number(process.env.MAX_HISTORY_TURNS || 8);
 
 function pcmDurationMs(pcm) {
@@ -165,6 +165,7 @@ async function main() {
   });
   let activeCall = false;
   let stopping = false;
+  softphone.enableDebugMode?.();
   softphone.on("signalingError", (error) => console.error("RingCentral signaling error:", error?.message || error));
   softphone.on("invite", async (inviteMessage) => {
     if (activeCall) {
@@ -185,6 +186,8 @@ async function main() {
     let history = [];
     let flushTimer;
     let turnTimeout;
+    let audioFrames = 0;
+    let lastAudioDiagnosticAt = 0;
     const resetAudioTurn = () => {
       pcmChunks = [];
       speechMs = 0;
@@ -249,15 +252,24 @@ async function main() {
       console.log("Incoming call detected.");
       session = await softphone.answer(inviteMessage);
       session.once("disposed", cleanup);
-      console.log("Call answered. Playing initial greeting.");
-      speaking = true;
-      await playReply(session, greeting);
-      speaking = false;
-      // Assumes ringcentral-softphone emits decoded PCM buffers on the session "audio" event.
-      session.on("audio", (audio) => {
-        if (disposed || speaking || processing || !Buffer.isBuffer(audio)) return;
+      // Listen BEFORE greeting playback. SDK versions expose decoded inbound PCM as
+      // either "audio" (Buffer) or "audioPacket" ({ payload: Buffer }); support both.
+      const onInboundAudio = (eventData) => {
+        if (disposed) return;
+        const audio = Buffer.isBuffer(eventData) ? eventData : eventData?.payload;
+        if (!Buffer.isBuffer(audio) || audio.length < 2) return;
+
+        audioFrames += 1;
         const now = Date.now();
         const level = rmsPcm16(audio);
+        if (now - lastAudioDiagnosticAt >= 2000) {
+          lastAudioDiagnosticAt = now;
+          console.log(`Inbound audio: frames=${audioFrames}, bytes=${audio.length}, RMS=${Math.round(level)}, threshold=${VAD_RMS_THRESHOLD}, speaking=${speaking}, processing=${processing}`);
+        }
+
+        // Ignore the assistant's own greeting/reply while still measuring incoming audio.
+        if (speaking || processing) return;
+
         if (level >= VAD_RMS_THRESHOLD) {
           hadSpeech = true;
           lastVoiceAt = now;
@@ -268,11 +280,19 @@ async function main() {
           pcmChunks.push(audio);
           if (lastVoiceAt && now - lastVoiceAt >= SILENCE_MS) void processTurn();
         }
-      });
+      };
+      session.on("audio", onInboundAudio);
+      session.on("audioPacket", onInboundAudio);
+
+      console.log("Call answered. Playing initial greeting.");
+      speaking = true;
+      await playReply(session, greeting);
+      speaking = false;
+
       flushTimer = setInterval(() => {
         if (hadSpeech && lastVoiceAt && Date.now() - lastVoiceAt >= SILENCE_MS) void processTurn();
       }, 200);
-      console.log("Conversational prototype ready. Speak after the greeting; press Ctrl+C to stop the service.");
+      console.log("Conversational prototype ready. Inbound audio diagnostics enabled.");
     } catch (error) {
       console.error("Inbound call handling failed:", error?.message || error);
       if (session) { try { await session.hangup(); } catch {} }
