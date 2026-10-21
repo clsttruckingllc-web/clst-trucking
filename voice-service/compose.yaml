@@ -1,0 +1,17 @@
+services:
+  clst-voice:
+    build:
+      context: ..
+      dockerfile: voice-service/Dockerfile
+    container_name: clst-trucking-ai-voice
+    restart: unless-stopped
+    network_mode: host
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: "8080"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
