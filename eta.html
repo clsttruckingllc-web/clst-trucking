@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101820">
+<title>CLST Trucking · ETA Estimator</title>
+<style>
+:root{color-scheme:dark;--bg:#0d141b;--panel:#151f29;--line:#2b3a47;--text:#f3f6f8;--muted:#aab7c3;--gold:#f4b942;--green:#63d6a2;--red:#ff8e8e}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#1b2b38 0,#0d141b 58%);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);min-height:100vh}
+main{width:min(900px,100%);margin:0 auto;padding:24px 16px 48px}
+header{display:flex;align-items:center;gap:14px;margin:4px 0 28px}
+.mark{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;background:var(--gold);color:#101820;font-weight:900;font-size:18px}
+.brand{font-size:13px;letter-spacing:.13em;color:var(--gold);font-weight:800}
+h1{font-size:clamp(28px,6vw,42px);line-height:1.08;margin:6px 0 10px}
+h2{font-size:19px;margin:0 0 16px}
+p{color:var(--muted);margin:0}
+.hero{margin-bottom:22px}
+.pill{display:inline-block;border:1px solid #8d6b25;color:#ffdc8a;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:750;margin-bottom:12px}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:rgba(21,31,41,.94);border:1px solid var(--line);border-radius:16px;padding:20px;min-width:0}
+.field{display:flex;flex-direction:column;gap:6px;margin:0 0 15px}
+label{font-size:13px;font-weight:700;color:#d9e2e9}
+input{width:100%;min-height:46px;border-radius:9px;border:1px solid #3b4d5c;background:#0e171f;color:var(--text);padding:10px 12px;font:inherit}
+input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.help{font-size:12px;color:var(--muted)}
+button{width:100%;min-height:48px;border:0;border-radius:10px;background:var(--gold);color:#151a20;font-weight:850;font-size:15px;cursor:pointer}
+button:focus-visible{outline:3px solid white;outline-offset:3px}
+.result{border:1px solid var(--line);background:#0e171f;border-radius:12px;padding:16px;margin-top:14px}
+.result-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:800}
+.eta{font-size:clamp(25px,5vw,34px);font-weight:850;line-height:1.15;margin:8px 0;color:var(--green);overflow-wrap:anywhere}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:12px}
+.stat strong{display:block;font-size:20px;margin-top:3px}
+.notice{border-left:3px solid var(--gold);padding:10px 12px;background:#211d13;border-radius:0 8px 8px 0;color:#f6e4b6;font-size:13px;margin-top:14px}
+.error{color:var(--red);font-size:13px;margin-top:12px}
+footer{color:var(--muted);font-size:12px;text-align:center;margin-top:22px}
+@media(max-width:680px){main{padding:18px 12px 32px}.layout{grid-template-columns:1fr}.card{padding:17px}.hero{margin-bottom:18px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="mark" aria-hidden="true">CLST</div>
+  <div><div class="brand">CLST TRUCKING LLC</div><p>Dispatch tools · Free prototype</p></div>
+</header>
+<section class="hero">
+  <span class="pill">BETA · NO API COST</span>
+  <h1>Load ETA Estimator</h1>
+  <p>Estimate a delivery arrival from dispatcher-confirmed remaining miles. This page runs in your browser and sends no data to an AI service.</p>
+</section>
+<div class="layout">
+<section class="card">
+  <h2>Trip details</h2>
+  <form id="etaForm">
+    <div class="field"><label for="load">Load number (optional)</label><input id="load" maxlength="80" placeholder="e.g. 102190"></div>
+    <div class="field"><label for="miles">Remaining miles *</label><input id="miles" type="number" min="0" max="10000" step="1" required placeholder="Use remaining miles, not total route miles"><span class="help">Enter miles left from the truck’s known current location.</span></div>
+    <div class="field"><label for="start">Departure / current time *</label><input id="start" type="datetime-local" required></div>
+    <div class="field"><label for="speed">Average driving speed (mph)</label><input id="speed" type="number" min="1" max="80" step="1" value="50" required></div>
+    <div class="field"><label for="hours">Planned driving hours per day</label><input id="hours" type="number" min="1" max="14" step="0.5" value="10" required></div>
+    <div class="field"><label for="rest">Rest hours between driving days</label><input id="rest" type="number" min="0" max="24" step="0.5" value="10" required></div>
+    <div class="field"><label for="appointment">Delivery appointment (optional)</label><input id="appointment" type="datetime-local"></div>
+    <button type="submit">Calculate estimated ETA</button>
+    <div id="error" class="error" role="alert" hidden></div>
+  </form>
+</section>
+<section class="card" aria-live="polite">
+  <h2>Estimate</h2>
+  <p id="resultIntro">Enter the remaining miles to calculate a planning estimate.</p>
+  <div class="result">
+    <div class="result-label">Estimated arrival</div>
+    <div id="arrival" class="eta">Not calculated</div>
+    <div id="loadLabel" class="help"></div>
+    <div class="stats">
+      <div class="stat"><span class="help">Driving time</span><strong id="driveTime">—</strong></div>
+      <div class="stat"><span class="help">Rest periods</span><strong id="restCount">—</strong></div>
+      <div class="stat"><span class="help">Elapsed estimate</span><strong id="elapsed">—</strong></div>
+      <div class="stat"><span class="help">Appointment</span><strong id="appointmentStatus">—</strong></div>
+    </div>
+  </div>
+  <div class="notice">This is a rough planning estimate, not live GPS or traffic tracking. It excludes weather, congestion, loading delays and driver-specific hours-of-service status. Confirm ETA with the driver or dispatch before giving it to a broker.</div>
+</section>
+</div>
+<footer>CLST Trucking LLC · Free local calculation · No sign-in · No API request</footer>
+</main>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2,'0');
+  function localInputValue(date){
+    return date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+'T'+pad(date.getHours())+':'+pad(date.getMinutes());
+  }
+  $('start').value = localInputValue(new Date());
+  function fmtDate(date){
+    return new Intl.DateTimeFormat(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(date);
+  }
+  function fmtDuration(hours){
+    const whole = Math.floor(hours);
+    const mins = Math.round((hours-whole)*60);
+    return mins ? whole+' h '+mins+' min' : whole+' h';
+  }
+  $('etaForm').addEventListener('submit',function(event){
+    event.preventDefault();
+    $('error').hidden = true;
+    const miles = Number($('miles').value);
+    const speed = Number($('speed').value);
+    const dailyHours = Number($('hours').value);
+    const restHours = Number($('rest').value);
+    const start = new Date($('start').value);
+    const appointmentRaw = $('appointment').value;
+    const appointment = appointmentRaw ? new Date(appointmentRaw) : null;
+    if (!Number.isFinite(miles) || miles < 0 || miles > 10000 ||
+        !Number.isFinite(speed) || speed <= 0 || speed > 80 ||
+        !Number.isFinite(dailyHours) || dailyHours <= 0 || dailyHours > 14 ||
+        !Number.isFinite(restHours) || restHours < 0 || restHours > 24 ||
+        Number.isNaN(start.getTime()) || (appointment && Number.isNaN(appointment.getTime()))) {
+      $('error').textContent = 'Check the values and enter a valid date, remaining miles, speed and rest schedule.';
+      $('error').hidden = false;
+      return;
+    }
+    const drivingHours = miles / speed;
+    const rests = miles === 0 ? 0 : Math.max(0,Math.ceil(drivingHours/dailyHours)-1);
+    const elapsed = drivingHours + rests*restHours;
+    const arrival = new Date(start.getTime()+elapsed*3600000);
+    $('arrival').textContent = fmtDate(arrival);
+    $('loadLabel').textContent = $('load').value.trim() ? 'Load '+$('load').value.trim() : 'Load number not provided';
+    $('driveTime').textContent = fmtDuration(drivingHours);
+    $('restCount').textContent = String(rests);
+    $('elapsed').textContent = fmtDuration(elapsed);
+    $('appointmentStatus').textContent = !appointment ? 'Not provided' : arrival <= appointment ? 'On-time estimate' : 'May be late';
+    $('appointmentStatus').style.color = !appointment ? 'var(--text)' : arrival <= appointment ? 'var(--green)' : 'var(--red)';
+    $('resultIntro').textContent = 'Estimate calculated using the assumptions entered on the left.';
+  });
+})();
+</script>
+</body>
+</html>
