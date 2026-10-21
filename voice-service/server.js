@@ -23,7 +23,13 @@ const PORT = Number(process.env.PORT || 8080);
 const TEST_CALL_TO = process.env.TEST_CALL_TO.trim();
 const API_KEY = process.env.VOICE_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const TTS_MODEL = process.env.GEMINI_TTS_MODEL || "gemini-2.5-flash-preview-tts";
+const configuredTtsModel = process.env.GEMINI_TTS_MODEL?.trim();
+const TTS_MODEL =
+  !configuredTtsModel ||
+  configuredTtsModel === "gemini-2.5-flash-tts" ||
+  configuredTtsModel === "gemini-2.5-flash-preview-tts"
+    ? "gemini-3.8-flash-lite-tts"
+    : configuredTtsModel;
 const GREETING_TEXT =
   process.env.TEST_GREETING ||
   "Hello, this is CLST Trucking. This is our first automated voice test. Our AI receptionist is being connected. Thank you for calling CLST Trucking.";
@@ -119,11 +125,19 @@ async function generateGreetingPcm() {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: `Speak in a warm, clear, professional female receptionist voice. Do not add words. Say exactly: ${GREETING_TEXT}` }] }],
+        contents: [{
+          role: "user",
+          parts: [{
+            text: GREETING_TEXT,
+            speech_metadata: {
+              style: "Warm, clear, professional female receptionist voice. Natural pace, friendly and confident. Speak the transcript verbatim.",
+            },
+          }],
+        }],
         generationConfig: {
           responseModalities: ["AUDIO"],
           speechConfig: {
-            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
+            voiceConfig: { voice: "Kore" },
           },
         },
       }),
