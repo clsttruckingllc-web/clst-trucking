@@ -172,7 +172,8 @@ async function startTestCall() {
 
   try {
     console.log("Starting one authorized test call to the configured destination.");
-    const pcmPromise = generateGreetingPcm();
+    // Generate audio before dialing so a TTS failure cannot leave a silent live call.
+    const pcm = await generateGreetingPcm();
     callSession = await softphone.call(TEST_CALL_TO);
 
     timeout = setTimeout(() => {
@@ -183,7 +184,6 @@ async function startTestCall() {
     callSession.once("answered", async () => {
       try {
         console.log("Test call answered; generating/playing the CLST greeting.");
-        const pcm = await pcmPromise;
         if (finished) return;
         const streamer = callSession.streamAudio(pcm);
         streamer.once("finished", () => {
