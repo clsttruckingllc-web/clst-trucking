@@ -1,9 +1,9 @@
 {
   "name": "clst-trucking-ai-voice",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Separate Node.js RingCentral SIP voice service scaffold for CLST Trucking AI",
+  "description": "RingCentral SIP voice test service for CLST Trucking AI",
   "scripts": {
     "start": "node server.js"
   },
