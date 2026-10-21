@@ -49,3 +49,34 @@ The endpoint does not accept a destination in the request body; it calls only `T
 ## Scope still to build
 
 This first test is one-way spoken audio. The next stage is streaming caller audio into speech recognition, conversational response generation, and speech output, with interruption handling, transfer to a human, privacy controls, and end-to-end tests. Do not route the main company number to this test service.
+
+
+## Free ETA estimator (no API call)
+
+The `eta.js` module is a deterministic, local calculation and does not call Gemini, OpenAI, or any paid service.
+
+Run its tests from this directory with:
+
+```bash
+npm test
+```
+
+Example use:
+
+```js
+import { estimateEta } from "./eta.js";
+
+const eta = estimateEta({
+  remainingMiles: 250,
+  startAt: new Date(),
+  deliveryAppointmentAt: "2026-10-22T18:00:00-05:00"
+});
+console.log(eta);
+```
+
+Important limits:
+- Supply **remaining miles from a known current location**, not total route miles copied from a Rate Confirmation.
+- If remaining miles are unknown, the function returns `status: "unknown"` rather than inventing an ETA.
+- The default planning assumptions are 50 mph, 10 driving hours per day, and 10 hours of rest between driving days; they are configurable and are not a substitute for driver-specific hours-of-service checks.
+- The estimate does not include live GPS, traffic, weather, loading delays, or driver status. It is not a guaranteed arrival time.
+- This helper is not yet connected to the RingCentral call flow or the Gmail dashboard; integration and end-to-end tests are still required.
