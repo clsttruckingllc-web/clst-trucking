@@ -88,12 +88,32 @@ function extractJson(text) {
   return JSON.parse(cleaned);
 }
 async function geminiGenerate(model, body) {
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
-    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) },
-  );
+  const timeoutMs = Number(process.env.GEMINI_TIMEOUT_MS || 20000);
+  console.log(`Gemini request started: model=${model}, timeout=${timeoutMs}ms`);
+  let response;
+  try {
+    response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(timeoutMs),
+      },
+    );
+  } catch (error) {
+    if (error?.name === "TimeoutError" || error?.name === "AbortError") {
+      throw new Error(`Gemini request timed out after ${timeoutMs}ms for model ${model}. Check internet access, API quota, and model name.`);
+    }
+    throw new Error(`Gemini network request failed for model ${model}: ${error?.message || error}`);
+  }
   const result = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(result?.error?.message || `Gemini HTTP ${response.status}`);
+  if (!response.ok) {
+    const detail = result?.error?.message || `Gemini HTTP ${response.status}`;
+    console.error(`Gemini API error (model=${model}, HTTP ${response.status}): ${detail}`);
+    throw new Error(detail);
+  }
+  console.log(`Gemini response received: model=${model}`);
   return result;
 }
 async function makeTtsPcm(text) {
