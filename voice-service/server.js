@@ -34,11 +34,16 @@ const GREETING_TEXT =
   process.env.TEST_GREETING ||
   "Hello, this is CLST Trucking. This is our first automated voice test. Our AI receptionist is being connected. Thank you for calling CLST Trucking.";
 
+const INBOUND_GREETING =
+  process.env.INBOUND_GREETING ||
+  "Thank you for calling CLST Trucking. Our automated receptionist is currently in a basic test version and cannot yet understand spoken replies. Please contact our office directly for assistance. Thank you.";
+
 const state = {
   sipRegistered: false,
   registering: false,
   callInProgress: false,
   lastError: null,
+  inboundCallsAnswered: 0,
   startedAt: new Date().toISOString(),
 };
 
@@ -118,7 +123,7 @@ function resamplePcm16(input, sourceRate = 24000, targetRate = 16000) {
   return output;
 }
 
-async function generateGreetingPcm() {
+async function generateGreetingPcm(text = GREETING_TEXT) {
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(TTS_MODEL)}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`,
     {
@@ -128,7 +133,7 @@ async function generateGreetingPcm() {
         contents: [{
           role: "user",
           parts: [{
-            text: GREETING_TEXT,
+            text,
             speech_metadata: {
               style: "Warm, clear, professional female receptionist voice. Natural pace, friendly and confident. Speak the transcript verbatim.",
             },
@@ -162,6 +167,76 @@ async function generateGreetingPcm() {
     return resamplePcm16(Buffer.from(audioPart.inlineData.data, "base64"), 24000, 16000);
   }
   throw new Error(`Unsupported Gemini TTS audio format: ${mimeType}`);
+}
+
+let inboundGreetingPcmPromise;
+
+async function getInboundGreetingPcm() {
+  if (!inboundGreetingPcmPromise) {
+    inboundGreetingPcmPromise = generateGreetingPcm(INBOUND_GREETING);
+  }
+  try {
+    return await inboundGreetingPcmPromise;
+  } catch (error) {
+    inboundGreetingPcmPromise = null;
+    throw error;
+  }
+}
+
+// Temporary inbound mode: answer with a transparent basic-version greeting,
+// then end the call. It does not listen to or understand the caller yet.
+async function handleInboundInvite(inviteMessage) {
+  if (state.callInProgress) {
+    try { await softphone.decline(inviteMessage); } catch {}
+    console.log("Declined an inbound call because another call is in progress.");
+    return;
+  }
+
+  state.callInProgress = true;
+  state.lastError = null;
+  let callSession;
+  let timeout;
+  let finished = false;
+
+  const finish = async (hangup = false) => {
+    if (finished) return;
+    finished = true;
+    if (timeout) clearTimeout(timeout);
+    if (hangup && callSession) {
+      try { await callSession.hangup(); } catch {}
+    }
+    state.callInProgress = false;
+  };
+
+  try {
+    // Warmed/cached TTS avoids making a fresh Gemini request for every caller.
+    const pcm = await getInboundGreetingPcm();
+    callSession = await softphone.answer(inviteMessage);
+    state.inboundCallsAnswered += 1;
+
+    timeout = setTimeout(() => {
+      state.lastError = "Inbound greeting call exceeded the 75-second safety limit";
+      void finish(true);
+    }, 75000);
+
+    callSession.once("disposed", () => {
+      console.log("Inbound call ended.");
+      void finish(false);
+    });
+
+    const streamer = callSession.streamAudio(pcm);
+    streamer.once("finished", () => {
+      console.log("Inbound greeting finished; ending basic-version call.");
+      void finish(true);
+    });
+  } catch (error) {
+    state.lastError = String(error?.message || "Inbound call handling failed").slice(0, 300);
+    console.error("Inbound call handling failed:", state.lastError);
+    if (!callSession) {
+      try { await softphone.decline(inviteMessage); } catch {}
+    }
+    await finish(Boolean(callSession));
+  }
 }
 
 async function startTestCall() {
@@ -237,6 +312,7 @@ const server = http.createServer(async (req, res) => {
       status: state.sipRegistered ? "ready" : state.registering ? "registering" : "not_registered",
       sipRegistered: state.sipRegistered,
       callInProgress: state.callInProgress,
+      inboundCallsAnswered: state.inboundCallsAnswered,
       lastError: state.lastError,
       startedAt: state.startedAt,
     });
@@ -285,11 +361,26 @@ async function registerSip() {
   }
 }
 
+// Attach the listener before registering so no inbound invite is missed.
+softphone.on("invite", (inviteMessage) => {
+  console.log("Inbound call received by the dedicated CLST AI SIP endpoint.");
+  void handleInboundInvite(inviteMessage);
+});
+
 softphone.on("signalingError", (error) => {
   state.sipRegistered = false;
   state.lastError = String(error?.message || "SIP signaling error").slice(0, 300);
   console.error("SIP signaling error:", state.lastError);
 });
+
+// Pre-generate the basic inbound greeting at startup. If TTS is temporarily
+// unavailable, the first inbound call retries and the health endpoint shows the error.
+void getInboundGreetingPcm()
+  .then(() => console.log("Inbound greeting audio is ready."))
+  .catch((error) => {
+    state.lastError = String(error?.message || "Inbound greeting warmup failed").slice(0, 300);
+    console.error("Inbound greeting warmup failed:", state.lastError);
+  });
 
 void registerSip();
 const registrationRetry = setInterval(() => {
