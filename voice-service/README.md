@@ -7,8 +7,10 @@ This is a long-running Node.js SIP voice service. It is separate from Cloudflare
 - Registers an authorized RingCentral **Existing Phone / OtherPhone** SIP endpoint.
 - Exposes `GET /health` for a safe status check.
 - Exposes authenticated `POST /test-call` that calls only the preconfigured `TEST_CALL_TO` number.
-- Uses Gemini TTS to speak a short, professional female-voice CLST greeting, then ends the test call.
-- Does **not** change company-number routing and does not yet conduct a two-way AI conversation. This is a first outbound audio test.
+- Exposes authenticated `POST /test-call` that calls only the preconfigured `TEST_CALL_TO` number.
+- Can answer inbound calls delivered to a **dedicated AI SIP endpoint**, play a transparent temporary greeting, then end the call.
+- Uses Gemini TTS for the female-voice greeting.
+- Does **not** change company-number routing and does not yet conduct a two-way AI conversation. Inbound mode is only a greeting-and-hangup fallback, not a receptionist that understands caller replies.
 
 ## Required environment variables
 
@@ -23,7 +25,8 @@ Set these in the hosting provider's private environment/secret settings. Never c
 - `VOICE_API_KEY`: a new long random API key to protect `POST /test-call`
 - `TEST_CALL_TO`: the test recipient in E.164 format, e.g. `+17205550123` (use your own test phone)
 - `GEMINI_TTS_MODEL`: optional; defaults to `gemini-2.5-flash-preview-tts`
-- `TEST_GREETING`: optional greeting text
+- `TEST_GREETING`: optional greeting text for the outbound test call
+- `INBOUND_GREETING`: optional temporary inbound greeting; the current fallback tells callers the system cannot understand replies yet
 
 Use a **separate AI Existing Phone/OtherPhone device**. Do not run the AI service with the same SIP credentials as the physical Yealink, because RingCentral delivers inbound calls to the most recently registered instance for shared credentials.
 
