@@ -29,3 +29,9 @@ jobs:
       - name: Verify Softphone SDK can be imported
         working-directory: voice-service
         run: node --input-type=module -e "import Softphone from 'ringcentral-softphone'; if (typeof Softphone !== 'function') process.exit(1); console.log('Softphone SDK import OK')"
+      - name: Validate Docker Compose configuration
+        run: |
+          touch voice-service/.env
+          docker compose -f voice-service/compose.yaml config --quiet
+      - name: Build production Docker image
+        run: docker build -f voice-service/Dockerfile -t clst-trucking-ai-voice:ci .
