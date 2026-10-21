@@ -1,11 +1,12 @@
 {
   "name": "clst-trucking-ai-voice",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "RingCentral SIP voice test service for CLST Trucking AI",
+  "description": "RingCentral SIP voice test service and free ETA estimator for CLST Trucking AI",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test eta.test.js"
   },
   "engines": {
     "node": ">=20"
