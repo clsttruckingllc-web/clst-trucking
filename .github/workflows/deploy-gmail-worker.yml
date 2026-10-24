@@ -53,7 +53,7 @@ jobs:
           id = "$CLOUDFLARE_KV_NAMESPACE_ID"
 
           [triggers]
-          crons = ["*/5 * * * *"]
+          crons = ["* * * * *"]
           EOF
 
       - name: Validate Worker JavaScript
