@@ -23,6 +23,7 @@ export default { async fetch(req, env) {
       else if (req.headers.get("Authorization") !== "Bearer "+env.API_KEY) r=json({error:"Unauthorized"},401);
       else if (url.pathname === "/api/models" && req.method === "GET") r=json({success:true,model:env.GEMINI_MODEL||MODEL,pdfAnalysis:!!env.GEMINI_API_KEY});
       else if (url.pathname === "/api/messages" && req.method === "GET") r=await messages(url,env);
+      else if (url.pathname === "/api/autoreply/status" && req.method === "GET") r=await autoReplyStatus(env);
       else if (url.pathname === "/api/autoreply/run" && req.method === "POST") r=await runAutoReplies(env);
       else if (url.pathname === "/api/rates" && req.method === "GET") r=await rates(url,env);
       else if (url.pathname === "/api/rates" && req.method === "POST") r=await oneRate(req,env);
@@ -34,7 +35,7 @@ export default { async fetch(req, env) {
     const h=new Headers(r.headers); for(const [k,v] of Object.entries(cors))h.set(k,v);
     return new Response(r.body,{status:r.status,headers:h});
   } catch(e) { return json({error:errText(e)},500,cors); }
-}, async scheduled(event,env,ctx) { ctx.waitUntil(processAutoReplies(env)); }
+}, async scheduled(event,env,ctx) { ctx.waitUntil(recordAutoReplyRun(env)); }
 };
 
 function json(x,status=200,headers={}) { return new Response(JSON.stringify(x),{status,headers:{"Content-Type":"application/json; charset=utf-8",...headers}}); }
@@ -57,7 +58,7 @@ async function oauthFinish(req,env){
  const d=await res.json().catch(()=>({}));
  if(!res.ok||!d.refresh_token)return new Response("Google token exchange failed: "+String(d.error_description||d.error||"No refresh token returned"),{status:400});
  await env.TOKENS.put("google_refresh_token",d.refresh_token);await env.TOKENS.delete("google_oauth_state");
- return Response.redirect("https://clst-trucking.pages.dev/?gmail=connected",302);
+ return Response.redirect("https://clst-trucking.pages.dev/ai/?gmail=connected",302);
 }
 async function googleToken(env){
  const refresh=await env.TOKENS.get("google_refresh_token");if(!refresh)throw Error("Gmail is not connected. Click Connect Gmail.");
@@ -288,8 +289,26 @@ async function processAutoReplies(env){
  }
  return {success:true,checked:(found.messages||[]).length,results};
 }
+async function recordAutoReplyRun(env){
+ const startedAt=new Date().toISOString();
+ try{
+  const result=await processAutoReplies(env);
+  const record={...result,startedAt,finishedAt:new Date().toISOString()};
+  await env.TOKENS.put("smart_reply_last_run",JSON.stringify(record),{expirationTtl:30*24*60*60});
+  return record;
+ }catch(e){
+  const record={success:false,error:errText(e),startedAt,finishedAt:new Date().toISOString()};
+  try{await env.TOKENS.put("smart_reply_last_run",JSON.stringify(record),{expirationTtl:30*24*60*60});}catch(ignore){}
+  throw e;
+ }
+}
+async function autoReplyStatus(env){
+ let lastRun=null;
+ try{const raw=await env.TOKENS.get("smart_reply_last_run");if(raw)lastRun=JSON.parse(raw);}catch(e){}
+ return json({success:true,configured:!!(env.GEMINI_API_KEY&&env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),gmailConnected:!!(await env.TOKENS.get("google_refresh_token")),model:env.GEMINI_MODEL||MODEL,lastRun});
+}
 async function runAutoReplies(env){
- try{return json(await processAutoReplies(env));}catch(e){return json({success:false,error:errText(e)},502);}
+ try{return json(await recordAutoReplyRun(env));}catch(e){return json({success:false,error:errText(e)},502);}
 }
 
 async function rcToken(env){
