@@ -190,6 +190,18 @@ function base64UrlUtf8(s){
  return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 }
 function safeHeader(s){return String(s||"").replace(/[\r\n]+/g," ").trim().slice(0,500);}
+function replyCc(m,to,myEmail){
+ const h=m.payload&&m.payload.headers||[];
+ const candidates=[head(h,"to"),head(h,"cc")].flatMap(v=>String(v||"").match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi)||[]);
+ const excluded=new Set([to,myEmail].map(v=>String(v||"").trim().toLowerCase()).filter(Boolean));
+ const cc=[],seen=new Set(excluded);
+ for(const address of [...candidates,"vic@clsttrucking.com"]){
+  const value=String(address||"").trim(),key=value.toLowerCase();
+  if(!key||seen.has(key))continue;
+  seen.add(key);cc.push(value);
+ }
+ return cc;
+}
 function autoSkipReason(m){
  const h=m.payload&&m.payload.headers||[];
  const val=n=>head(h,n).trim();
@@ -205,20 +217,22 @@ function autoSkipReason(m){
 function riskyEmail(text){
  return /\b(rate quote|quote a rate|bid|bidding|accept (the )?load|book (the )?load|contract|agreement|invoice|payment dispute|claim|cargo damage|accident|injury|lawsuit|legal|insurance|detention|tonu|chargeback|settlement|refund|wire transfer|bank details|ssn|social security|password|login code|verification code|urgent payment)\b/i.test(String(text||""));
 }
-async function createReplyDraft(env,m,to,subject,body,token){
+async function createReplyDraft(env,m,to,subject,body,token,myEmail){
  const h=m.payload&&m.payload.headers||[],msgId=head(h,"message-id"),refs=head(h,"references");
  const replySubject=/^re:/i.test(subject)?"Re: "+subject.replace(/^re:\s*/i,""):"Re: "+subject;
  const lines=["To: "+safeHeader(to),"Subject: "+safeHeader(replySubject)];
+ const cc=replyCc(m,to,myEmail);if(cc.length)lines.push("Cc: "+cc.map(safeHeader).join(", "));
  if(msgId)lines.push("In-Reply-To: "+safeHeader(msgId));
  if(refs||msgId)lines.push("References: "+safeHeader([refs,msgId].filter(Boolean).join(" ")));
  lines.push("MIME-Version: 1.0","Content-Type: text/plain; charset=UTF-8","Content-Transfer-Encoding: 8bit","","",String(body||"").slice(0,5000));
  const raw=base64UrlUtf8(lines.join("\r\n"));
  return gmailWrite(env,"/drafts","POST",{message:{raw,threadId:m.threadId}},token);
 }
-async function sendReply(env,m,to,subject,body,token){
+async function sendReply(env,m,to,subject,body,token,myEmail){
  const h=m.payload&&m.payload.headers||[],msgId=head(h,"message-id"),refs=head(h,"references");
  const replySubject=/^re:/i.test(subject)?"Re: "+subject.replace(/^re:\s*/i,""):"Re: "+subject;
  const lines=["To: "+safeHeader(to),"Subject: "+safeHeader(replySubject)];
+ const cc=replyCc(m,to,myEmail);if(cc.length)lines.push("Cc: "+cc.map(safeHeader).join(", "));
  if(msgId)lines.push("In-Reply-To: "+safeHeader(msgId));
  if(refs||msgId)lines.push("References: "+safeHeader([refs,msgId].filter(Boolean).join(" ")));
  lines.push("MIME-Version: 1.0","Content-Type: text/plain; charset=UTF-8","Content-Transfer-Encoding: 8bit","","",String(body||"").slice(0,5000));
@@ -238,6 +252,8 @@ async function classifyReply(env,m){
 async function processAutoReplies(env){
  if(!env.GEMINI_API_KEY||!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET)throw Error("Auto-reply requires Google OAuth and Gemini configuration.");
  const token=await googleToken(env);
+ const profile=await gmail(env,"/profile",token),myEmail=emailAddress(profile.emailAddress);
+ if(!myEmail)throw Error("Could not identify the connected Gmail account; automatic replies are paused for safety.");
  const found=await gmail(env,"/messages?maxResults=12&q="+encodeURIComponent("in:inbox is:unread newer_than:2d -from:me -category:promotions -category:social -category:updates"),token);
  const results=[];
  for(const item of(found.messages||[]).slice(0,12)){
@@ -259,12 +275,12 @@ async function processAutoReplies(env){
    const hardRisk=riskyEmail(a.subject+" "+a.body);
    const canSend=a.action==="send"&&a.confidence>=0.92&&!hardRisk&&a.reply.length>=20&&a.reply.length<=1800;
    if(canSend){
-    const sent=await sendReply(env,m,a.to,a.subject,a.reply,token);
+    const sent=await sendReply(env,m,a.to,a.subject,a.reply,token,myEmail);
     await env.TOKENS.put(key,JSON.stringify({status:"sent",sentId:sent.id||null,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
     results.push({id,status:"sent",confidence:a.confidence});
    }else{
     const reason=hardRisk?"Sensitive/commitment-related email requires review":a.reason+(a.confidence<0.92?" (confidence below 0.92)":"");
-    const draft=await createReplyDraft(env,m,a.to,a.subject,a.reply,token);
+    const draft=await createReplyDraft(env,m,a.to,a.subject,a.reply,token,myEmail);
     await env.TOKENS.put(key,JSON.stringify({status:"draft",draftId:draft.id||null,reason,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
     results.push({id,status:"draft_for_review",reason,confidence:a.confidence});
    }
