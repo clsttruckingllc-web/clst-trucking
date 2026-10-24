@@ -45,7 +45,13 @@ jobs:
           [[kv_namespaces]]
           binding = "TOKENS"
           id = "$CLOUDFLARE_KV_NAMESPACE_ID"
+
+          [triggers]
+          crons = ["*/5 * * * *"]
           EOF
+
+      - name: Validate Worker JavaScript
+        run: node --check cloudflare-worker.js
 
       - name: Deploy Worker
         env:
