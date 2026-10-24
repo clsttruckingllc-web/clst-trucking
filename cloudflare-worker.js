@@ -319,13 +319,16 @@ async function processAutoReplies(env){
 }
 async function recordAutoReplyRun(env){
  const startedAt=new Date().toISOString();
+ console.log("[smart-auto-reply] run started", startedAt);
  try{
   const result=await processAutoReplies(env);
   const record={...result,startedAt,finishedAt:new Date().toISOString()};
   await env.TOKENS.put("smart_reply_last_run",JSON.stringify(record),{expirationTtl:30*24*60*60});
+  console.log("[smart-auto-reply] run finished", JSON.stringify({success:record.success,checked:record.checked,results:record.results,note:record.note,startedAt,finishedAt:record.finishedAt}));
   return record;
  }catch(e){
   const record={success:false,error:errText(e),startedAt,finishedAt:new Date().toISOString()};
+  console.error("[smart-auto-reply] run failed", JSON.stringify(record));
   try{await env.TOKENS.put("smart_reply_last_run",JSON.stringify(record),{expirationTtl:30*24*60*60});}catch(ignore){}
   throw e;
  }
