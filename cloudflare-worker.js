@@ -256,6 +256,15 @@ async function classifyReply(env,m){
 async function processAutoReplies(env){
  if(!env.GEMINI_API_KEY||!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET)throw Error("Auto-reply requires Google OAuth and Gemini configuration.");
  const token=await googleToken(env);
+ // Establish a one-time activation baseline so enabling automation never replies to old unread mail.
+ const baselineKey="smart_reply_started_at";
+ let baseline=await env.TOKENS.get(baselineKey);
+ if(!baseline){
+  baseline=new Date().toISOString();
+  await env.TOKENS.put(baselineKey,baseline);
+  return {success:true,checked:0,results:[],note:"Initial safety baseline set; existing unread emails were not auto-replied to."};
+ }
+ const baselineMs=Date.parse(baseline);
  const profile=await gmail(env,"/profile",token),myEmail=emailAddress(profile.emailAddress);
  if(!myEmail)throw Error("Could not identify the connected Gmail account; automatic replies are paused for safety.");
  const found=await gmail(env,"/messages?maxResults=12&q="+encodeURIComponent("in:inbox is:unread newer_than:2d -from:me -category:promotions -category:social -category:updates"),token);
@@ -265,7 +274,13 @@ async function processAutoReplies(env){
   const key="smart_reply_v1:"+id;
   if(await env.TOKENS.get(key))continue;
   try{
-   const m=await fullMessage(env,id,token),e=meta(m),skip=autoSkipReason(m);
+   const m=await fullMessage(env,id,token),e=meta(m);
+   if(Number(m.internalDate||0)<=baselineMs){
+    const reason="Message predates automatic-reply activation";
+    await env.TOKENS.put(key,JSON.stringify({status:"ignored",reason,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
+    results.push({id,status:"ignored",reason});continue;
+   }
+   const skip=autoSkipReason(m);
    if(skip){await env.TOKENS.put(key,JSON.stringify({status:"ignored",reason:skip,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});results.push({id,status:"ignored",reason:skip});continue;}
    const a=await classifyReply(env,m);
    if(a.action==="ignore"){
