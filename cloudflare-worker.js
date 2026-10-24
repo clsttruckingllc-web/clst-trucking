@@ -302,7 +302,7 @@ async function processAutoReplies(env){
     const draft=await createReplyDraft(env,m,a.to,a.subject,a.reply,token,myEmail);
     // For broker/load emails that need human approval, still acknowledge receipt immediately
     // without quoting a rate, accepting a load, or promising availability.
-    const brokerContext=/\\b(load|rate confirmation|rate con|freight|pickup|delivery|tender|carrier|dispatch|shipment|lane|truckload|broker|load number)\\b/i.test(a.subject+" "+a.body);
+    const brokerContext=/\b(load|rate confirmation|rate con|freight|pickup|delivery|tender|carrier|dispatch|shipment|lane|truckload|broker|load number)\b/i.test(a.subject+" "+a.body);
     let acknowledgementId=null;
     if(brokerContext){
      const acknowledgement="Hello,\n\nThank you for reaching out to CLST Trucking LLC. We received your message and are reviewing the load details. We will follow up shortly.\n\nBest regards,\nCLST Trucking LLC";
