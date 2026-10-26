@@ -125,7 +125,7 @@ export async function onRequest({ request, env }) {
   // protect this endpoint without embedding any credential in public HTML.
   // Alternatively, use a Cloudflare Access application and signed JWT.
   const authorization = request.headers.get("Authorization") || "";
-  const bearerMatch = authorization.match(/^Bearer\\s+(.+)$/i);
+  const bearerMatch = authorization.match(/^Bearer\s+(.+)$/i);
   const suppliedBearer = bearerMatch ? bearerMatch[1].trim() : "";
   let authenticated = false;
 
