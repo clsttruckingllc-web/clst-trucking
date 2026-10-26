@@ -57,7 +57,8 @@ a{color:#ffdc8a}
   <form id="etaForm">
     <div class="field"><label for="loadSelect">Load from Gmail Rate Confirmations</label><select id="loadSelect"><option value="">Loading saved loads…</option></select><span class="help" id="loadStatus">Loading analyzed loads from the dashboard API…</span></div>
     <div class="field"><label for="load">Load number (optional)</label><input id="load" maxlength="80" placeholder="e.g. 102190"></div>
-    <div class="field"><label for="currentLocation">Truck’s current location *</label><input id="currentLocation" maxlength="220" required placeholder="e.g. Dallas, TX or street address"><span class="help">Enter a city, ZIP code, or address confirmed by the driver. This page does not track GPS automatically. The location is sent to public OpenStreetMap-based lookup/routing services to calculate the route.</span></div>
+    <div class="field"><label for="gpsTruckSelect">Select truck from ROCK ELD (optional)</label><select id="gpsTruckSelect"><option value="">Load GPS trucks first…</option></select><button type="button" id="loadGpsButton" class="secondary">Load ROCK ELD GPS locations</button><span class="help" id="gpsStatus" role="status">Live GPS requires the protected Cloudflare Access integration to be configured. Manual location entry remains available.</span></div>
+    <div class="field"><label for="currentLocation">Truck’s current location *</label><input id="currentLocation" maxlength="220" required placeholder="e.g. Dallas, TX or street address"><span class="help">GPS reports older than 15 minutes are marked stale and cannot be selected. Route lookup sends the chosen location to public OpenStreetMap-based lookup/routing services.</span></div>
     <div class="field"><label for="destination">Delivery location *</label><input id="destination" maxlength="220" required placeholder="Select a load or enter delivery city/address"></div>
     <button type="button" id="routeButton" class="secondary">Find remaining road miles</button>
     <div id="routeStatus" class="status" role="status">Enter both locations, then calculate the route.</div>
@@ -177,6 +178,81 @@ a{color:#ffdc8a}
     }finally{button.disabled=false;button.textContent='Find remaining road miles';}
   }
   $('routeButton').addEventListener('click',findRoadMiles);
+
+  let gpsLocations = [];
+  $('loadGpsButton').addEventListener('click', loadRockEldLocations);
+  $('gpsTruckSelect').addEventListener('change', () => {
+    const selected = gpsLocations.find(item => String(item.vehicleId ?? item.id) === $('gpsTruckSelect').value);
+    if (!selected) return;
+    if (selected.status !== 'fresh') {
+      $('gpsStatus').textContent = 'This GPS report is stale or has no timestamp. It cannot be used for a new ETA.';
+      $('gpsStatus').className = 'help status bad';
+      return;
+    }
+    if (!selected.location) {
+      $('gpsStatus').textContent = 'This truck has no readable location name. Enter a location manually instead.';
+      $('gpsStatus').className = 'help status bad';
+      return;
+    }
+    $('currentLocation').value = selected.location;
+    $('gpsStatus').textContent = 'Selected truck ' + (selected.vehicleId ?? selected.id) +
+      ' · report age ' + selected.ageMinutes + ' minute(s). Check the location, then find remaining road miles.';
+    $('gpsStatus').className = 'help status ok';
+  });
+
+  async function loadRockEldLocations() {
+    const button = $('loadGpsButton');
+    const select = $('gpsTruckSelect');
+    button.disabled = true;
+    button.textContent = 'Loading GPS…';
+    $('gpsStatus').textContent = 'Requesting recent truck locations from the protected ROCK ELD endpoint…';
+    $('gpsStatus').className = 'help';
+    try {
+      const response = await fetch('/api/rockeld/locations', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        credentials: 'same-origin',
+        cache: 'no-store'
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error || ('ROCK ELD GPS request failed (HTTP ' + response.status + ').'));
+      }
+      gpsLocations = Array.isArray(data.locations) ? data.locations : [];
+      select.replaceChildren(new Option('Choose a truck…', ''));
+      for (const item of gpsLocations) {
+        const key = String(item.vehicleId ?? item.id ?? '');
+        if (!key) continue;
+        const age = item.ageMinutes === null || item.ageMinutes === undefined
+          ? 'age unknown'
+          : item.ageMinutes + ' min old';
+        const state = item.status === 'fresh' ? 'FRESH' : item.status === 'stale' ? 'STALE' : 'UNKNOWN';
+        const label = 'Truck ' + (item.vehicleId ?? key) + ' — ' + state + ' · ' + age +
+          (item.location ? ' · ' + item.location : '');
+        const option = new Option(label, key);
+        option.disabled = item.status !== 'fresh' || !item.location;
+        select.add(option);
+      }
+      if (!gpsLocations.length) {
+        $('gpsStatus').textContent = 'ROCK ELD returned no truck locations. You can still enter the location manually.';
+        $('gpsStatus').className = 'help status bad';
+      } else {
+        const fresh = gpsLocations.filter(item => item.status === 'fresh' && item.location).length;
+        $('gpsStatus').textContent = 'Received ' + gpsLocations.length + ' truck record(s); ' + fresh +
+          ' have a location reported within 15 minutes. Older reports are disabled.';
+        $('gpsStatus').className = 'help status ok';
+      }
+    } catch (error) {
+      $('gpsStatus').textContent = String(error.message || error) +
+        ' If Access has not been configured, GPS stays unavailable; manual ETA still works.';
+      $('gpsStatus').className = 'help status bad';
+      select.replaceChildren(new Option('GPS unavailable — enter location manually', ''));
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Load ROCK ELD GPS locations';
+    }
+  }
+
   function fmtDate(date){return new Intl.DateTimeFormat(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(date);}
   function fmtDuration(hours){const whole=Math.floor(hours);const mins=Math.round((hours-whole)*60);return mins?whole+' h '+mins+' min':whole+' h';}
   $('etaForm').addEventListener('submit',function(event){
