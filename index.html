@@ -392,7 +392,7 @@ function renderEmails() {
     '</tbody></table></div>';
 }
 
-async function analyze() {
+async function analyze({background = false} = {}) {
   const b = $('analyzeBtn');
   b.disabled = true;
   b.textContent = 'Analyzing PDFs...';
@@ -457,8 +457,15 @@ async function analyze() {
     }
   } catch (err) {
     console.error('CLST Trucking AI:',err);
-    connection('Connection error','var(--red)');
-    status(err.message || 'Could not retrieve PDF data.','error');
+    // If a background refresh fails, keep the last successful results visible
+    // and don't make the whole dashboard look disconnected.
+    if (background && emailRecords.length) {
+      connection('Showing saved results','var(--green)');
+      status('Automatic refresh failed (' + (err.message || 'network error') + '). Showing the last successfully loaded results. You can retry with Analyze Gmail PDFs.','error');
+    } else {
+      connection('Connection error','var(--red)');
+      status(err.message || 'Could not retrieve PDF data.','error');
+    }
   } finally {
     b.disabled = false;
     b.textContent = 'Analyze Gmail PDFs';
@@ -558,7 +565,7 @@ async function autoRefreshGmail() {
   if (autoRefreshBusy || document.hidden || $('analyzeBtn').disabled) return;
   autoRefreshBusy = true;
   try {
-    await analyze();
+    await analyze({background:true});
   } finally {
     autoRefreshBusy = false;
   }
