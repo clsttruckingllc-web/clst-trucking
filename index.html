@@ -549,9 +549,25 @@ $('analyzeBtn').addEventListener('click',analyze);
 $('connectBtn').addEventListener('click',connect);
 $('search').addEventListener('input',renderRates);
 
+// Automatically refresh Gmail data every 60 seconds while the dashboard is open.
+let autoRefreshBusy = false;
+async function autoRefreshGmail() {
+  if (autoRefreshBusy || document.hidden || $('analyzeBtn').disabled) return;
+  autoRefreshBusy = true;
+  try {
+    await analyze();
+  } finally {
+    autoRefreshBusy = false;
+  }
+}
+window.addEventListener('load', () => {
+  autoRefreshGmail();
+  window.setInterval(autoRefreshGmail, 60000);
+});
+
 const params = new URLSearchParams(location.search);
 if (params.get('gmail') === 'connected') {
-  status('Gmail authorization completed. Click Analyze Gmail PDFs to retrieve your documents.','success');
+  status('Gmail authorization completed. The dashboard will automatically check Gmail for PDFs while this page is open.','success');
   history.replaceState({},document.title,location.pathname);
 }
 
