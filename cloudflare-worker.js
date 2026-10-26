@@ -48,8 +48,13 @@ function redirectUri(req,env){return env.GOOGLE_REDIRECT_URI||new URL("/oauth/ca
 async function oauthStart(req,env){
  if(!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET)return json({error:"Google OAuth credentials are missing."},500);
  const state=crypto.randomUUID(); await env.TOKENS.put("google_oauth_state",state,{expirationTtl:600});
+ const alreadyConnected=!!(await env.TOKENS.get("google_refresh_token"));
  const u=new URL("https://accounts.google.com/o/oauth2/v2/auth");
- for(const [k,v] of Object.entries({client_id:env.GOOGLE_CLIENT_ID,redirect_uri:redirectUri(req,env),response_type:"code",scope:"https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.compose",access_type:"offline",prompt:"consent",state}))u.searchParams.set(k,v);
+ const params={client_id:env.GOOGLE_CLIENT_ID,redirect_uri:redirectUri(req,env),response_type:"code",scope:"https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.compose",access_type:"offline",state};
+ // Request explicit consent only for the first connection; avoid forcing it on routine reconnections.
+ if(!alreadyConnected)params.prompt="consent";
+ else params.prompt="select_account";
+ for(const [k,v] of Object.entries(params))u.searchParams.set(k,v);
  return Response.redirect(u.toString(),302);
 }
 async function oauthFinish(req,env){
@@ -59,8 +64,11 @@ async function oauthFinish(req,env){
  if(!code||!state||!saved||state!==saved)return new Response("OAuth state validation failed. Start Connect Gmail again.",{status:400});
  const res=await fetch("https://oauth2.googleapis.com/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({code,client_id:env.GOOGLE_CLIENT_ID,client_secret:env.GOOGLE_CLIENT_SECRET,redirect_uri:redirectUri(req,env),grant_type:"authorization_code"})});
  const d=await res.json().catch(()=>({}));
- if(!res.ok||!d.refresh_token)return new Response("Google token exchange failed: "+String(d.error_description||d.error||"No refresh token returned"),{status:400});
- await env.TOKENS.put("google_refresh_token",d.refresh_token);await env.TOKENS.delete("google_oauth_state");
+ const existingRefresh=await env.TOKENS.get("google_refresh_token");
+ if(!res.ok||(!d.refresh_token&&!existingRefresh))return new Response("Google token exchange failed: "+String(d.error_description||d.error||"No refresh token returned and no saved Gmail connection exists"),{status:400});
+ // Google may omit refresh_token on subsequent OAuth grants. Keep the saved token unless a new one is provided.
+ if(d.refresh_token)await env.TOKENS.put("google_refresh_token",d.refresh_token);
+ await env.TOKENS.delete("google_oauth_state");
  return Response.redirect("https://clst-trucking.pages.dev/ai/?gmail=connected",302);
 }
 async function googleToken(env){
