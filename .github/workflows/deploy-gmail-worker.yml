@@ -52,8 +52,7 @@ jobs:
           binding = "TOKENS"
           id = "$CLOUDFLARE_KV_NAMESPACE_ID"
 
-          [triggers]
-          crons = ["* * * * *"]
+          # Cron trigger intentionally omitted to pause scheduled Gmail automation.
           EOF
 
       - name: Validate Worker JavaScript
