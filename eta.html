@@ -57,7 +57,8 @@ a{color:#ffdc8a}
   <form id="etaForm">
     <div class="field"><label for="loadSelect">Load from Gmail Rate Confirmations</label><select id="loadSelect"><option value="">Loading saved loads…</option></select><span class="help" id="loadStatus">Loading analyzed loads from the dashboard API…</span></div>
     <div class="field"><label for="load">Load number (optional)</label><input id="load" maxlength="80" placeholder="e.g. 102190"></div>
-    <div class="field"><label for="gpsTruckSelect">Select truck from ROCK ELD (optional)</label><select id="gpsTruckSelect"><option value="">Load GPS trucks first…</option></select><button type="button" id="loadGpsButton" class="secondary">Load ROCK ELD GPS locations</button><span class="help" id="gpsStatus" role="status">Live GPS requires the protected Cloudflare Access integration to be configured. Manual location entry remains available.</span></div>
+    <div class="field"><label for="gpsAccessToken">ROCK ELD GPS access token</label><input id="gpsAccessToken" type="password" maxlength="500" autocomplete="current-password" placeholder="Enter the token configured in Cloudflare Pages"><span class="help">For free pages.dev testing, this must match the Cloudflare Pages Secret named ROCKELD_GPS_ACCESS_TOKEN. It is sent over HTTPS and is not saved in this browser. Leave blank only if Cloudflare Access sign-in is configured.</span></div>
+    <div class="field"><label for="gpsTruckSelect">Select truck from ROCK ELD (optional)</label><select id="gpsTruckSelect"><option value="">Load GPS trucks first…</option></select><button type="button" id="loadGpsButton" class="secondary">Load ROCK ELD GPS locations</button><span class="help" id="gpsStatus" role="status">Live GPS is protected. Configure the access token in Cloudflare Pages Secrets before using this feature. Manual location entry remains available.</span></div>
     <div class="field"><label for="currentLocation">Truck’s current location *</label><input id="currentLocation" maxlength="220" required placeholder="e.g. Dallas, TX or street address"><span class="help">GPS reports older than 15 minutes are marked stale and cannot be selected. Route lookup sends the chosen location to public OpenStreetMap-based lookup/routing services.</span></div>
     <div class="field"><label for="destination">Delivery location *</label><input id="destination" maxlength="220" required placeholder="Select a load or enter delivery city/address"></div>
     <button type="button" id="routeButton" class="secondary">Find remaining road miles</button>
@@ -208,12 +209,19 @@ a{color:#ffdc8a}
     $('gpsStatus').textContent = 'Requesting recent truck locations from the protected ROCK ELD endpoint…';
     $('gpsStatus').className = 'help';
     try {
+      const headers = { 'Accept': 'application/json' };
+      const accessToken = $('gpsAccessToken').value.trim();
+      if (accessToken) headers.Authorization = 'Bearer ' + accessToken;
       const response = await fetch('/api/rockeld/locations', {
         method: 'GET',
-        headers: { 'Accept': 'application/json' },
+        headers,
         credentials: 'same-origin',
         cache: 'no-store'
       });
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('The GPS endpoint returned a sign-in page instead of JSON. Configure the GPS access token or complete Cloudflare Access sign-in.');
+      }
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(data.error || ('ROCK ELD GPS request failed (HTTP ' + response.status + ').'));
