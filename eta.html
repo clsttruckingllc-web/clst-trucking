@@ -59,6 +59,7 @@ a{color:#ffdc8a}
     <div class="field"><label for="load">Load number (optional)</label><input id="load" maxlength="80" placeholder="e.g. 102190"></div>
     
     <div class="field"><label for="gpsTruckSelect">Select truck from ROCK ELD (optional)</label><select id="gpsTruckSelect"><option value="">Load GPS trucks first…</option></select><button type="button" id="loadGpsButton" class="secondary">Refresh truck locations</button><span class="help" id="gpsStatus" role="status">Loading recent truck locations automatically. Manual location entry is available if GPS access is not connected.</span></div>
+    <div class="field"><label for="gpsAccessToken">ROCK ELD access token</label><input id="gpsAccessToken" type="password" autocomplete="off" maxlength="500" placeholder="Paste GPS access token"><span class="help">Used in this page only; it is not saved in the HTML or browser storage.</span></div>
     <div class="field"><label for="currentLocation">Truck’s current location *</label><input id="currentLocation" maxlength="220" required placeholder="e.g. Dallas, TX or street address"><span class="help">GPS reports older than 15 minutes are marked stale and cannot be selected. Route lookup sends the chosen location to public OpenStreetMap-based lookup/routing services.</span></div>
     <div class="field"><label for="destination">Delivery location *</label><input id="destination" maxlength="220" required placeholder="Select a load or enter delivery city/address"></div>
     <button type="button" id="routeButton" class="secondary">Find remaining road miles</button>
@@ -204,12 +205,18 @@ a{color:#ffdc8a}
   async function loadRockEldLocations() {
     const button = $('loadGpsButton');
     const select = $('gpsTruckSelect');
+    const token = $('gpsAccessToken').value.trim();
+    if (!token) {
+      $('gpsStatus').textContent = 'Paste the ROCK ELD access token above, then click Refresh truck locations.';
+      $('gpsStatus').className = 'help status bad';
+      return;
+    }
     button.disabled = true;
     button.textContent = 'Loading GPS…';
     $('gpsStatus').textContent = 'Requesting recent truck locations from the protected ROCK ELD endpoint…';
     $('gpsStatus').className = 'help';
     try {
-      const headers = { 'Accept': 'application/json' };
+      const headers = { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token };
       const response = await fetch('/api/rockeld/locations', {
         method: 'GET',
         headers,
