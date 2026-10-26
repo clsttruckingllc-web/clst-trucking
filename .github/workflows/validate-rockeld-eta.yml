@@ -1,0 +1,31 @@
+name: Validate ROCK ELD ETA
+on:
+  push:
+    paths:
+      - "functions/api/rockeld/**"
+      - "eta.html"
+      - "scripts/validate-rockeld-eta.mjs"
+      - ".github/workflows/validate-rockeld-eta.yml"
+  pull_request:
+    paths:
+      - "functions/api/rockeld/**"
+      - "eta.html"
+      - "scripts/validate-rockeld-eta.mjs"
+      - ".github/workflows/validate-rockeld-eta.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check Cloudflare Pages Function syntax
+        run: node --input-type=module --check < functions/api/rockeld/locations.js
+      - name: Validate ETA page and protected GPS wiring
+        run: node scripts/validate-rockeld-eta.mjs
