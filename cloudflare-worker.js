@@ -343,7 +343,7 @@ async function processAutoReplies(env){
      results.push({id,status:"acknowledged",reason:"AI returned no suggested reply; sent neutral receipt acknowledgement"});
     }else{
      const draft=await createReplyDraft(env,m,a.to,a.subject,fallback,token,myEmail);
-     await env.TOKENS.put(key,JSON.stringify({status:"draft",draftId:draft.id||null,reason:"AI returned no suggested reply; created safe fallback draft",at:new Date().toISOString()},{expirationTtl:90*24*60*60}));
+     await env.TOKENS.put(key,JSON.stringify({status:"draft",draftId:draft.id||null,reason:"AI returned no suggested reply; created safe fallback draft",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
      results.push({id,status:"draft_for_review",reason:"AI returned no suggested reply; safe fallback draft created"});
     }
     continue;
