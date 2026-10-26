@@ -396,13 +396,16 @@ async function analyze() {
   const b = $('analyzeBtn');
   b.disabled = true;
   b.textContent = 'Analyzing PDFs...';
-  status('Searching Gmail for PDF attachments and analyzing them with the backend.');
+  status('Checking the newest matching Gmail message and analyzing its PDF attachments.');
   connection('Connecting...');
 
   try {
-    const res = await fetch('/api/rates?maxResults=10', {
+    // Start with one message so the dashboard stays responsive while the backend analyzes PDFs.
+    // Stop waiting after 90 seconds and show an error instead of spinning forever.
+    const res = await fetch('/api/rates?maxResults=1', {
       headers:{Accept:'application/json'},
-      cache:'no-store'
+      cache:'no-store',
+      signal: AbortSignal.timeout(90000)
     });
 
     const raw = await res.text();
