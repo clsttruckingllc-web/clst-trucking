@@ -47,9 +47,9 @@ a{color:#ffdc8a}
 <main>
 <header><div class="mark" aria-hidden="true">CLST</div><div><div class="brand">CLST TRUCKING LLC</div><p>Dispatch tools · Free prototype</p></div></header>
 <section class="hero">
-  <span class="pill">BETA · FREE ROUTE ESTIMATE</span>
+  <span class="pill">DISPATCH · LIVE ROUTE ESTIMATE</span>
   <h1>Load ETA Estimator</h1>
-  <p>Choose a Rate Confirmation, enter the truck’s current location, and estimate remaining road miles to delivery.</p>
+  <p>Rate Confirmations and recent truck locations load automatically. Review the trip details and calculate the estimated arrival.</p>
 </section>
 <div class="layout">
 <section class="card">
@@ -57,8 +57,8 @@ a{color:#ffdc8a}
   <form id="etaForm">
     <div class="field"><label for="loadSelect">Load from Gmail Rate Confirmations</label><select id="loadSelect"><option value="">Loading saved loads…</option></select><span class="help" id="loadStatus">Loading analyzed loads from the dashboard API…</span></div>
     <div class="field"><label for="load">Load number (optional)</label><input id="load" maxlength="80" placeholder="e.g. 102190"></div>
-    <div class="field"><label for="gpsAccessToken">ROCK ELD GPS access token</label><input id="gpsAccessToken" type="password" maxlength="500" autocomplete="current-password" placeholder="Enter the token configured in Cloudflare Pages"><span class="help">For free pages.dev testing, this must match the Cloudflare Pages Secret named ROCKELD_GPS_ACCESS_TOKEN. It is sent over HTTPS and is not saved in this browser. Leave blank only if Cloudflare Access sign-in is configured.</span></div>
-    <div class="field"><label for="gpsTruckSelect">Select truck from ROCK ELD (optional)</label><select id="gpsTruckSelect"><option value="">Load GPS trucks first…</option></select><button type="button" id="loadGpsButton" class="secondary">Load ROCK ELD GPS locations</button><span class="help" id="gpsStatus" role="status">Live GPS is protected. Configure the access token in Cloudflare Pages Secrets before using this feature. Manual location entry remains available.</span></div>
+    
+    <div class="field"><label for="gpsTruckSelect">Select truck from ROCK ELD (optional)</label><select id="gpsTruckSelect"><option value="">Load GPS trucks first…</option></select><button type="button" id="loadGpsButton" class="secondary">Refresh truck locations</button><span class="help" id="gpsStatus" role="status">Loading recent truck locations automatically. Manual location entry is available if GPS access is not connected.</span></div>
     <div class="field"><label for="currentLocation">Truck’s current location *</label><input id="currentLocation" maxlength="220" required placeholder="e.g. Dallas, TX or street address"><span class="help">GPS reports older than 15 minutes are marked stale and cannot be selected. Route lookup sends the chosen location to public OpenStreetMap-based lookup/routing services.</span></div>
     <div class="field"><label for="destination">Delivery location *</label><input id="destination" maxlength="220" required placeholder="Select a load or enter delivery city/address"></div>
     <button type="button" id="routeButton" class="secondary">Find remaining road miles</button>
@@ -210,8 +210,6 @@ a{color:#ffdc8a}
     $('gpsStatus').className = 'help';
     try {
       const headers = { 'Accept': 'application/json' };
-      const accessToken = $('gpsAccessToken').value.trim();
-      if (accessToken) headers.Authorization = 'Bearer ' + accessToken;
       const response = await fetch('/api/rockeld/locations', {
         method: 'GET',
         headers,
@@ -220,7 +218,7 @@ a{color:#ffdc8a}
       });
       const contentType = response.headers.get('content-type') || '';
       if (!contentType.includes('application/json')) {
-        throw new Error('The GPS endpoint returned a sign-in page instead of JSON. Configure the GPS access token or complete Cloudflare Access sign-in.');
+        throw new Error('GPS access requires the company sign-in to be configured for this site.');
       }
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
@@ -252,12 +250,12 @@ a{color:#ffdc8a}
       }
     } catch (error) {
       $('gpsStatus').textContent = String(error.message || error) +
-        ' If Access has not been configured, GPS stays unavailable; manual ETA still works.';
+        ' Company sign-in must be configured once by the site administrator; manual ETA remains available.';
       $('gpsStatus').className = 'help status bad';
       select.replaceChildren(new Option('GPS unavailable — enter location manually', ''));
     } finally {
       button.disabled = false;
-      button.textContent = 'Load ROCK ELD GPS locations';
+      button.textContent = 'Refresh truck locations';
     }
   }
 
@@ -279,6 +277,7 @@ a{color:#ffdc8a}
     $('resultIntro').textContent='Estimate calculated from the entered road miles and planning assumptions, not live GPS or traffic data.';
   });
   void loadRateConfirmations();
+  void loadRockEldLocations();
 })();
 </script>
 </body>
