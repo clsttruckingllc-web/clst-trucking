@@ -307,7 +307,7 @@ async function processAutoReplies(env){
  const baselineMs=Date.parse(baseline);
  const profile=await gmail(env,"/profile",token),myEmail=emailAddress(profile.emailAddress);
  if(!myEmail)throw Error("Could not identify the connected Gmail account; automatic replies are paused for safety.");
- const query="in:inbox newer_than:2d -from:me -category:promotions -category:social -category:updates";
+ const query="in:inbox newer_than:2d -from:me -in:spam -in:trash -category:promotions -category:social -category:updates";
  const found=await gmail(env,"/messages?maxResults=12&q="+encodeURIComponent(query),token);
  console.log("[smart-auto-reply] Gmail search",JSON.stringify({query,resultSizeEstimate:found.resultSizeEstimate||0,returned:(found.messages||[]).length,baseline}));
  const results=[];
