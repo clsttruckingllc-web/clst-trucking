@@ -319,22 +319,38 @@ async function processAutoReplies(env){
  }
  return {success:true,checked:(found.messages||[]).length,results};
 }
+async function saveAutoReplyStatusIfDue(env,record){
+ // Cron may run every minute. KV writes are quota-limited, so persist status at most
+ // once every 15 minutes while still allowing status reads between persisted updates.
+ const key="smart_reply_last_run";
+ try{
+  const previousRaw=await env.TOKENS.get(key);
+  if(previousRaw){
+   const previous=JSON.parse(previousRaw);
+   const previousAt=Date.parse(previous.finishedAt||previous.startedAt||"");
+   if(Number.isFinite(previousAt)&&Date.now()-previousAt<15*60*1000)return false;
+  }
+ }catch(e){
+  // If status is unreadable, make a best-effort attempt to restore it.
+ }
+ await env.TOKENS.put(key,JSON.stringify(record),{expirationTtl:30*24*60*60});
+ return true;
+}
 async function recordAutoReplyRun(env){
  const startedAt=new Date().toISOString();
  console.log("[smart-auto-reply] run started", startedAt);
  try{
   const result=await processAutoReplies(env);
   const record={...result,startedAt,finishedAt:new Date().toISOString()};
-  await env.TOKENS.put("smart_reply_last_run",JSON.stringify(record),{expirationTtl:30*24*60*60});
+  await saveAutoReplyStatusIfDue(env,record);
   console.log("[smart-auto-reply] run finished", JSON.stringify({success:record.success,checked:record.checked,results:record.results,note:record.note,startedAt,finishedAt:record.finishedAt}));
   return record;
  }catch(e){
   const record={success:false,error:errText(e),startedAt,finishedAt:new Date().toISOString()};
   console.error("[smart-auto-reply] run failed", JSON.stringify(record));
-  try{await env.TOKENS.put("smart_reply_last_run",JSON.stringify(record),{expirationTtl:30*24*60*60});}catch(ignore){}
+  try{await saveAutoReplyStatusIfDue(env,record);}catch(ignore){}
   throw e;
- }
-}
+ }}
 async function autoReplyStatus(env){
  let lastRun=null;
  try{const raw=await env.TOKENS.get("smart_reply_last_run");if(raw)lastRun=JSON.parse(raw);}catch(e){}
