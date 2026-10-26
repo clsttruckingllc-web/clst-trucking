@@ -95,6 +95,17 @@ async function verifyCloudflareAccessJwt(token, env) {
   }
 }
 
+function constantTimeEqual(a, b) {
+  const left = new TextEncoder().encode(String(a));
+  const right = new TextEncoder().encode(String(b));
+  let difference = left.length ^ right.length;
+  const length = Math.max(left.length, right.length);
+  for (let i = 0; i < length; i++) {
+    difference |= (left[i % (left.length || 1)] || 0) ^ (right[i % (right.length || 1)] || 0);
+  }
+  return difference === 0;
+}
+
 export async function onRequest({ request, env }) {
   if (request.method === "OPTIONS") {
     return new Response(null, {
@@ -110,16 +121,37 @@ export async function onRequest({ request, env }) {
     return json({ error: "Method not allowed" }, 405);
   }
 
-  // Verify the signed Access JWT in this function as well as configuring
-  // a Cloudflare Access application/policy at the edge for this route.
-  const token = request.headers.get("Cf-Access-Jwt-Assertion");
-  if (!token) {
-    return json({ error: "Sign in through Cloudflare Access to view fleet GPS." }, 401);
+  // For a free pages.dev prototype, a manually entered bearer token can
+  // protect this endpoint without embedding any credential in public HTML.
+  // Alternatively, use a Cloudflare Access application and signed JWT.
+  const authorization = request.headers.get("Authorization") || "";
+  const bearerMatch = authorization.match(/^Bearer\\s+(.+)$/i);
+  const suppliedBearer = bearerMatch ? bearerMatch[1].trim() : "";
+  let authenticated = false;
+
+  if (env.ROCKELD_GPS_ACCESS_TOKEN && suppliedBearer) {
+    authenticated = constantTimeEqual(suppliedBearer, env.ROCKELD_GPS_ACCESS_TOKEN);
+    if (!authenticated) {
+      return json({ error: "Invalid ROCK ELD GPS access token." }, 401);
+    }
+  } else {
+    const accessJwt = request.headers.get("Cf-Access-Jwt-Assertion");
+    if (accessJwt) {
+      const auth = await verifyCloudflareAccessJwt(accessJwt, env);
+      if (!auth.ok) {
+        return json({ error: auth.error }, auth.status);
+      }
+      authenticated = true;
+    }
   }
 
-  const auth = await verifyCloudflareAccessJwt(token, env);
-  if (!auth.ok) {
-    return json({ error: auth.error }, auth.status);
+  if (!authenticated) {
+    if (!env.ROCKELD_GPS_ACCESS_TOKEN && (!env.CF_ACCESS_TEAM_DOMAIN || !env.CF_ACCESS_AUD)) {
+      return json({
+        error: "GPS access is not configured yet. Set ROCKELD_GPS_ACCESS_TOKEN in Cloudflare Pages Secrets, or configure Cloudflare Access."
+      }, 503);
+    }
+    return json({ error: "Enter the GPS access token or sign in through Cloudflare Access." }, 401);
   }
 
   if (!env.ROCKELD_API_KEY) {
