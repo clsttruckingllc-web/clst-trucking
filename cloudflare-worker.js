@@ -472,13 +472,22 @@ async function processAutoReplies(env){
     results.push({id,status:"ignored",reason:a.reason});continue;
    }
    if(!a.reply){
-    // Never send a generic acknowledgement when the AI failed to compose a message.
-    // Save a clearly marked draft instead; the owner can review the original email
-    // and write the correct response without sending misleading boilerplate.
-    const fallback="Draft not generated automatically. Please review the original email and compose a reply based on its actual contents.\n\nCLST Trucking LLC";
+    // If AI generation fails, still acknowledge ordinary, low-risk business email.
+    // Never use this fallback for load status/POD, rates, payments, legal matters,
+    // or other messages where an acknowledgement could be mistaken for an answer.
+    const riskText=a.subject+" "+a.body;
+    if(!riskyEmail(riskText)&&!requiresLoadStatusReview(riskText)){
+     const cleanSubject=String(a.subject||"your email").replace(/^re:\s*/i,"").replace(/[\r\n]+/g," ").trim().slice(0,180)||"your email";
+     const fallback="Hello,\n\nWe received your email regarding \""+cleanSubject+"\". Thank you for contacting CLST Trucking LLC.\n\nCLST Trucking LLC";
+     const sent=await sendReply(env,m,a.to,a.subject,fallback,token,myEmail);
+     await env.TOKENS.put(key,JSON.stringify({status:"sent_fallback_ack",sentId:sent.id||null,reason:"AI could not generate a tailored reply; sent a safe acknowledgement for a low-risk message",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
+     results.push({id,status:"sent_fallback_ack",reason:"AI failed; safe acknowledgement sent for low-risk email"});
+     continue;
+    }
+    const fallback="AI could not safely generate a reply. Please review the original email and respond using verified information.\n\nCLST Trucking LLC";
     const draft=await createReplyDraft(env,m,a.to,a.subject,fallback,token,myEmail);
-    await env.TOKENS.put(key,JSON.stringify({status:"draft",draftId:draft.id||null,reason:"AI returned no suggested reply; no email was sent",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
-    results.push({id,status:"draft_for_review",reason:"AI returned no suggested reply; no email was sent"});
+    await env.TOKENS.put(key,JSON.stringify({status:"draft",draftId:draft.id||null,reason:"AI returned no usable reply for a sensitive/operational message; no email was sent",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
+    results.push({id,status:"draft_for_review",reason:"AI failed and message requires a human-verified response"});
     continue;
    }
    const hardRisk=riskyEmail(a.subject+" "+a.body);
