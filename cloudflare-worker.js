@@ -92,6 +92,7 @@ async function gmailScopeStatus(token){
   };
  }catch(e){return {verified:false,error:errText(e)};}
 }
+function inboxOnlyQuery(q){return "in:inbox -in:spam -in:trash -category:promotions "+String(q||"newer_than:30d");}
 async function gmail(env,path,token){
  const t=token||await googleToken(env),res=await fetch(GMAIL+path,{headers:{Authorization:"Bearer "+t,Accept:"application/json"}});
  const d=await res.json().catch(()=>({}));if(!res.ok)throw Error("Gmail API "+res.status+": "+String(d.error&&d.error.message||"request failed"));return d;
@@ -100,7 +101,7 @@ function head(h,n){const x=(h||[]).find(a=>String(a.name||"").toLowerCase()===n)
 function meta(m){const h=m.payload&&m.payload.headers||[];return{id:m.id,threadId:m.threadId,subject:head(h,"subject")||"(no subject)",from:head(h,"from"),date:head(h,"date"),snippet:m.snippet||""};}
 async function messages(url,env){
  const max=int(url.searchParams.get("maxResults"),25,1,50),q=url.searchParams.get("q")||"newer_than:30d",token=await googleToken(env);
- const d=await gmail(env,"/messages?maxResults="+max+"&q="+encodeURIComponent(q),token),out=[];
+ const d=await gmail(env,"/messages?maxResults="+max+"&q="+encodeURIComponent(inboxOnlyQuery(q)),token),out=[];
  for(const x of(d.messages||[]).slice(0,max)){out.push(meta(await gmail(env,"/messages/"+encodeURIComponent(x.id)+"?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=Date",token)));}
  return json({success:true,resultSizeEstimate:d.resultSizeEstimate||out.length,messages:out});
 }
@@ -195,7 +196,7 @@ async function analyzeMessage(env,m,max=3,token){
 }
 async function rates(url,env){
  const max=int(url.searchParams.get("maxResults"),10,1,12),days=int(url.searchParams.get("days"),90,1,365),q=url.searchParams.get("q")||"newer_than:"+days+"d has:attachment filename:pdf",token=await googleToken(env);
- const found=await gmail(env,"/messages?maxResults="+max+"&q="+encodeURIComponent(q),token),out=[];
+ const found=await gmail(env,"/messages?maxResults="+max+"&q="+encodeURIComponent(inboxOnlyQuery(q)),token),out=[];
  for(const item of(found.messages||[]).slice(0,max)){try{const m=await fullMessage(env,item.id,token);if(pdfs(m.payload).length)out.push(await analyzeMessage(env,m,3,token));}catch(e){out.push({email:{id:item.id,subject:"Could not read message",from:"",date:""},pdfs:[{filename:"attachment.pdf",analysis:null,error:errText(e)}]});}}
  return json({success:true,query:q,resultSizeEstimate:found.resultSizeEstimate||out.length,rates:out});
 }
@@ -222,7 +223,7 @@ async function ask(req,env,voiceMode=false){
  let b;try{b=await req.json();}catch(e){return json({error:"Request body must be JSON."},400);}
  const question=String(b.question||b.message||"").trim();if(!question)return json({error:"Provide a question."},400);
  const requestedLoad=(question.match(/[0-9]{5,}/)||[])[0]||null;
- const token=await googleToken(env),q=b.query||queryFor(question),found=await gmail(env,"/messages?maxResults=12&q="+encodeURIComponent(q),token),ctx=[],sources=[],pdfAnalyses=[];
+ const token=await googleToken(env),q=inboxOnlyQuery(b.query||queryFor(question)),found=await gmail(env,"/messages?maxResults=12&q="+encodeURIComponent(q),token),ctx=[],sources=[],pdfAnalyses=[];
  for(const item of(found.messages||[]).slice(0,50)){try{
   const m=await fullMessage(env,item.id,token),e=meta(m),ps=pdfs(m.payload),body=textParts(m.payload).join(" ").replace(/\s+/g," ").slice(0,6000);
   ctx.push("EMAIL: "+e.subject+"\nFROM: "+e.from+"\nDATE: "+e.date+"\nBODY: "+body);
@@ -379,7 +380,7 @@ async function getReplyThreadContext(env,m,token){
 async function getLoadEvidence(env,loadNumber,token,includePdfs){
  // Read-only lookup across Gmail for records explicitly mentioning this exact load number.
  // Gmail is the only connected source today; absence of evidence must never be treated as a status.
- const q="newer_than:365d \""+loadNumber+"\" -in:spam -in:trash";
+ const q=inboxOnlyQuery("newer_than:365d \""+loadNumber+"\"");
  const found=await gmail(env,"/messages?maxResults=3&q="+encodeURIComponent(q),token);
  const evidence=[];
  for(const item of (found.messages||[]).slice(0,3)){
@@ -453,7 +454,7 @@ async function processAutoReplies(env){
  const baselineMs=Date.parse(baseline);
  const profile=await gmail(env,"/profile",token),myEmail=emailAddress(profile.emailAddress);
  if(!myEmail)throw Error("Could not identify the connected Gmail account; automatic replies are paused for safety.");
- const query="in:inbox newer_than:7d -from:me -in:spam -in:trash";
+ const query=inboxOnlyQuery("newer_than:7d -from:me");
  // Scan a bounded inbox page per Cron invocation to stay within Cloudflare subrequest limits.
  // The five-minute Cron continues through newer messages over successive runs.
  const candidates=[];
