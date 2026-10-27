@@ -111,6 +111,29 @@ async function getPdf(env,msgId,pdf,token){
  const d=await gmail(env,"/messages/"+encodeURIComponent(msgId)+"/attachments/"+encodeURIComponent(pdf.id),token),bytes=decode64(d.data);
  if(bytes.length>12*1024*1024)throw Error("PDF exceeds the 12 MB analysis limit.");if(!bytes.length)throw Error("PDF attachment is empty.");return bytes;
 }
+async function aiGenerateGemini(env,parts,instruction,jsonMode=true){
+ if(!env.GEMINI_API_KEY)throw Error("Gmail AI requires GEMINI_API_KEY; OpenAI is reserved for the voice system.");
+ const configuredGeminiModel=env.GEMINI_MODEL||MODEL;
+ const model=configuredGeminiModel==="gemini-2.5-flash-lite"?MODEL:configuredGeminiModel;
+ const url="https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(model)+":generateContent?key="+encodeURIComponent(env.GEMINI_API_KEY);
+ let last="";
+ for(let i=0;i<3;i++){
+  const generationConfig={temperature:0.1,maxOutputTokens:3000};
+  if(jsonMode)generationConfig.responseMimeType="application/json";
+  const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({systemInstruction:{parts:[{text:instruction}]},contents:[{role:"user",parts}],generationConfig})});
+  const d=await res.json().catch(()=>({}));
+  if(res.ok){
+   const p=d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts;
+   const output=p?p.map(x=>x.text||"").join("\n"):"";
+   if(!output)throw Error("Gemini returned an empty response.");
+   return output;
+  }
+  last="Gemini API "+res.status+": "+String(d.error&&d.error.message||"request failed");
+  if(![429,500,502,503,504].includes(res.status)||i===2)break;
+  await new Promise(r=>setTimeout(r,650*(i+1)));
+ }
+ throw Error(last);
+}
 async function aiGenerate(env,parts,instruction,jsonMode=true){
  if(env.OPENAI_API_KEY){
   try{
@@ -398,7 +421,7 @@ async function classifyReply(env,m,token){
  for(let attempt=0;attempt<2;attempt++){
   try{
    const retryPrompt=attempt===0?prompt:prompt+"\n\nRETRY REQUIREMENT: Your previous output was unusable. Return exactly one complete JSON object with action, confidence, reason, and a specific complete reply. For legitimate messages, reply must contain at least 20 characters and address the sender's actual question using only supplied evidence. Do not return markdown or an empty reply.";
-   const raw=await aiGenerate(env,[{text:retryPrompt}],instruction,true);
+   const raw=await aiGenerateGemini(env,[{text:retryPrompt}],instruction,true);
    const parsed=JSON.parse(cleanJson(raw));
    const proposedAction=["send","review","ignore"].includes(parsed.action)?parsed.action:"review";
    const usableReply=String(parsed.reply||"").trim();
@@ -412,7 +435,7 @@ async function classifyReply(env,m,token){
  return {action,confidence,reason:String(a.reason||"No reason supplied").slice(0,400),reply:String(a.reply||"").trim().slice(0,5000),subject,from,to,body};
 }
 async function processAutoReplies(env){
- if(!(env.OPENAI_API_KEY||env.GEMINI_API_KEY)||!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET)throw Error("Auto-reply requires Google OAuth and either OPENAI_API_KEY or GEMINI_API_KEY.");
+ if(!env.GEMINI_API_KEY||!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET)throw Error("Auto-reply requires Google OAuth and GEMINI_API_KEY. OpenAI is reserved for the voice system.");
  const token=await googleToken(env);
  const scopes=await gmailScopeStatus(token);
  if(scopes.verified&&(!scopes.readonly||!scopes.send||!scopes.compose)){
