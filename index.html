@@ -13,16 +13,16 @@ html{scroll-behavior:smooth;scroll-padding-top:90px}
 body{margin:0;background:radial-gradient(ellipse at 50% -20%,#3a1017 0,#111116 35%,var(--bg) 70%);color:var(--text);font:15px/1.55 Inter,Arial,Helvetica,sans-serif}
 button,input{font:inherit}button{border:1px solid transparent;border-radius:10px;padding:11px 15px;font-weight:750;cursor:pointer;transition:transform .15s,border-color .15s,background .15s}button:hover,.action-link:hover{transform:translateY(-1px)}button:disabled{opacity:.6;cursor:wait}
 .primary{background:var(--red);color:#fff}.primary:hover{background:var(--red2)}.secondary,.action-link{background:#202127;color:#fff;border:1px solid #3a3b44}.action-link{display:inline-flex;align-items:center;text-decoration:none;border-radius:10px;padding:11px 15px;font-weight:750}
-header{position:sticky;top:0;z-index:10;padding:14px max(4%,calc((100% - 1450px)/2));background:rgba(9,10,13,.92);backdrop-filter:blur(16px);border-bottom:1px solid #302128;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+header{position:sticky;top:0;z-index:10;padding:12px max(3%,calc((100% - 1680px)/2));background:rgba(9,10,13,.92);backdrop-filter:blur(16px);border-bottom:1px solid #302128;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;display:grid;place-items:center;background:linear-gradient(135deg,#ff3345,#a80017);border-radius:13px;font-size:23px;font-weight:950;box-shadow:0 8px 24px #e11d2e30}h1{margin:0;font-size:21px;letter-spacing:-.5px}h2{margin:0 0 7px;font-size:clamp(23px,3vw,31px);letter-spacing:-.6px}h3{margin:0;font-size:18px}.subtitle,.muted,.stat-label{color:var(--muted)}.subtitle,.connection{font-size:12px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--yellow);margin-right:7px;box-shadow:0 0 12px currentColor}
 nav{display:flex;gap:7px;flex-wrap:wrap}nav a{color:#d6d6dc;text-decoration:none;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:800}nav a:hover{background:#292027;color:#fff}
-main{max-width:1450px;margin:auto;padding:28px 4% 55px}.welcome,.panel-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}.welcome{padding:26px;margin-bottom:20px;border:1px solid #4a222a;border-radius:18px;background:linear-gradient(110deg,#241116 0,#171419 48%,#111216 100%);box-shadow:0 18px 55px #0003}.eyebrow{font-size:11px;font-weight:900;letter-spacing:.17em;color:#ff6572;margin-bottom:8px}.welcome .muted{max-width:620px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+main{max-width:1680px;margin:auto;padding:24px 3% 48px}.welcome,.panel-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}.welcome{padding:26px;margin-bottom:20px;border:1px solid #4a222a;border-radius:18px;background:linear-gradient(110deg,#241116 0,#171419 48%,#111216 100%);box-shadow:0 18px 55px #0003}.eyebrow{font-size:11px;font-weight:900;letter-spacing:.17em;color:#ff6572;margin-bottom:8px}.welcome .muted{max-width:620px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
 .notice,.status{border:1px solid var(--border);border-radius:11px;padding:13px 15px;font-size:13px;line-height:1.55;overflow-wrap:anywhere}.notice{background:#17171c;color:var(--muted);margin-bottom:14px}.status{background:var(--panel);margin-bottom:20px}.status.success{color:var(--green);border-color:#255540}.status.error{color:#ff929a;border-color:#642b34}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}.stat,.panel{background:linear-gradient(150deg,#17191f,#111216);border:1px solid var(--border);border-radius:15px}.stat{padding:19px;position:relative;overflow:hidden}.stat:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red)}.stat-number{font-size:28px;font-weight:900;margin-top:7px;overflow-wrap:anywhere;letter-spacing:-.6px}.panel{padding:20px;margin-bottom:20px;scroll-margin-top:90px}.panel-heading{margin-bottom:16px}.search{width:100%;max-width:350px;background:#0b0c10;border:1px solid var(--border);border-radius:9px;padding:11px;color:var(--text)}
 .rate-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.ask-row{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}.ask-row input{flex:1;min-width:220px;background:#0b0c10;border:1px solid var(--border);border-radius:9px;padding:12px;color:var(--text)}.ask-answer{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;background:#0b0c10;border:1px solid var(--border);border-radius:10px;padding:15px;min-height:54px;margin-top:14px}.ask-sources{font-size:12px;color:var(--muted);margin-top:10px;overflow-wrap:anywhere}
 .rate-card{background:#101116;border:1px solid #33343d;border-radius:12px;padding:17px;min-width:0}.rate-card h4{margin:0 0 10px;font-size:16px;overflow-wrap:anywhere}.pill{display:inline-block;border-radius:20px;padding:5px 9px;background:#2a2b33;color:#d4d4dc;font-size:11px;font-weight:800}.pill.good{color:#9cf0ce;background:#16392f}.pill.bad{color:#ffc1c5;background:#43232a}.amount{font-size:25px;font-weight:900;margin:13px 0;color:#fff}.detail{display:grid;grid-template-columns:minmax(95px,.8fr) minmax(0,1.2fr);gap:12px;padding:9px 0;border-bottom:1px solid #292a31;font-size:12px;line-height:1.5}.detail span:first-child{color:var(--muted)}.detail span:last-child{text-align:right;overflow-wrap:anywhere}.error-box,.warning-box{padding:11px;border-radius:8px;font-size:12px;line-height:1.5;overflow-wrap:anywhere;margin-top:12px}.error-box{border:1px solid #713843;background:#291923;color:#ffb7bf}.warning-box{border:1px solid #75602e;background:#302919;color:#ffe2a0}.empty{border:1px dashed #45464e;color:var(--muted);border-radius:11px;padding:25px 15px;text-align:center;line-height:1.6}
 table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;vertical-align:top;padding:12px;border-bottom:1px solid var(--border);font-size:12px;overflow-wrap:anywhere}th{color:var(--muted)}.table-wrap{overflow-x:auto}
-.gps-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.truck-card{background:#0d0e12;border:1px solid #34353d;border-radius:12px;padding:15px;min-width:0}.truck-id{font-size:18px;font-weight:900}.truck-location{font-size:12px;color:var(--muted);margin:8px 0;overflow-wrap:anywhere}.fresh{color:var(--green)}.stale{color:#ff9da4}.app-frame{width:100%;height:1100px;border:1px solid var(--border);border-radius:12px;background:#0b0c10}footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid var(--border);font-size:12px}
+.gps-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.gps-card{background:linear-gradient(145deg,#17191f,#0d0e12);border:1px solid #34353d;border-radius:14px;padding:18px;min-width:0;display:flex;flex-direction:column;gap:9px;overflow-wrap:anywhere}.gps-card-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.gps-card-heading strong{font-size:20px}.gps-card .status{margin:0;padding:5px 8px;font-size:11px}.gps-card a{color:#ff7b86;font-weight:800;text-decoration:none}.gps-card a:hover{text-decoration:underline}.app-frame{width:100%;height:1100px;border:1px solid var(--border);border-radius:12px;background:#0b0c10}footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid var(--border);font-size:12px}
 @media(max-width:850px){header{padding:12px 4%}.gps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rate-grid{grid-template-columns:1fr}.app-frame{height:1450px}}
 @media(max-width:560px){h1{font-size:18px}.stats{grid-template-columns:1fr}.welcome{padding:18px}.panel{padding:14px}.gps-grid{grid-template-columns:1fr}.actions{width:100%}.actions button,.actions .action-link{flex:1;justify-content:center}.app-frame{height:1550px}}
 </style>
@@ -48,7 +48,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
     <div>
       <div class="eyebrow">CLST TRUCKING LLC / COMMAND CENTER</div>
       <h2>Everything moving. One command center.</h2>
-      <div class="muted">Gmail rate confirmations, AI load intelligence, live ELD locations, ETA planning and RingCentral tools — together in one workspace.</div>
+      <div class="muted">Gmail, live fleet locations, dispatch ETA and company communications — all in one simpler workspace.</div>
     </div>
     <div class="actions">
       <button class="secondary" id="connectBtn">Connect Gmail</button>
@@ -555,7 +555,7 @@ async function refreshEldLocations() {
     if (!response.ok || data.error) {
       const message = String(data.error || ('HTTP ' + response.status));
       if (response.status === 401) {
-        throw new Error(message + ' Enter your CLST username and password, then press Sign in.');
+        throw new Error(message + ' Fleet GPS access needs to be configured on the server.');
       }
       throw new Error(message + (data.upstreamStatus ? ' (upstream HTTP ' + data.upstreamStatus + ')' : ''));
     }
@@ -595,30 +595,7 @@ async function refreshEldLocations() {
   }
 }
 
-const ELD_USER_KEY='clst_rockeld_gps_username';
-const ELD_PASS_KEY='clst_rockeld_gps_password';
-$('eldUsername').value=sessionStorage.getItem(ELD_USER_KEY)||'';
-$('eldPassword').value=sessionStorage.getItem(ELD_PASS_KEY)||'';
-$('saveEldCredentialsBtn').addEventListener('click',()=>{
-  const username=$('eldUsername').value.trim();
-  const password=$('eldPassword').value;
-  if(!username||!password){
-    sessionStorage.removeItem(ELD_USER_KEY);sessionStorage.removeItem(ELD_PASS_KEY);
-    $('eldStatus').textContent='Enter your CLST username and password.';
-    $('eldStatus').className='status error';return;
-  }
-  sessionStorage.setItem(ELD_USER_KEY,username);
-  sessionStorage.setItem(ELD_PASS_KEY,password);
-  $('eldStatus').textContent='Signing in and loading fleet locations…';
-  refreshEldLocations();
-});
-function eldHeaders(){
-  const username=sessionStorage.getItem(ELD_USER_KEY)||$('eldUsername').value.trim();
-  const password=sessionStorage.getItem(ELD_PASS_KEY)||$('eldPassword').value;
-  const headers={Accept:'application/json'};
-  if(username&&password)headers.Authorization='Basic '+btoa(unescape(encodeURIComponent(username+':'+password)));
-  return headers;
-}
+function eldHeaders(){ return {Accept:'application/json'}; }
 $('refreshEldBtn').addEventListener('click',refreshEldLocations);
 
 $('askForm').addEventListener('submit',askCLST);
