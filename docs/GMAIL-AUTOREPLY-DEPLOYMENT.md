@@ -2,7 +2,7 @@
 
 ## What the Worker does
 
-- Checks up to 12 unread Inbox messages from the last two days on each scheduled run.
+- Scans Inbox mail from the last seven days, paging past already-processed messages so older pending mail is not starved; processes up to 50 not-yet-processed messages per run.
 - Ignores internal, automated, bulk, and obvious no-reply messages.
 - Sends only routine, low-risk replies when the model confidence is at least 0.92.
 - Creates Gmail drafts for messages involving rates, load acceptance, scheduling commitments, payments, claims, legal/insurance, detention/TONU, or uncertain facts.
@@ -32,7 +32,7 @@ Optional:
 In the Google Cloud OAuth client, add this exact authorized redirect URI:
 `https://clst-gmail-backend.clsttruckingllc.workers.dev/oauth/callback`
 
-The Gmail OAuth grant requires the readonly, send, and compose scopes. If scopes change or the refresh token was issued before the required scopes were granted, reconnect Gmail using the app's Connect Gmail flow.
+The Gmail OAuth grant requires the readonly, send, and compose scopes. The protected `/api/autoreply/status` response reports `gmailScopes`; if a required permission is missing, use its `reconnectUrl` (or open `https://clst-gmail-backend.clsttruckingllc.workers.dev/auth/start?consent=1`) to grant consent again. The Worker pauses auto-replies with an explicit error when Google confirms a required scope is missing.
 
 ## Scheduled deployment
 
