@@ -94,6 +94,7 @@ a{color:#ff9ca4}
 (function(){
   const $ = id => document.getElementById(id);
   let rateRecords = [];
+  function gpsHeaders(){const token=sessionStorage.getItem('clst_rockeld_gps_token')||'';return token?{Accept:'application/json',Authorization:'Bearer '+token}:{Accept:'application/json'};}
   const pad = n => String(n).padStart(2,'0');
   function localInputValue(date){return date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+'T'+pad(date.getHours())+':'+pad(date.getMinutes());}
   $('start').value = localInputValue(new Date());
@@ -211,10 +212,10 @@ a{color:#ff9ca4}
     $('gpsStatus').textContent = 'Requesting recent truck locations through the secured company connection…';
     $('gpsStatus').className = 'help';
     try {
-      const headers = { 'Accept': 'application/json' };
+      const headers = gpsHeaders();
       const response = await fetch('/api/rockeld/locations', {
         method: 'GET',
-        headers,
+        headers: gpsHeaders(),
         credentials: 'same-origin',
         cache: 'no-store'
       });
