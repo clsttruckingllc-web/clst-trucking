@@ -330,6 +330,22 @@ function genericAcknowledgement(text){
 function riskyEmail(text){
  return /\b(rate quote|quote a rate|bid|bidding|accept (the )?load|book (the )?load|contract|agreement|invoice|payment dispute|claim|cargo damage|accident|injury|lawsuit|legal|insurance|detention|tonu|chargeback|settlement|refund|wire transfer|bank details|ssn|social security|password|login code|verification code|urgent payment)\b/i.test(String(text||""));
 }
+function isLoadOfferOrRateConfirmation(text){
+ const s=String(text||"");
+ return /\b(rate confirmation|rate con|load offer|available load|load posting|interested in this load|interested in the load|carrier rate|please confirm (?:the )?rate|confirm (?:the )?rate|accept (?:the )?load|book (?:the )?load|rate of\s*\$?\s*\d|\$\s*\d[\d,]*(?:\.\d{2})?\s*(?:for|on)\s+(?:this\s+)?load|tender(?:ing)? (?:the )?load)\b/i.test(s);
+}
+function isEtaOrLoadStatusQuestion(text){
+ return /\b(ETA|estimated time of arrival|status update|delivery status|pickup status|load status|where is (the )?load|current location|truck location|where is (the )?(truck|unit|tractor)|location for truck|is (the )?load (delivered|picked up|on time)|confirm(ed|ation)? (delivery|pickup)|proof of delivery|POD|BOL|bill of lading|delivery confirmation|has (the )?load been (delivered|picked up)|when will (the )?load (deliver|arrive))\b/i.test(String(text||""));
+}
+function isOtherHighRisk(text){
+ return /\b(payment dispute|claim|cargo damage|accident|injury|lawsuit|legal|insurance|detention|tonu|chargeback|settlement|refund|wire transfer|bank details|ssn|social security|password|login code|verification code|urgent payment|invoice dispute|contract dispute)\b/i.test(String(text||""));
+}
+function safeLoadOfferReply(){
+ return "Hello,\\n\\nThank you for sending this load over. We're checking the details and will get back to you shortly if we're interested. This message is not an acceptance of the load or its rate.\\n\\nCLST Trucking LLC";
+}
+function safeStatusCheckReply(){
+ return "Hello,\\n\\nWe're checking the latest confirmed status and ETA. We'll send an update as soon as the information is verified.\\n\\nCLST Trucking LLC";
+}
 // Load-status and POD requests must never receive an automatically sent promise or guessed update.
 // Keep these messages as drafts until a human verifies the load facts in the TMS/POD records.
 function requiresLoadStatusReview(text){
@@ -478,6 +494,27 @@ async function processAutoReplies(env){
    }
    const skip=autoSkipReason(m);
    if(skip){await env.TOKENS.put(key,JSON.stringify({status:"ignored",reason:skip,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});results.push({id,status:"ignored",reason:skip});continue;}
+   const inboundText=(e.subject||"")+" "+textParts(m.payload).join(" ").replace(/\\s+/g," ").trim().slice(0,7000);
+   // Load offers and rate confirmations get a non-binding acknowledgement only, never acceptance or negotiation.
+   if(isLoadOfferOrRateConfirmation(inboundText)){
+    const profile=await gmail(env,"/profile",token);
+    const sent=await sendReply(env,m,emailAddress(head(m.payload.headers||[],"reply-to")||e.from),e.subject,safeLoadOfferReply(),token,emailAddress(profile.emailAddress));
+    await env.TOKENS.put(key,JSON.stringify({status:"sent_safe_load_ack",sentId:sent.id||null,reason:"Non-binding acknowledgement only; no load/rate acceptance or negotiation",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
+    results.push({id,status:"sent_safe_load_ack",reason:"Non-binding load acknowledgement sent; no commitment made"});continue;
+   }
+   // ETA and load-status inquiries get a prompt acknowledgement, without inventing a status or leaving a draft.
+   if(isEtaOrLoadStatusQuestion(inboundText)){
+    const profile=await gmail(env,"/profile",token);
+    const sent=await sendReply(env,m,emailAddress(head(m.payload.headers||[],"reply-to")||e.from),e.subject,safeStatusCheckReply(),token,emailAddress(profile.emailAddress));
+    await env.TOKENS.put(key,JSON.stringify({status:"sent_status_check",sentId:sent.id||null,reason:"Acknowledged ETA/status request without inventing unverified facts",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
+    results.push({id,status:"sent_status_check",reason:"ETA/status acknowledgement sent; no unverified status claimed"});continue;
+   }
+   // Other sensitive matters are left for the owner, but never as unsent drafts.
+   if(isOtherHighRisk(inboundText)){
+    const reason="Sensitive legal, claim, payment, or safety matter requires owner response; no draft or email sent";
+    await env.TOKENS.put(key,JSON.stringify({status:"ignored_owner_action",reason,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
+    results.push({id,status:"ignored_owner_action",reason});continue;
+   }
    const a=await classifyReply(env,m,token);
    if(a.action==="ignore"){
     await env.TOKENS.put(key,JSON.stringify({status:"ignored",reason:a.reason,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
@@ -496,10 +533,9 @@ async function processAutoReplies(env){
      results.push({id,status:"sent_fallback_ack",reason:"AI failed; safe acknowledgement sent for low-risk email"});
      continue;
     }
-    const fallback="AI could not safely generate a reply. Please review the original email and respond using verified information.\n\nCLST Trucking LLC";
-    const draft=await createReplyDraft(env,m,a.to,a.subject,fallback,token,myEmail);
-    await env.TOKENS.put(key,JSON.stringify({status:"draft",draftId:draft.id||null,reason:"AI returned no usable reply for a sensitive/operational message; no email was sent",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
-    results.push({id,status:"draft_for_review",reason:"AI failed and message requires a human-verified response"});
+    const reason="AI could not safely generate a reply; no draft created and no email sent";
+    await env.TOKENS.put(key,JSON.stringify({status:"ignored_owner_action",reason,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
+    results.push({id,status:"ignored_owner_action",reason});
     continue;
    }
    const hardRisk=riskyEmail(a.subject+" "+a.body);
@@ -511,12 +547,9 @@ async function processAutoReplies(env){
     await env.TOKENS.put(key,JSON.stringify({status:"sent",sentId:sent.id||null,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
     results.push({id,status:"sent",confidence:a.confidence});
    }else{
-    const reason=hardRisk?"Sensitive/commitment-related email requires review":loadStatusReview?"Load status/POD must be verified by a person before replying":generic?"Generic acknowledgement rejected; tailored response requires review":a.reason+(a.confidence<0.85?" (confidence below 0.85)":"");
-    const draft=await createReplyDraft(env,m,a.to,a.subject,a.reply,token,myEmail);
-    // Keep the tailored AI response as a Gmail draft whenever review is required.
-    // Do not send a generic acknowledgement that hides the actual message content.
-    await env.TOKENS.put(key,JSON.stringify({status:"draft",draftId:draft.id||null,reason,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
-    results.push({id,status:"draft_for_review",reason,confidence:a.confidence});
+    const reason=hardRisk?"Sensitive/commitment-related email blocked from auto-reply":loadStatusReview?"Load status/POD requires owner response":generic?"Generic AI acknowledgement rejected; no draft created":a.reason+(a.confidence<0.85?" (confidence below 0.85)":"");
+    await env.TOKENS.put(key,JSON.stringify({status:"ignored_owner_action",reason,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
+    results.push({id,status:"ignored_owner_action",reason,confidence:a.confidence});
    }
   }catch(err){
    const message=errText(err);
