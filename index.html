@@ -94,8 +94,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
   </section>
 
 <section class="panel" id="eld">
-    <div class="panel-heading"><div><h3>ROCK ELD · Fleet GPS</h3><div class="muted" style="font-size:12px;margin-top:4px">Token is kept only in this browser session and sent to the server over HTTPS; it is not stored in the HTML or GitHub.</div></div><button class="primary" id="refreshEldBtn" type="button">Refresh truck locations</button></div>
-    <div class="ask-row" style="margin-bottom:12px"><input id="eldAccessToken" type="password" autocomplete="off" placeholder="ROCK ELD GPS access token" aria-label="ROCK ELD GPS access token"><button class="secondary" id="saveEldTokenBtn" type="button">Save for this session</button></div>
+    <div class="panel-heading"><div><h3>ROCK ELD · Fleet GPS</h3><div class="muted" style="font-size:12px;margin-top:4px">Fleet locations are requested through the server. API keys are not entered or stored in this dashboard.</div></div><button class="primary" id="refreshEldBtn" type="button">Refresh truck locations</button></div>
     <div id="eldStatus" class="status">Checking the secured ROCK ELD connection…</div>
     <div id="eldVehicles" class="gps-grid"><div class="empty">Loading fleet locations…</div></div>
   </section>
@@ -532,25 +531,12 @@ async function askCLST(event) {
 }
 
 
-const ELD_TOKEN_KEY='clst_rockeld_gps_token';
-$('eldAccessToken').value=sessionStorage.getItem(ELD_TOKEN_KEY)||'';
-$('saveEldTokenBtn').addEventListener('click',()=>{
-  const token=$('eldAccessToken').value.trim();
-  if(!token){sessionStorage.removeItem(ELD_TOKEN_KEY);$('eldStatus').textContent='GPS token cleared from this browser session.';$('eldStatus').className='status';return;}
-  sessionStorage.setItem(ELD_TOKEN_KEY,token);
-  $('eldStatus').textContent='Token saved for this browser tab/session. Refreshing fleet locations…';
-  refreshEldLocations();
-});
-function eldHeaders(){
-  const token=sessionStorage.getItem(ELD_TOKEN_KEY)||$('eldAccessToken').value.trim();
-  return token?{Accept:'application/json',Authorization:'Bearer '+token}:{Accept:'application/json'};
-}
 async function refreshEldLocations(){
   const btn=$('refreshEldBtn');btn.disabled=true;btn.textContent='Refreshing…';
   $('eldStatus').textContent='Requesting fleet locations through the secured server endpoint…';
   $('eldStatus').className='status';
   try{
-    const res=await fetch('/api/rockeld/locations',{headers:eldHeaders(),credentials:'same-origin',cache:'no-store'});
+    const res=await fetch('/api/rockeld/locations',{headers:{Accept:'application/json'},credentials:'same-origin',cache:'no-store'});
     const data=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(data.error||('ROCK ELD returned HTTP '+res.status));
     const trucks=Array.isArray(data.locations)?data.locations:[];
