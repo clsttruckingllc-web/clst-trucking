@@ -121,37 +121,40 @@ export async function onRequest({ request, env }) {
     return json({ error: "Method not allowed" }, 405);
   }
 
-  // For a free pages.dev prototype, a manually entered bearer token can
-  // protect this endpoint without embedding any credential in public HTML.
-  // Alternatively, use a Cloudflare Access application and signed JWT.
+  // Validate CLST username/password on the server. The upstream ROCK ELD API key never leaves this function.
   const authorization = request.headers.get("Authorization") || "";
-  const bearerMatch = authorization.match(/^Bearer\s+(.+)$/i);
-  const suppliedBearer = bearerMatch ? bearerMatch[1].trim() : "";
+  const basicMatch = authorization.match(/^Basic\s+(.+)$/i);
   let authenticated = false;
 
-  if (env.ROCKELD_GPS_ACCESS_TOKEN && suppliedBearer) {
-    authenticated = constantTimeEqual(suppliedBearer, env.ROCKELD_GPS_ACCESS_TOKEN);
-    if (!authenticated) {
-      return json({ error: "Invalid ROCK ELD GPS access token." }, 401);
+  if (env.ROCKELD_GPS_USERNAME && env.ROCKELD_GPS_PASSWORD && basicMatch) {
+    try {
+      const decoded = atob(basicMatch[1]);
+      const separator = decoded.indexOf(":");
+      const suppliedUser = separator >= 0 ? decoded.slice(0, separator) : "";
+      const suppliedPassword = separator >= 0 ? decoded.slice(separator + 1) : "";
+      authenticated =
+        constantTimeEqual(suppliedUser, env.ROCKELD_GPS_USERNAME) &&
+        constantTimeEqual(suppliedPassword, env.ROCKELD_GPS_PASSWORD);
+    } catch {
+      authenticated = false;
     }
+    if (!authenticated) return json({ error: "Incorrect CLST username or password." }, 401);
   } else {
     const accessJwt = request.headers.get("Cf-Access-Jwt-Assertion");
     if (accessJwt) {
       const auth = await verifyCloudflareAccessJwt(accessJwt, env);
-      if (!auth.ok) {
-        return json({ error: auth.error }, auth.status);
-      }
+      if (!auth.ok) return json({ error: auth.error }, auth.status);
       authenticated = true;
     }
   }
 
   if (!authenticated) {
-    if (!env.ROCKELD_GPS_ACCESS_TOKEN && (!env.CF_ACCESS_TEAM_DOMAIN || !env.CF_ACCESS_AUD)) {
+    if (!env.ROCKELD_GPS_USERNAME || !env.ROCKELD_GPS_PASSWORD) {
       return json({
-        error: "GPS access is not configured yet. Set ROCKELD_GPS_ACCESS_TOKEN in Cloudflare Pages Secrets, or configure Cloudflare Access."
+        error: "Company login is not configured yet. Set ROCKELD_GPS_USERNAME and ROCKELD_GPS_PASSWORD in Cloudflare Pages Secrets."
       }, 503);
     }
-    return json({ error: "Enter the GPS access token or sign in through Cloudflare Access." }, 401);
+    return json({ error: "Sign in with your CLST username and password." }, 401);
   }
 
   if (!env.ROCKELD_API_KEY) {
