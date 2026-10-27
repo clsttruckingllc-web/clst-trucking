@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#e11d2e">
-<title>CLST Trucking Â· ETA Estimator</title>
+<title>CLST Trucking · ETA Estimator</title>
 <style>
 :root{color-scheme:dark;--bg:#0d141b;--panel:#151f29;--line:#2b3a47;--text:#f3f6f8;--muted:#aab7c3;--gold:#e11d2e;--green:#63d392;--red:#ff8e8e}
 *{box-sizing:border-box}
@@ -45,9 +45,9 @@ a{color:#ff9ca4}
 </head>
 <body>
 <main>
-<header><div class="mark" aria-hidden="true">CLST</div><div><div class="brand">CLST TRUCKING LLC</div><p>Dispatch tools Â· Free prototype</p></div></header>
+<header><div class="mark" aria-hidden="true">CLST</div><div><div class="brand">CLST TRUCKING LLC</div><p>Dispatch tools · Free prototype</p></div></header>
 <section class="hero">
-  <span class="pill">DISPATCH Â· LIVE ROUTE ESTIMATE</span>
+  <span class="pill">DISPATCH · LIVE ROUTE ESTIMATE</span>
   <h1>Load ETA Estimator</h1>
   <p>Load Rate Confirmations automatically by load number, then calculate the estimated arrival from the current truck location and route.</p>
 </section>
@@ -65,16 +65,16 @@ a{color:#ff9ca4}
   <div class="result">
     <div class="result-label">Estimated arrival</div><div id="arrival" class="eta">Waiting for load</div><div id="loadLabel" class="help"></div>
     <div class="stats">
-      <div class="stat"><span class="help">Current truck location</span><strong id="truckLocation" style="font-size:15px">â€”</strong></div>
-      <div class="stat"><span class="help">Delivery location</span><strong id="deliveryLocation" style="font-size:15px">â€”</strong></div>
-      <div class="stat"><span class="help">Road miles</span><strong id="roadMiles">â€”</strong></div>
-      <div class="stat"><span class="help">Driving time</span><strong id="driveTime">â€”</strong></div>
+      <div class="stat"><span class="help">Current truck location</span><strong id="truckLocation" style="font-size:15px">—</strong></div>
+      <div class="stat"><span class="help">Delivery location</span><strong id="deliveryLocation" style="font-size:15px">—</strong></div>
+      <div class="stat"><span class="help">Road miles</span><strong id="roadMiles">—</strong></div>
+      <div class="stat"><span class="help">Driving time</span><strong id="driveTime">—</strong></div>
     </div>
   </div>
   <div class="notice">Automatic ETA uses the saved Rate Confirmation and the latest authorized ROCK ELD location. No location, mileage, speed or token fields are shown. ETA is an estimate and excludes live traffic, weather, loading delays and actual hours-of-service records.</div>
 </section>
 </div>
-<footer>CLST Trucking LLC Â· OpenStreetMap / OSRM route estimate Â· <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Map data attribution</a></footer>
+<footer>CLST Trucking LLC · OpenStreetMap / OSRM route estimate · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Map data attribution</a></footer>
 </main>
 <script>
 (function(){
@@ -129,9 +129,9 @@ a{color:#ff9ca4}
   }
   async function calculate(event){
     event.preventDefault();
-    const button=$('calculateButton');button.disabled=true;button.textContent='Calculating automaticallyâ€¦';$('error').hidden=true;
-    $('status').textContent='Finding the load, current truck location and delivery routeâ€¦';$('status').className='status';
-    $('arrival').textContent='Calculatingâ€¦';$('truckLocation').textContent='Loadingâ€¦';$('deliveryLocation').textContent='Loadingâ€¦';$('roadMiles').textContent='â€”';$('driveTime').textContent='â€”';
+    const button=$('calculateButton');button.disabled=true;button.textContent='Calculating automatically…';$('error').hidden=true;
+    $('status').textContent='Finding the load, current truck location and delivery route…';$('status').className='status';
+    $('arrival').textContent='Calculating…';$('truckLocation').textContent='Loading…';$('deliveryLocation').textContent='Loading…';$('roadMiles').textContent='—';$('driveTime').textContent='—';
     try{
       const loadNumber=$('load').value.trim();
       if(!loadNumber)throw new Error('Enter the load number.');
