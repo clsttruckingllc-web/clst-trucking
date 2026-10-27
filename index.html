@@ -4,64 +4,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b1220">
+<meta name="theme-color" content="#e11d2e"><meta name="description" content="CLST Trucking operations hub for Gmail rate confirmations, dispatch ETA, ROCK ELD GPS, and RingCentral.">
 <title>CLST Trucking AI</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1220;--panel:#111c2e;--panel2:#17263c;--border:#293a53;--text:#f3f6fc;--muted:#9aabc2;--blue:#428cff;--green:#36d99a;--red:#ff858e;--yellow:#ffd166}
+:root{color-scheme:dark;--bg:#090a0d;--panel:#13151a;--panel2:#1c1e24;--border:#30323a;--text:#fff;--muted:#a7a9b2;--red:#e11d2e;--red2:#ff3446;--green:#42d392;--yellow:#f4c35b}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Arial,Helvetica,sans-serif}
-button,input{font:inherit}
-button{border:0;border-radius:9px;padding:12px 16px;font-weight:700;cursor:pointer}
-button:disabled{opacity:.6;cursor:wait}
-.primary{background:var(--blue);color:#fff}
-.secondary{background:var(--panel2);color:#fff;border:1px solid var(--border)}
-.action-link{display:inline-block;text-decoration:none;border-radius:9px;padding:12px 16px;font-weight:700;text-align:center}
-header{padding:22px 5%;background:#0e1829;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:13px}
-.logo{width:48px;height:48px;display:grid;place-items:center;background:var(--blue);border-radius:12px;font-size:23px;font-weight:900}
-h1{margin:0 0 5px;font-size:24px}
-h2{margin:0 0 8px;font-size:24px}
-h3{margin:0;font-size:18px}
-.subtitle,.muted,.stat-label{color:var(--muted)}
-.subtitle,.connection{font-size:13px}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--yellow);margin-right:7px}
-main{max-width:1400px;margin:auto;padding:28px 5% 50px}
-.welcome,.panel-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
-.welcome{margin-bottom:22px}
-.actions{display:flex;gap:10px;flex-wrap:wrap}
-.notice,.status{border:1px solid var(--border);border-radius:10px;padding:14px;font-size:13px;line-height:1.55;overflow-wrap:anywhere}
-.notice{background:var(--panel2);color:var(--muted);margin-bottom:15px}
-.status{background:var(--panel);margin-bottom:22px}
-.status.success{color:var(--green)}
-.status.error{color:var(--red)}
-.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-bottom:22px}
-.stat,.panel{background:var(--panel);border:1px solid var(--border);border-radius:13px}
-.stat{padding:20px}
-.stat-number{font-size:27px;font-weight:800;margin-top:10px;overflow-wrap:anywhere}
-.panel{padding:20px;margin-bottom:22px}
-.panel-heading{margin-bottom:17px}
-.search{width:100%;max-width:350px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px;color:var(--text)}
-.rate-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
-.ask-row{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}.ask-row input{flex:1;min-width:220px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text)}.ask-answer{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:15px;min-height:54px;margin-top:14px}.ask-sources{font-size:12px;color:var(--muted);margin-top:10px;overflow-wrap:anywhere}
-.rate-card{background:#101a2a;border:1px solid var(--border);border-radius:11px;padding:17px;min-width:0}
-.rate-card h4{margin:0 0 10px;font-size:16px;overflow-wrap:anywhere}
-.pill{display:inline-block;border-radius:20px;padding:5px 9px;background:#24354d;color:#c5d7f1;font-size:11px;font-weight:700}
-.pill.good{color:#9cf0ce;background:#16392f}
-.pill.bad{color:#ffc1c5;background:#43232a}
-.amount{font-size:25px;font-weight:800;margin:13px 0}
-.detail{display:grid;grid-template-columns:minmax(95px,.8fr) minmax(0,1.2fr);gap:12px;padding:9px 0;border-bottom:1px solid #24334a;font-size:12px;line-height:1.5}
-.detail span:first-child{color:var(--muted)}
-.detail span:last-child{text-align:right;overflow-wrap:anywhere}
-.error-box,.warning-box{padding:11px;border-radius:8px;font-size:12px;line-height:1.5;overflow-wrap:anywhere;margin-top:12px}
-.error-box{border:1px solid #713843;background:#291923;color:#ffb7bf}
-.warning-box{border:1px solid #75602e;background:#302919;color:#ffe2a0}
-.empty{border:1px dashed var(--border);color:var(--muted);border-radius:10px;padding:25px 15px;text-align:center;line-height:1.6}
-table{border-collapse:collapse;width:100%;min-width:600px}
-th,td{text-align:left;vertical-align:top;padding:12px;border-bottom:1px solid var(--border);font-size:12px;overflow-wrap:anywhere}
-th{color:var(--muted)}
-.table-wrap{overflow-x:auto}
-footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid var(--border);font-size:12px}
-@media(max-width:750px){header{padding:18px 5%}h1{font-size:20px}main{padding-top:20px}.stats,.rate-grid{grid-template-columns:1fr}.panel{padding:15px}.actions{width:100%}.actions button{flex:1}.search{max-width:100%}}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{margin:0;background:radial-gradient(ellipse at 50% -20%,#3a1017 0,#111116 35%,var(--bg) 70%);color:var(--text);font:15px/1.55 Inter,Arial,Helvetica,sans-serif}
+button,input{font:inherit}button{border:1px solid transparent;border-radius:10px;padding:11px 15px;font-weight:750;cursor:pointer;transition:transform .15s,border-color .15s,background .15s}button:hover,.action-link:hover{transform:translateY(-1px)}button:disabled{opacity:.6;cursor:wait}
+.primary{background:var(--red);color:#fff}.primary:hover{background:var(--red2)}.secondary,.action-link{background:#202127;color:#fff;border:1px solid #3a3b44}.action-link{display:inline-flex;align-items:center;text-decoration:none;border-radius:10px;padding:11px 15px;font-weight:750}
+header{position:sticky;top:0;z-index:10;padding:14px max(4%,calc((100% - 1450px)/2));background:rgba(9,10,13,.92);backdrop-filter:blur(16px);border-bottom:1px solid #302128;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;display:grid;place-items:center;background:linear-gradient(135deg,#ff3345,#a80017);border-radius:13px;font-size:23px;font-weight:950;box-shadow:0 8px 24px #e11d2e30}h1{margin:0;font-size:21px;letter-spacing:-.5px}h2{margin:0 0 7px;font-size:clamp(23px,3vw,31px);letter-spacing:-.6px}h3{margin:0;font-size:18px}.subtitle,.muted,.stat-label{color:var(--muted)}.subtitle,.connection{font-size:12px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--yellow);margin-right:7px;box-shadow:0 0 12px currentColor}
+nav{display:flex;gap:7px;flex-wrap:wrap}nav a{color:#d6d6dc;text-decoration:none;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:800}nav a:hover{background:#292027;color:#fff}
+main{max-width:1450px;margin:auto;padding:28px 4% 55px}.welcome,.panel-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}.welcome{padding:26px;margin-bottom:20px;border:1px solid #4a222a;border-radius:18px;background:linear-gradient(110deg,#241116 0,#171419 48%,#111216 100%);box-shadow:0 18px 55px #0003}.eyebrow{font-size:11px;font-weight:900;letter-spacing:.17em;color:#ff6572;margin-bottom:8px}.welcome .muted{max-width:620px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.notice,.status{border:1px solid var(--border);border-radius:11px;padding:13px 15px;font-size:13px;line-height:1.55;overflow-wrap:anywhere}.notice{background:#17171c;color:var(--muted);margin-bottom:14px}.status{background:var(--panel);margin-bottom:20px}.status.success{color:var(--green);border-color:#255540}.status.error{color:#ff929a;border-color:#642b34}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}.stat,.panel{background:linear-gradient(150deg,#17191f,#111216);border:1px solid var(--border);border-radius:15px}.stat{padding:19px;position:relative;overflow:hidden}.stat:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red)}.stat-number{font-size:28px;font-weight:900;margin-top:7px;overflow-wrap:anywhere;letter-spacing:-.6px}.panel{padding:20px;margin-bottom:20px;scroll-margin-top:90px}.panel-heading{margin-bottom:16px}.search{width:100%;max-width:350px;background:#0b0c10;border:1px solid var(--border);border-radius:9px;padding:11px;color:var(--text)}
+.rate-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.ask-row{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}.ask-row input{flex:1;min-width:220px;background:#0b0c10;border:1px solid var(--border);border-radius:9px;padding:12px;color:var(--text)}.ask-answer{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;background:#0b0c10;border:1px solid var(--border);border-radius:10px;padding:15px;min-height:54px;margin-top:14px}.ask-sources{font-size:12px;color:var(--muted);margin-top:10px;overflow-wrap:anywhere}
+.rate-card{background:#101116;border:1px solid #33343d;border-radius:12px;padding:17px;min-width:0}.rate-card h4{margin:0 0 10px;font-size:16px;overflow-wrap:anywhere}.pill{display:inline-block;border-radius:20px;padding:5px 9px;background:#2a2b33;color:#d4d4dc;font-size:11px;font-weight:800}.pill.good{color:#9cf0ce;background:#16392f}.pill.bad{color:#ffc1c5;background:#43232a}.amount{font-size:25px;font-weight:900;margin:13px 0;color:#fff}.detail{display:grid;grid-template-columns:minmax(95px,.8fr) minmax(0,1.2fr);gap:12px;padding:9px 0;border-bottom:1px solid #292a31;font-size:12px;line-height:1.5}.detail span:first-child{color:var(--muted)}.detail span:last-child{text-align:right;overflow-wrap:anywhere}.error-box,.warning-box{padding:11px;border-radius:8px;font-size:12px;line-height:1.5;overflow-wrap:anywhere;margin-top:12px}.error-box{border:1px solid #713843;background:#291923;color:#ffb7bf}.warning-box{border:1px solid #75602e;background:#302919;color:#ffe2a0}.empty{border:1px dashed #45464e;color:var(--muted);border-radius:11px;padding:25px 15px;text-align:center;line-height:1.6}
+table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;vertical-align:top;padding:12px;border-bottom:1px solid var(--border);font-size:12px;overflow-wrap:anywhere}th{color:var(--muted)}.table-wrap{overflow-x:auto}
+.gps-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.truck-card{background:#0d0e12;border:1px solid #34353d;border-radius:12px;padding:15px;min-width:0}.truck-id{font-size:18px;font-weight:900}.truck-location{font-size:12px;color:var(--muted);margin:8px 0;overflow-wrap:anywhere}.fresh{color:var(--green)}.stale{color:#ff9da4}.app-frame{width:100%;height:1100px;border:1px solid var(--border);border-radius:12px;background:#0b0c10}footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid var(--border);font-size:12px}
+@media(max-width:850px){header{padding:12px 4%}.gps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rate-grid{grid-template-columns:1fr}.app-frame{height:1450px}}
+@media(max-width:560px){h1{font-size:18px}.stats{grid-template-columns:1fr}.welcome{padding:18px}.panel{padding:14px}.gps-grid{grid-template-columns:1fr}.actions{width:100%}.actions button,.actions .action-link{flex:1;justify-content:center}.app-frame{height:1550px}}
 </style>
 </head>
 <body>
@@ -70,9 +33,10 @@ footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid va
     <div class="logo">C</div>
     <div>
       <h1>CLST Trucking AI</h1>
-      <div class="subtitle">Intelligent trucking operations assistant</div>
+      <div class="subtitle">DISPATCH INTELLIGENCE · ONE WORKSPACE</div>
     </div>
   </div>
+  <nav aria-label="Dashboard navigation"><a href="#gmail">GMAIL & AI</a><a href="#eld">ROCK ELD</a><a href="#eta">ETA DISPATCH</a><a href="#ringcentral">RINGCENTRAL</a></nav>
   <div class="connection">
     <span class="dot" id="dot"></span>
     <span id="connectionText">Ready</span>
@@ -82,12 +46,12 @@ footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid va
 <main>
   <section class="welcome">
     <div>
-      <h2>Operations Dashboard</h2>
-      <div class="muted">Gmail Rate Confirmations and PDF analysis</div>
+      <div class="eyebrow">CLST TRUCKING LLC / COMMAND CENTER</div>
+      <h2>Everything moving. One command center.</h2>
+      <div class="muted">Gmail rate confirmations, AI load intelligence, live ELD locations, ETA planning and RingCentral tools — together in one workspace.</div>
     </div>
     <div class="actions">
       <button class="secondary" id="connectBtn">Connect Gmail</button>
-      <button class="secondary" id="ringcentralTestBtn" type="button">Test RingCentral</button>
       <a class="secondary action-link" href="./eta.html">ETA Estimator</a>
       <button class="primary" id="analyzeBtn">Analyze Gmail PDFs</button>
     </div>
@@ -118,7 +82,7 @@ footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid va
     </div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="gmail">
     <div class="panel-heading"><h3>Ask CLST AI about Gmail & PDFs</h3></div>
     <div class="muted" style="margin-bottom:12px">Ask for full load details from our carrier Rate Confirmations: broker, pickup, delivery, freight, equipment, miles, pay terms, detention, and driver instructions.</div>
     <form id="askForm" class="ask-row">
@@ -129,7 +93,20 @@ footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid va
     <div id="askSources" class="ask-sources"></div>
   </section>
 
-  <section class="panel">
+<section class="panel" id="eld">
+    <div class="panel-heading"><div><h3>ROCK ELD · Fleet GPS</h3><div class="muted" style="font-size:12px;margin-top:4px">Vehicle locations from the secured server connection — no token field in the dashboard.</div></div><button class="primary" id="refreshEldBtn" type="button">Refresh truck locations</button></div>
+    <div id="eldStatus" class="status">Checking the secured ROCK ELD connection…</div>
+    <div id="eldVehicles" class="gps-grid"><div class="empty">Loading fleet locations…</div></div>
+  </section>
+  <section class="panel" id="eta">
+    <div class="panel-heading"><div><h3>Dispatch ETA · Load planning</h3><div class="muted" style="font-size:12px;margin-top:4px">Choose a Gmail load and use current truck location to estimate delivery.</div></div><a class="action-link" href="./eta.html" target="_blank" rel="noopener">Open ETA full page ↗</a></div>
+    <iframe class="app-frame" src="./eta.html" title="CLST Trucking ETA dispatch estimator" loading="lazy"></iframe>
+  </section>
+  <section class="panel" id="ringcentral">
+    <div class="panel-heading"><div><h3>RingCentral · Communications</h3><div class="muted" style="font-size:12px;margin-top:4px">Check API connection and open the company communications workspace.</div></div><div class="actions" style="margin:0"><button class="secondary" id="ringcentralTestBtn" type="button">Test RingCentral</button><a class="action-link" href="https://app.ringcentral.com/" target="_blank" rel="noopener noreferrer">Open RingCentral ↗</a></div></div>
+    <div class="muted" style="font-size:13px">The connection test is read-only. Calls and messaging depend on the RingCentral account, assigned extension and configured telephony service.</div>
+  </section>
+    <section class="panel" id="ratesPanel">
     <div class="panel-heading">
       <h3>Rate Confirmations</h3>
       <input id="search" class="search" type="search" placeholder="Search broker, load, pickup, delivery..." aria-label="Search rate confirmations">
@@ -139,7 +116,7 @@ footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid va
     </div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="emailsPanel">
     <div class="panel-heading"><h3>Source Gmail Messages</h3></div>
     <div id="emails">
       <div class="empty">Email information will appear after analysis.</div>
@@ -553,6 +530,32 @@ async function askCLST(event) {
   }
 }
 
+
+async function refreshEldLocations(){
+  const btn=$('refreshEldBtn');btn.disabled=true;btn.textContent='Refreshing…';
+  $('eldStatus').textContent='Requesting fleet locations through the secured server endpoint…';
+  $('eldStatus').className='status';
+  try{
+    const res=await fetch('/api/rockeld/locations',{headers:{Accept:'application/json'},credentials:'same-origin',cache:'no-store'});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(data.error||('ROCK ELD returned HTTP '+res.status));
+    const trucks=Array.isArray(data.locations)?data.locations:[];
+    $('eldVehicles').innerHTML=trucks.length?trucks.map(t=>{
+      const fresh=t.status==='fresh';
+      return '<article class="truck-card"><div class="truck-id">Truck '+esc(t.vehicleId??t.id??'—')+'</div><div class="'+(fresh?'fresh':'stale')+'" style="font-size:11px;font-weight:900;margin-top:5px">'+esc(String(t.status||'unknown').toUpperCase())+(t.ageMinutes===null||t.ageMinutes===undefined?'':' · '+esc(t.ageMinutes)+' min old')+'</div><div class="truck-location">'+esc(t.location||'Location unavailable')+'</div><div class="muted" style="font-size:11px">Speed: '+esc(t.speed??'—')+' · Report: '+esc(t.lastReport||'Unknown')+'</div></article>';
+    }).join(''):'<div class="empty">ROCK ELD returned no vehicle records.</div>';
+    const fresh=trucks.filter(t=>t.status==='fresh'&&t.location).length;
+    $('eldStatus').textContent='ROCK ELD connected · '+trucks.length+' vehicle record(s) · '+fresh+' fresh location(s) within 15 minutes.';
+    $('eldStatus').className='status '+(trucks.length?'success':'');
+    const frame=document.querySelector('.app-frame');if(frame?.contentWindow)frame.contentWindow.postMessage({type:'CLST_ELD_LOCATIONS',locations:trucks},location.origin);
+  }catch(err){
+    $('eldVehicles').innerHTML='<div class="empty">Fleet GPS could not be loaded. The server must authorize this dashboard through company sign-in; the browser must not contain a shared ELD secret.</div>';
+    $('eldStatus').textContent='ROCK ELD connection needs secure sign-in: '+String(err.message||err);
+    $('eldStatus').className='status error';
+  }finally{btn.disabled=false;btn.textContent='Refresh truck locations';}
+}
+$('refreshEldBtn').addEventListener('click',refreshEldLocations);
+
 $('askForm').addEventListener('submit',askCLST);
 $('ringcentralTestBtn').addEventListener('click',testRingCentral);
 $('analyzeBtn').addEventListener('click',analyze);
@@ -572,7 +575,9 @@ async function autoRefreshGmail() {
 }
 window.addEventListener('load', () => {
   autoRefreshGmail();
+  refreshEldLocations();
   window.setInterval(autoRefreshGmail, 60000);
+  window.setInterval(refreshEldLocations, 120000);
 });
 
 const params = new URLSearchParams(location.search);
