@@ -346,7 +346,7 @@ async function getLoadEvidence(env,loadNumber,token,includePdfs){
  for(const item of (found.messages||[]).slice(0,8)){
   try{
    const msg=await fullMessage(env,item.id,token),e=meta(msg);
-   const body=textParts(msg.payload).join("\n").replace(/\\s+/g," ").trim().slice(0,3000);
+   const body=textParts(msg.payload).join("\n").replace(/\s+/g," ").trim().slice(0,3000);
    const attachments=pdfs(msg.payload);
    let docs=[];
    if(includePdfs&&attachments.length){
@@ -364,7 +364,7 @@ async function getLoadEvidence(env,loadNumber,token,includePdfs){
 }
 async function classifyReply(env,m,token){
  const h=m.payload&&m.payload.headers||[],subject=head(h,"subject")||"(no subject)",from=head(h,"from"),to=emailAddress(head(h,"reply-to")||from);
- const body=textParts(m.payload).join("\n").replace(/\\s+/g," ").trim().slice(0,7000);
+ const body=textParts(m.payload).join("\n").replace(/\s+/g," ").trim().slice(0,7000);
  if(!to)return {action:"ignore",reason:"No reply address",subject,from,to,body:""};
  const threadContext=await getReplyThreadContext(env,m,token);
  const currentText=subject+" "+body+" "+threadContext;
