@@ -139,6 +139,34 @@ footer{color:#b7a386}
 @media(max-width:850px){.immersive-road{min-height:0}.immersive-road .cinema-gallery{grid-template-columns:1fr 1fr}.immersive-road .cinema-truck{grid-column:1/-1;min-height:270px}.immersive-road .cinema-card{min-height:220px}}
 @media(max-width:560px){.immersive-road .cinema-copy h2{font-size:clamp(39px,12vw,58px)}.immersive-road .cinema-gallery{grid-template-columns:1fr}.immersive-road .cinema-truck{grid-column:auto}.immersive-road .cinema-card{min-height:230px}.road-invitation{font-size:9px;letter-spacing:.12em}}
 @media(prefers-reduced-motion:reduce){.road-light,.road-horizon span,.road-invitation span{animation:none!important}.immersive-road:before{transform:none}}
+
+/* MODERN NIGHT-HAUL LOOK: replace the muddy 70s palette */
+:root{--bg:#080d14;--panel:#101a27;--panel2:#172638;--border:#263c52;--text:#f4f8fc;--muted:#a8bbcc;--red:#087fe0;--red2:#2da6ff;--green:#42d392;--yellow:#ffd36a}
+body{background:linear-gradient(180deg,rgba(4,10,18,.74),rgba(4,10,18,.92)),url("https://images.unsplash.com/photo-1501706362039-c6e08c7e6d3a?auto=format&fit=crop&w=2400&q=85") center center/cover fixed,#080d14}
+.cinema-hero,.immersive-road{background:linear-gradient(115deg,rgba(4,12,22,.94),rgba(8,29,49,.84) 52%,rgba(4,10,18,.95))!important;border-color:#2e5d80!important}
+.immersive-road:before{background-image:linear-gradient(180deg,rgba(3,9,16,.22),rgba(3,9,16,.18)),url("https://images.unsplash.com/photo-1501706362039-c6e08c7e6d3a?auto=format&fit=crop&w=2400&q=85")!important;background-size:cover!important;background-position:center!important;opacity:.72!important;animation:road-pan 18s linear infinite alternate,road-breathe 8s ease-in-out infinite alternate!important}
+.immersive-road:after{background:linear-gradient(180deg,#06101c20,transparent 35%,#030912e8),repeating-linear-gradient(112deg,transparent 0 110px,#5bc0ff14 111px 113px)!important}
+.immersive-road .cinema-copy h2 span{background:linear-gradient(90deg,#fff,#54b8ff 65%,#a7ddff)!important;background-clip:text!important;-webkit-background-clip:text!important}
+.immersive-road .cinema-tags span{border-color:#2873a7!important;color:#bfe5ff!important;background:#0b2740c9!important}
+.moving-highway{position:absolute;z-index:1;left:0;right:0;bottom:0;height:190px;pointer-events:none;overflow:hidden;opacity:.96}
+.road-surface{position:absolute;left:0;right:0;bottom:0;height:70px;background:linear-gradient(#263341,#0b111a);border-top:2px solid #607589;box-shadow:0 -18px 38px #0008}
+.road-surface:before{content:"";position:absolute;left:0;right:0;top:8px;height:2px;background:#a6b6c7;opacity:.55}
+.road-surface span{position:absolute;top:34px;width:70px;height:5px;border-radius:4px;background:#e5edf6;box-shadow:0 0 9px #c4e7ff77;animation:road-dashes 1.2s linear infinite}
+.road-surface span:nth-child(1){left:0}.road-surface span:nth-child(2){left:18%}.road-surface span:nth-child(3){left:36%}.road-surface span:nth-child(4){left:54%}.road-surface span:nth-child(5){left:72%}.road-surface span:nth-child(6){left:90%}
+.drive-truck{position:absolute;width:min(34vw,360px);min-width:230px;bottom:34px;filter:drop-shadow(0 10px 13px #000a);animation:truck-drive 13s linear infinite}
+.drive-truck svg{display:block;width:100%;height:auto;overflow:visible}
+.drive-truck-one{left:-400px;animation-delay:-2s}
+.drive-truck-two{left:-420px;bottom:76px;width:min(27vw,290px);min-width:190px;opacity:.82;transform:scaleX(-1);animation:truck-drive-reverse 19s linear infinite;animation-delay:-9s}
+.drive-truck circle[ r="17"]{transform-box:fill-box;transform-origin:center;animation:wheel-spin .7s linear infinite}
+@keyframes truck-drive{from{left:-400px}to{left:calc(100% + 400px)}}
+@keyframes truck-drive-reverse{from{left:calc(100% + 420px)}to{left:-420px}}
+@keyframes wheel-spin{to{transform:rotate(360deg)}}
+@keyframes road-dashes{from{transform:translateX(-110px)}to{transform:translateX(110px)}}
+@keyframes road-pan{from{background-position:44% center}to{background-position:58% center}}
+.soundtrack-bar{display:none!important}
+@media(max-width:600px){.moving-highway{height:150px}.road-surface{height:48px}.drive-truck{bottom:24px;min-width:210px}.drive-truck-two{bottom:52px;min-width:170px}.immersive-road .cinema-gallery{position:relative;z-index:2}}
+@media(prefers-reduced-motion:reduce){.moving-highway,.drive-truck,.road-surface span,.immersive-road:before{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -176,6 +204,15 @@ footer{color:#b7a386}
     <div class="road-light road-light-one" aria-hidden="true"></div>
     <div class="road-light road-light-two" aria-hidden="true"></div>
     <div class="road-horizon" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="moving-highway" aria-hidden="true">
+      <div class="drive-truck drive-truck-one">
+        <svg viewBox="0 0 360 132" role="img"><g stroke="#c8d6e5" stroke-width="2"><rect x="18" y="34" width="190" height="61" rx="3" fill="#f0f4f8"/><path d="M24 42H202M24 86H202" stroke="#b4c3d3"/><rect x="208" y="55" width="82" height="40" rx="4" fill="#1267b1"/><path d="M290 63H319L344 82V95H290Z" fill="#0d4d87"/><path d="M302 67H318L335 82H302Z" fill="#bce8ff"/><rect x="305" y="96" width="30" height="4" fill="#111923"/><rect x="16" y="96" width="330" height="6" fill="#252e38"/></g><circle cx="67" cy="104" r="17" fill="#080b10" stroke="#8593a2" stroke-width="5"/><circle cx="67" cy="104" r="5" fill="#dce5ed"/><circle cx="250" cy="104" r="17" fill="#080b10" stroke="#8593a2" stroke-width="5"/><circle cx="250" cy="104" r="5" fill="#dce5ed"/><circle cx="321" cy="104" r="17" fill="#080b10" stroke="#8593a2" stroke-width="5"/><circle cx="321" cy="104" r="5" fill="#dce5ed"/><path d="M30 54H190" stroke="#1677c8" stroke-width="4"/><path d="M221 61H281" stroke="#72c7ff" stroke-width="3"/><path d="M344 86l12 4v8h-12" fill="#ffdb67"/></svg>
+      </div>
+      <div class="drive-truck drive-truck-two">
+        <svg viewBox="0 0 360 132" role="img"><g stroke="#d1dbe6" stroke-width="2"><rect x="18" y="34" width="190" height="61" rx="3" fill="#273646"/><path d="M24 42H202M24 86H202" stroke="#526477"/><rect x="208" y="55" width="82" height="40" rx="4" fill="#e9edf2"/><path d="M290 63H319L344 82V95H290Z" fill="#d8e2ec"/><path d="M302 67H318L335 82H302Z" fill="#73d0ff"/><rect x="305" y="96" width="30" height="4" fill="#111923"/><rect x="16" y="96" width="330" height="6" fill="#252e38"/></g><circle cx="67" cy="104" r="17" fill="#080b10" stroke="#8593a2" stroke-width="5"/><circle cx="67" cy="104" r="5" fill="#dce5ed"/><circle cx="250" cy="104" r="17" fill="#080b10" stroke="#8593a2" stroke-width="5"/><circle cx="250" cy="104" r="5" fill="#dce5ed"/><circle cx="321" cy="104" r="17" fill="#080b10" stroke="#8593a2" stroke-width="5"/><circle cx="321" cy="104" r="5" fill="#dce5ed"/><path d="M30 54H190" stroke="#0f9fff" stroke-width="4"/><path d="M221 61H281" stroke="#0f9fff" stroke-width="3"/><path d="M344 86l12 4v8h-12" fill="#ffdb67"/></svg>
+      </div>
+      <div class="road-surface"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    </div>
     <div class="cinema-copy">
       <div class="eyebrow">CLST TRUCKING LLC · THE OPEN ROAD EXPERIENCE</div>
       <h2>Hear the diesel.<br><span>Feel the freedom.</span></h2>
@@ -192,16 +229,6 @@ footer{color:#b7a386}
   </section>
 
   <div class="magic-divider" id="magicDivider">MILES MADE. PROMISES KEPT. THE ROAD GOES ON.</div>
-
-  <section class="soundtrack-bar" id="backgroundMusic">
-    <div class="soundtrack-mark" aria-hidden="true"><span class="soundtrack-note-icon">♫</span><span class="soundtrack-eq"><i></i><i></i><i></i><i></i></span></div>
-    <div class="soundtrack-copy"><div class="eyebrow">CLST SOUNDTRACK</div><h3>The Road to Hell · Background Audio</h3><p>Original track when available · otherwise live diesel + highway ambience</p></div>
-    <div class="soundtrack-controls">
-      <button class="primary" id="soundtrackToggle" type="button">▶ Start road soundtrack</button>
-      <span id="soundtrackStatus" class="soundtrack-status" role="status">Tap to start · engine + open-road ambience</span>
-    </div>
-    <audio id="clstBackgroundAudio" src="./audio/road-to-hell.mp3" preload="auto" loop playsinline></audio>
-  </section>
 
   <div class="notice">
     <strong>Secure connection:</strong>
@@ -340,96 +367,47 @@ footer{color:#b7a386}
 
 const $ = id => document.getElementById(id);
 
-const soundtrack = $('clstBackgroundAudio');
-const soundtrackToggle = $('soundtrackToggle');
-const soundtrackStatus = $('soundtrackStatus');
-let roadAudioContext = null;
-let roadAudioNodes = [];
-let roadNoiseSource = null;
-function setSoundtrackStatus(message) {
-  if (soundtrackStatus) soundtrackStatus.textContent = message;
-}
-function stopRoadAmbience() {
-  roadAudioNodes.forEach(node => { try { node.stop?.(); } catch {} try { node.disconnect?.(); } catch {} });
-  roadAudioNodes = [];
-  if (roadNoiseSource) { try { roadNoiseSource.stop(); } catch {} try { roadNoiseSource.disconnect(); } catch {} roadNoiseSource = null; }
-  if (roadAudioContext) { roadAudioContext.close().catch(() => {}); roadAudioContext = null; }
-}
-async function startRoadAmbience() {
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  if (!AudioCtx) { setSoundtrackStatus('This browser does not support road ambience'); return; }
-  stopRoadAmbience();
-  roadAudioContext = new AudioCtx();
-  const ctx = roadAudioContext;
-  await ctx.resume();
-  const master = ctx.createGain();
-  master.gain.value = 0.0001;
-  master.connect(ctx.destination);
-  master.gain.setTargetAtTime(0.14, ctx.currentTime, 1.1);
-  const engine = ctx.createOscillator();
-  engine.type = 'sawtooth';
-  engine.frequency.value = 46;
-  const engineFilter = ctx.createBiquadFilter();
-  engineFilter.type = 'lowpass';
-  engineFilter.frequency.value = 125;
-  const engineGain = ctx.createGain();
-  engineGain.gain.value = 0.16;
-  engine.connect(engineFilter); engineFilter.connect(engineGain); engineGain.connect(master); engine.start();
-  const pulse = ctx.createOscillator();
-  pulse.type = 'sine';
-  pulse.frequency.value = 1.7;
-  const pulseGain = ctx.createGain();
-  pulseGain.gain.value = 0.035;
-  pulse.connect(pulseGain); pulseGain.connect(engineGain.gain); pulse.start();
-  const buffer = ctx.createBuffer(1, ctx.sampleRate * 3, ctx.sampleRate);
-  const channel = buffer.getChannelData(0);
-  for (let i = 0; i < channel.length; i++) channel[i] = (Math.random() * 2 - 1) * 0.22;
-  roadNoiseSource = ctx.createBufferSource();
-  roadNoiseSource.buffer = buffer;
-  roadNoiseSource.loop = true;
-  const roadFilter = ctx.createBiquadFilter();
-  roadFilter.type = 'lowpass';
-  roadFilter.frequency.value = 520;
-  const roadGain = ctx.createGain();
-  roadGain.gain.value = 0.08;
-  roadNoiseSource.connect(roadFilter); roadFilter.connect(roadGain); roadGain.connect(master); roadNoiseSource.start();
-  roadAudioNodes = [engine, pulse];
-  $('backgroundMusic')?.classList.add('is-playing');
-  soundtrackToggle.textContent = '❚❚ Stop road soundtrack';
-  setSoundtrackStatus('Road ambience playing · soft diesel + highway');
-}
-async function startSoundtrack() {
-  if (!soundtrack) return;
-  try {
-    soundtrack.volume = 0.34;
-    await soundtrack.play();
-    $('backgroundMusic')?.classList.add('is-playing');
-    if (soundtrackToggle) soundtrackToggle.textContent = '❚❚ Pause soundtrack';
-    setSoundtrackStatus('Playing The Road to Hell');
-  } catch {
-    await startRoadAmbience();
+/* Automatic road sound: try on load; browsers may require a first user interaction. */
+(function automaticTruckHorns(){
+  let audioCtx = null, started = false, hornTimer = null;
+  function horn(){
+    if(!audioCtx || audioCtx.state !== 'running') return;
+    const now = audioCtx.currentTime;
+    [0,0.16].forEach((delay,index)=>{
+      const osc=audioCtx.createOscillator(), gain=audioCtx.createGain(), filter=audioCtx.createBiquadFilter();
+      osc.type='sawtooth'; osc.frequency.setValueAtTime(index ? 392 : 349,now+delay);
+      filter.type='lowpass'; filter.frequency.value=1050;
+      gain.gain.setValueAtTime(0.0001,now+delay);
+      gain.gain.exponentialRampToValueAtTime(0.11,now+delay+0.035);
+      gain.gain.setValueAtTime(0.11,now+delay+0.42);
+      gain.gain.exponentialRampToValueAtTime(0.0001,now+delay+0.62);
+      osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(now+delay); osc.stop(now+delay+0.65);
+    });
   }
-}
-if (soundtrackToggle && soundtrack) {
-  soundtrackToggle.addEventListener('click', async () => {
-    if (!soundtrack.paused || roadAudioContext) {
-      soundtrack.pause();
-      stopRoadAmbience();
-      $('backgroundMusic')?.classList.remove('is-playing');
-      soundtrackToggle.textContent = '▶ Start road soundtrack';
-      setSoundtrackStatus('Sound paused');
-    } else {
-      await startSoundtrack();
-    }
+  async function start(){
+    if(started) return;
+    const Ctx=window.AudioContext||window.webkitAudioContext;
+    if(!Ctx) return;
+    try{
+      audioCtx=new Ctx();
+      await audioCtx.resume();
+      if(audioCtx.state!=='running') return;
+      started=true;
+      // Very quiet low engine bed, then a short horn as each truck enters.
+      const engine=audioCtx.createOscillator(), eg=audioCtx.createGain(), ef=audioCtx.createBiquadFilter();
+      engine.type='sawtooth'; engine.frequency.value=48; ef.type='lowpass'; ef.frequency.value=105;
+      eg.gain.value=0.018; engine.connect(ef); ef.connect(eg); eg.connect(audioCtx.destination); engine.start();
+      window.setTimeout(horn,900);
+      hornTimer=window.setInterval(horn,18000);
+    }catch(e){ /* Browser may block autoplay; next normal interaction retries. */ }
+  }
+  window.addEventListener('load',()=>{void start();},{once:true});
+  ['pointerdown','touchstart','keydown','scroll'].forEach(eventName=>{
+    window.addEventListener(eventName,()=>{if(!started) void start();},{once:true,passive:true});
   });
-  soundtrack.addEventListener('pause', () => { if (!roadAudioContext) $('backgroundMusic')?.classList.remove('is-playing'); });
-  soundtrack.addEventListener('playing', () => { $('backgroundMusic')?.classList.add('is-playing'); });
-  soundtrack.addEventListener('error', () => {
-    setSoundtrackStatus('Original MP3 unavailable · tap to start road ambience');
-    soundtrackToggle.textContent = '▶ Start road soundtrack';
-  });
-  // Browsers block unsolicited sound; start on a deliberate tap, not on page load.
-}
+})();
+
 let pdfRecords = [];
 let emailRecords = [];
 
