@@ -30,7 +30,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -q 'confidence<0.85' cloudflare-worker.js
+          grep -q 'confidence>=0.85' cloudflare-worker.js
           grep -q 'smart_reply_v1:' cloudflare-worker.js
           grep -q 'Sensitive/commitment-related email requires review' cloudflare-worker.js
           grep -q '/api/autoreply/status' cloudflare-worker.js
