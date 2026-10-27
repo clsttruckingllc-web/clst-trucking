@@ -31,9 +31,36 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
 .soundtrack-bar{display:grid;grid-template-columns:auto minmax(190px,1fr) minmax(260px,360px);align-items:center;gap:18px;margin:0 0 22px;padding:16px 20px;border:1px solid #67303a;border-radius:16px;background:linear-gradient(100deg,rgba(40,13,20,.96),rgba(15,16,22,.97));box-shadow:0 16px 42px #0006}.soundtrack-mark{width:48px;height:48px;display:grid;place-items:center;border-radius:50%;background:#e11d2e;color:#fff;font-size:28px;box-shadow:0 0 28px #e11d2e55}.soundtrack-copy h3{font-size:17px}.soundtrack-copy p{margin:4px 0 0;color:var(--muted);font-size:12px}.soundtrack-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}.soundtrack-status{color:#a7a9b2;font-size:11px}.soundtrack-note{grid-column:2/4;color:#a7a9b2;font-size:11px;margin-top:-8px}.soundtrack-note code{color:#ff9aa3}
 @media(max-width:850px){header{padding:12px 4%}.cinema-gallery{grid-template-columns:1fr 1fr}.cinema-truck{grid-column:1/-1;min-height:280px}.cinema-card{min-height:220px}.soundtrack-bar{grid-template-columns:auto 1fr}.soundtrack-controls{grid-column:1/-1;justify-content:flex-start}.soundtrack-note{grid-column:1/-1;margin-top:0}.gps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rate-grid{grid-template-columns:1fr}.app-frame{height:1450px}}
 @media(max-width:560px){h1{font-size:18px}.cinema-hero{padding:22px 16px}.cinema-copy h2{font-size:38px;letter-spacing:-1px}.cinema-gallery{grid-template-columns:1fr}.cinema-truck{grid-column:auto;min-height:230px}.cinema-card{min-height:210px}.soundtrack-bar{padding:14px;gap:12px}.soundtrack-mark{width:40px;height:40px}.soundtrack-copy h3{font-size:15px}.soundtrack-player{max-width:none}.stats{grid-template-columns:1fr}.welcome{padding:18px}.panel{padding:14px}.gps-grid{grid-template-columns:1fr}.actions{width:100%}.actions button,.actions .action-link{flex:1;justify-content:center}.app-frame{height:1550px}}
+
+/* MAGIC PASS — cinematic light, depth and motion */
+body{background-attachment:fixed}
+body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(circle at var(--glow-x,75%) var(--glow-y,18%),rgba(225,29,46,.14),transparent 27%),radial-gradient(ellipse at 12% 65%,rgba(65,110,255,.07),transparent 32%);transition:background-position .2s}
+.magic-sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;opacity:.65}
+.magic-sky i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;box-shadow:0 0 9px 2px #ff6572;animation:magic-twinkle var(--twinkle,4s) ease-in-out infinite alternate;animation-delay:var(--delay,0s)}
+@keyframes magic-twinkle{from{opacity:.12;transform:scale(.65)}to{opacity:.95;transform:scale(1.8)}}
+header,main,footer{position:relative;z-index:1}
+.cinema-hero{overflow:hidden}
+.cinema-hero:after{content:"";position:absolute;inset:-60% -40%;z-index:1;pointer-events:none;background:linear-gradient(112deg,transparent 42%,rgba(255,255,255,.055) 49%,rgba(255,255,255,.16) 50%,transparent 57%);transform:translateX(-70%) rotate(-7deg);animation:cinema-sweep 11s ease-in-out infinite}
+@keyframes cinema-sweep{0%,35%{transform:translateX(-70%) rotate(-7deg)}65%,100%{transform:translateX(70%) rotate(-7deg)}}
+.cinema-card{transform:translateZ(0);will-change:transform}
+.cinema-card:before{content:"";position:absolute;inset:0;z-index:1;opacity:0;background:radial-gradient(circle at 50% 0%,rgba(255,90,110,.35),transparent 58%);transition:opacity .4s;pointer-events:none}
+.cinema-card:hover:before{opacity:1}
+.cinema-card-label{z-index:2}
+.cinema-tags span{position:relative;overflow:hidden;transition:background .25s,border-color .25s,transform .25s}
+.cinema-tags span:hover{transform:translateY(-3px);background:#e11d2e22;border-color:#ff536388}
+.soundtrack-bar{position:relative;overflow:hidden}
+.soundtrack-bar:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#ff9ba4,#e11d2e,#7b1421);box-shadow:0 0 20px #e11d2e;animation:edge-glow 3s ease-in-out infinite alternate}
+@keyframes edge-glow{from{opacity:.45}to{opacity:1}}
+.magic-divider{display:flex;align-items:center;gap:12px;margin:22px 0;color:#ff8b95;font-size:10px;font-weight:900;letter-spacing:.22em}
+.magic-divider:before,.magic-divider:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,#e11d2e88,transparent)}
+.cinema-copy .eyebrow{animation:eyebrow-glow 3s ease-in-out infinite alternate}
+@keyframes eyebrow-glow{from{text-shadow:0 0 0 transparent}to{text-shadow:0 0 16px #ff536366}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
 </style>
 </head>
 <body>
+<div class="magic-sky" id="magicSky" aria-hidden="true"></div>
 <header>
   <div class="brand">
     <div class="logo">C</div>
@@ -77,6 +104,8 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
     </div>
     <div class="cinema-orbit orbit-one"></div><div class="cinema-orbit orbit-two"></div>
   </section>
+
+  <div class="magic-divider" id="magicDivider">THE JOURNEY NEVER STOPS</div>
 
   <section class="soundtrack-bar" id="backgroundMusic">
     <div class="soundtrack-mark">♫</div>
@@ -160,6 +189,51 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
 
 <script>
 'use strict';
+
+/* Subtle starfield + cursor light: decorative only, never blocks controls. */
+(function createMagicAtmosphere(){
+  const sky = document.getElementById('magicSky');
+  if (!sky) return;
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const count = window.innerWidth < 600 ? 24 : 48;
+  for (let i = 0; i < count; i++) {
+    const star = document.createElement('i');
+    star.style.left = (Math.random() * 100) + '%';
+    star.style.top = (Math.random() * 100) + '%';
+    star.style.setProperty('--twinkle', (2.5 + Math.random() * 5) + 's');
+    star.style.setProperty('--delay', (-Math.random() * 6) + 's');
+    if (i % 7 === 0) {
+      star.style.width = '3px';
+      star.style.height = '3px';
+      star.style.boxShadow = '0 0 12px 3px rgba(225,29,46,.65)';
+    }
+    sky.appendChild(star);
+  }
+  if (!reduced && window.matchMedia('(pointer:fine)').matches) {
+    let frame = 0;
+    window.addEventListener('pointermove', event => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        document.body.style.setProperty('--glow-x', event.clientX + 'px');
+        document.body.style.setProperty('--glow-y', event.clientY + 'px');
+        frame = 0;
+      });
+    }, {passive:true});
+  }
+  const cards = document.querySelectorAll('.cinema-card');
+  if (!reduced && window.matchMedia('(pointer:fine)').matches) {
+    cards.forEach(card => {
+      card.addEventListener('pointermove', event => {
+        const rect = card.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width - .5;
+        const y = (event.clientY - rect.top) / rect.height - .5;
+        card.style.transform = 'perspective(900px) rotateY(' + (x * 5).toFixed(2) + 'deg) rotateX(' + (-y * 4).toFixed(2) + 'deg) translateY(-4px) scale(1.012)';
+      });
+      card.addEventListener('pointerleave', () => { card.style.transform = ''; });
+    });
+  }
+})();
+
 
 const $ = id => document.getElementById(id);
 
