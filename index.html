@@ -84,6 +84,38 @@ footer{color:#b7a386}
 ::selection{background:#7d3b21;color:#fff0d4}
 @media(max-width:700px){body{background-attachment:scroll}.cinema-copy h2{font-size:36px}.soundtrack-bar{background:linear-gradient(145deg,#2b2117,#15100b)!important}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+/* IMMERSIVE ROAD EXPERIENCE — motion reacts to scroll and pointer */
+.immersive-road{min-height:600px;display:grid;grid-template-columns:minmax(0,1fr);align-content:center;gap:14px;isolation:isolate;overflow:hidden}
+.immersive-road:before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,#090704f2 0%,#120d08d9 44%,#100b08a8 100%),url("https://images.unsplash.com/photo-1501706362039-c6e08c7e6d3a?auto=format&fit=crop&w=2200&q=85") center 45%/cover;transform:scale(1.04) translateY(var(--road-parallax,0px));will-change:transform;filter:saturate(.78) contrast(1.08)}
+.immersive-road:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#100a0530,transparent 38%,#090704bd),repeating-linear-gradient(112deg,transparent 0 110px,#e8c58b0b 111px 113px);mix-blend-mode:screen}
+.immersive-road .cinema-copy{max-width:850px}
+.immersive-road .cinema-copy h2{font-size:clamp(42px,7vw,86px);max-width:850px;text-shadow:0 4px 0 #100803,0 0 32px #d98c3c38}
+.immersive-road .cinema-copy h2 span{color:#e9b66f;background:linear-gradient(90deg,#f3d9a6,#d58c4d 60%,#fff0c8);background-clip:text;-webkit-background-clip:text}
+.immersive-road .cinema-copy p{font-size:clamp(16px,1.7vw,20px);max-width:700px;color:#e4d4ba}
+.road-light{position:absolute;z-index:0;pointer-events:none;top:10%;width:35%;height:2px;background:linear-gradient(90deg,transparent,#e9b56c,transparent);filter:blur(2px);opacity:.55;animation:road-sweep 7s ease-in-out infinite}
+.road-light-one{left:-40%;transform:rotate(-14deg)}
+.road-light-two{right:-40%;top:28%;transform:rotate(11deg);animation-delay:-3.5s}
+.road-horizon{position:absolute;z-index:0;pointer-events:none;left:0;right:0;bottom:36%;height:90px;overflow:hidden;opacity:.42;mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent)}
+.road-horizon span{position:absolute;left:-20%;width:140%;height:1px;background:linear-gradient(90deg,transparent,#d4a56a,transparent);transform:rotate(-4deg);animation:horizon-drift 9s linear infinite}
+.road-horizon span:nth-child(2){top:30px;transform:rotate(3deg);animation-duration:12s;animation-delay:-5s}
+.road-horizon span:nth-child(3){top:62px;transform:rotate(-1deg);animation-duration:15s;animation-delay:-8s}
+.road-invitation{display:inline-flex;align-items:center;gap:14px;margin-top:26px;color:#e6bb7a;font:900 11px/1.4 Arial,sans-serif;letter-spacing:.19em}
+.road-invitation span{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid #b68a52;border-radius:50%;font-size:18px;animation:road-bounce 1.5s ease-in-out infinite}
+.immersive-road .cinema-gallery{grid-template-columns:1.35fr 1fr 1fr;margin-top:30px;gap:14px}
+.immersive-road .cinema-card{min-height:260px;transition:transform .5s cubic-bezier(.2,.75,.2,1),filter .5s;filter:saturate(.78)}
+.immersive-road .cinema-card:hover{filter:saturate(1.18) brightness(1.08)}
+.immersive-road .cinema-truck{background-image:linear-gradient(180deg,#0000,#080502bd),url('https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1400&q=90')!important}
+.immersive-road .cinema-bike{background-image:linear-gradient(180deg,#0000,#080502c9),url('https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1000&q=85')!important}
+.immersive-road .cinema-road-card{background-image:linear-gradient(180deg,#0000,#080502c9),url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1000&q=85')!important}
+.immersive-road .cinema-card-label strong{font-family:Georgia,"Times New Roman",serif;font-size:clamp(17px,2vw,25px);color:#fff0d3}
+.immersive-road .cinema-card-label span{color:#e5b878!important}
+@keyframes road-sweep{0%,100%{opacity:.1;translate:0 0}50%{opacity:.75;translate:130vw 24px}}
+@keyframes horizon-drift{from{translate:-8% 0}to{translate:8% 0}}
+@keyframes road-bounce{0%,100%{transform:translateY(-2px)}50%{transform:translateY(4px)}}
+@media(max-width:850px){.immersive-road{min-height:0}.immersive-road .cinema-gallery{grid-template-columns:1fr 1fr}.immersive-road .cinema-truck{grid-column:1/-1;min-height:270px}.immersive-road .cinema-card{min-height:220px}}
+@media(max-width:560px){.immersive-road .cinema-copy h2{font-size:clamp(39px,12vw,58px)}.immersive-road .cinema-gallery{grid-template-columns:1fr}.immersive-road .cinema-truck{grid-column:auto}.immersive-road .cinema-card{min-height:230px}.road-invitation{font-size:9px;letter-spacing:.12em}}
+@media(prefers-reduced-motion:reduce){.road-light,.road-horizon span,.road-invitation span{animation:none!important}.immersive-road:before{transform:none}}
 </style>
 </head>
 <body>
@@ -117,15 +149,21 @@ footer{color:#b7a386}
     </div>
   </section>
 
-  <section class="cinema-hero" aria-label="CLST cinematic fleet">
+  <section class="cinema-hero immersive-road" id="roadExperience" aria-label="Immersive retro trucker road experience">
+    <div class="road-light road-light-one" aria-hidden="true"></div>
+    <div class="road-light road-light-two" aria-hidden="true"></div>
+    <div class="road-horizon" aria-hidden="true"><span></span><span></span><span></span></div>
     <div class="cinema-copy">
-      <div class="eyebrow">CLST TRUCKING LLC · 1874 FRONTIER RETRO</div>
-      <h2>Forged by grit.<br><span>Driven by the road.</span></h2>
-      <p>Think old frontier freight-house, weathered leather, brass, iron and sepia — reimagined for today’s big rigs and the people who keep them rolling.</p>
-      <div class="cinema-tags"><span>✦ IRON & BRASS</span><span>✦ FRONTIER GRIT</span><span>✦ MILES AHEAD</span></div>
+      <div class="eyebrow">CLST TRUCKING LLC · THE OPEN ROAD EXPERIENCE</div>
+      <h2>Hear the diesel.<br><span>Feel the freedom.</span></h2>
+      <p>Chrome catching the last light. The open highway pulling you forward. Old-school truck stops, roaring engines, long-haul pride and the freedom that lives behind the wheel.</p>
+      <div class="cinema-tags"><span>✦ BIG RIGS</span><span>✦ MOTORCYCLES</span><span>✦ OPEN HIGHWAY</span></div>
+      <div class="road-invitation">SCROLL INTO THE WORLD OF THE ROAD <span aria-hidden="true">↓</span></div>
     </div>
     <div class="cinema-gallery">
-      <article class="cinema-card cinema-truck"><div class="cinema-card-shade"></div><div class="cinema-card-label"><span>01 / THE ROAD</span><strong>Built to move.</strong></div></article>
+      <article class="cinema-card cinema-truck"><div class="cinema-card-shade"></div><div class="cinema-card-label"><span>01 / THE LONG HAUL</span><strong>Built for the miles.</strong></div></article>
+      <article class="cinema-card cinema-bike"><div class="cinema-card-shade"></div><div class="cinema-card-label"><span>02 / THE BROTHERHOOD</span><strong>Chrome. Thunder. Freedom.</strong></div></article>
+      <article class="cinema-card cinema-road-card"><div class="cinema-card-shade"></div><div class="cinema-card-label"><span>03 / THE OPEN ROAD</span><strong>Chase the horizon.</strong></div></article>
     </div>
     <div class="cinema-orbit orbit-one"></div><div class="cinema-orbit orbit-two"></div>
   </section>
@@ -258,6 +296,24 @@ footer{color:#b7a386}
   }
 })();
 
+
+/* Scroll-driven depth: the background follows the visitor gently, not like a slideshow. */
+(function roadParallax(){
+  const scene=document.getElementById('roadExperience');
+  if(!scene || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let pending=false;
+  const update=()=>{
+    const rect=scene.getBoundingClientRect();
+    const progress=(window.innerHeight-rect.top)/(window.innerHeight+rect.height);
+    const shift=Math.max(-46,Math.min(46,(progress-.5)*92));
+    scene.style.setProperty('--road-parallax',shift.toFixed(1)+'px');
+    pending=false;
+  };
+  const onScroll=()=>{if(!pending){pending=true;window.requestAnimationFrame(update)}};
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',onScroll,{passive:true});
+  update();
+})();
 
 const $ = id => document.getElementById(id);
 
