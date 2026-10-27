@@ -1,0 +1,8 @@
+﻿.wrangler/
+.dev.vars
+.env
+.env.*
+!.env.example
+
+# Local backups
+*.backup-*

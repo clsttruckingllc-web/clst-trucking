@@ -1,3 +1,4 @@
+import { verifyGpsSession } from "../../_shared/gps-auth.js";
 const JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
   "Cache-Control": "no-store, private",
@@ -121,30 +122,11 @@ export async function onRequest({ request, env }) {
     return json({ error: "Method not allowed" }, 405);
   }
 
-  // Require a verified Cloudflare Access session before returning live fleet GPS.
-  // Cloudflare Access may provide the JWT as an origin header when the route is
-  // protected, or as the CF_Authorization cookie for a same-origin browser request.
-  const cookieHeader = request.headers.get("Cookie") || "";
-  const accessCookie = cookieHeader
-    .split(";")
-    .map((part) => part.trim())
-    .find((part) => /^CF_Authorization(?:[-_][^=]+)?=/i.test(part));
-  let cookieToken = "";
-  if (accessCookie) {
-    const separator = accessCookie.indexOf("=");
-    const rawCookieToken = separator >= 0 ? accessCookie.slice(separator + 1) : "";
-    try {
-      cookieToken = decodeURIComponent(rawCookieToken);
-    } catch {
-      cookieToken = rawCookieToken;
-    }
+  // Require a valid server-signed CLST GPS session before returning live fleet GPS.
+  const authenticated = await verifyGpsSession(request, env);
+  if (!authenticated) {
+    return json({ error: "GPS login required. Open /gps-login.html and sign in." }, 401);
   }
-  const accessToken = request.headers.get("Cf-Access-Jwt-Assertion") || cookieToken;
-  if (!accessToken) {
-    return json({ error: "Cloudflare Access session missing. Sign in to this site through Cloudflare Access, then refresh fleet locations." }, 401);
-  }
-  const access = await verifyCloudflareAccessJwt(accessToken, env);
-  if (!access.ok) return json({ error: access.error }, access.status);
 
   // The upstream ROCK ELD API key remains server-side in encrypted Pages Secrets.
   // Never expose ROCKELD_API_KEY to browser code or responses.

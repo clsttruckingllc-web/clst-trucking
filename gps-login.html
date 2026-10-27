@@ -1,0 +1,49 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CLST GPS Sign In</title>
+  <style>
+    body{font:16px system-ui,sans-serif;max-width:420px;margin:12vh auto;padding:24px;color:#172033}
+    form{display:grid;gap:14px}input,button{font:inherit;padding:12px;border-radius:8px}
+    input{border:1px solid #9aa4b2}button{border:0;background:#174ea6;color:white;cursor:pointer}
+    #message{color:#b42318;white-space:pre-wrap}
+  </style>
+</head>
+<body>
+  <h1>CLST GPS Sign In</h1>
+  <p>Sign in to access authorized fleet GPS locations.</p>
+  <form id="login">
+    <label for="password">GPS access password</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <button type="submit">Sign in</button>
+    <p id="message" role="alert"></p>
+  </form>
+  <script>
+    document.getElementById("login").addEventListener("submit", async event => {
+      event.preventDefault();
+      const message = document.getElementById("message");
+      const button = event.currentTarget.querySelector("button");
+      button.disabled = true;
+      message.textContent = "Signing in…";
+      try {
+        const response = await fetch("/api/rockeld/login", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({ password: document.getElementById("password").value })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || "Sign-in failed.");
+        document.getElementById("password").value = "";
+        location.href = "/index.html";
+      } catch (error) {
+        message.textContent = error.message || "Sign-in failed.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
