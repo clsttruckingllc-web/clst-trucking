@@ -94,13 +94,14 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
   </section>
 
 <section class="panel" id="eld">
-    <div class="panel-heading"><div><h3>ROCK ELD · Fleet GPS</h3><div class="muted" style="font-size:12px;margin-top:4px">Vehicle locations from the secured server connection — no token field in the dashboard.</div></div><button class="primary" id="refreshEldBtn" type="button">Refresh truck locations</button></div>
+    <div class="panel-heading"><div><h3>ROCK ELD · Fleet GPS</h3><div class="muted" style="font-size:12px;margin-top:4px">Token is kept only in this browser session and sent to the server over HTTPS; it is not stored in the HTML or GitHub.</div></div><button class="primary" id="refreshEldBtn" type="button">Refresh truck locations</button></div>
+    <div class="ask-row" style="margin-bottom:12px"><input id="eldAccessToken" type="password" autocomplete="off" placeholder="ROCK ELD GPS access token" aria-label="ROCK ELD GPS access token"><button class="secondary" id="saveEldTokenBtn" type="button">Save for this session</button></div>
     <div id="eldStatus" class="status">Checking the secured ROCK ELD connection…</div>
     <div id="eldVehicles" class="gps-grid"><div class="empty">Loading fleet locations…</div></div>
   </section>
   <section class="panel" id="eta">
     <div class="panel-heading"><div><h3>Dispatch ETA · Load planning</h3><div class="muted" style="font-size:12px;margin-top:4px">Choose a Gmail load and use current truck location to estimate delivery.</div></div><a class="action-link" href="./eta.html" target="_blank" rel="noopener">Open ETA full page ↗</a></div>
-    <iframe class="app-frame" src="./eta.html" title="CLST Trucking ETA dispatch estimator" loading="lazy"></iframe>
+    <iframe class="app-frame" src="./eta.html" title="CLST Trucking ETA dispatch estimator" loading="eager"></iframe>
   </section>
   <section class="panel" id="ringcentral">
     <div class="panel-heading"><div><h3>RingCentral · Communications</h3><div class="muted" style="font-size:12px;margin-top:4px">Check API connection and open the company communications workspace.</div></div><div class="actions" style="margin:0"><button class="secondary" id="ringcentralTestBtn" type="button">Test RingCentral</button><a class="action-link" href="https://app.ringcentral.com/" target="_blank" rel="noopener noreferrer">Open RingCentral ↗</a></div></div>
@@ -531,12 +532,25 @@ async function askCLST(event) {
 }
 
 
+const ELD_TOKEN_KEY='clst_rockeld_gps_token';
+$('eldAccessToken').value=sessionStorage.getItem(ELD_TOKEN_KEY)||'';
+$('saveEldTokenBtn').addEventListener('click',()=>{
+  const token=$('eldAccessToken').value.trim();
+  if(!token){sessionStorage.removeItem(ELD_TOKEN_KEY);$('eldStatus').textContent='GPS token cleared from this browser session.';$('eldStatus').className='status';return;}
+  sessionStorage.setItem(ELD_TOKEN_KEY,token);
+  $('eldStatus').textContent='Token saved for this browser tab/session. Refreshing fleet locations…';
+  refreshEldLocations();
+});
+function eldHeaders(){
+  const token=sessionStorage.getItem(ELD_TOKEN_KEY)||$('eldAccessToken').value.trim();
+  return token?{Accept:'application/json',Authorization:'Bearer '+token}:{Accept:'application/json'};
+}
 async function refreshEldLocations(){
   const btn=$('refreshEldBtn');btn.disabled=true;btn.textContent='Refreshing…';
   $('eldStatus').textContent='Requesting fleet locations through the secured server endpoint…';
   $('eldStatus').className='status';
   try{
-    const res=await fetch('/api/rockeld/locations',{headers:{Accept:'application/json'},credentials:'same-origin',cache:'no-store'});
+    const res=await fetch('/api/rockeld/locations',{headers:eldHeaders(),credentials:'same-origin',cache:'no-store'});
     const data=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(data.error||('ROCK ELD returned HTTP '+res.status));
     const trucks=Array.isArray(data.locations)?data.locations:[];
