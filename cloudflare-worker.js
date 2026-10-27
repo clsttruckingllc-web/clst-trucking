@@ -446,7 +446,7 @@ async function processAutoReplies(env){
  // The five-minute Cron continues through newer messages over successive runs.
  const candidates=[];
  let pageToken="",scanned=0,resultSizeEstimate=0;
- for(let page=0;page<1&&candidates.length<1;page++){
+ for(let page=0;page<5&&candidates.length<1;page++){
   const params=new URLSearchParams({maxResults:"10",q:query});
   if(pageToken)params.set("pageToken",pageToken);
   const batch=await gmail(env,"/messages?"+params.toString(),token);
