@@ -51,9 +51,10 @@ async function oauthStart(req,env){
  const state=crypto.randomUUID(); await env.TOKENS.put("google_oauth_state",state,{expirationTtl:600});
  const alreadyConnected=!!(await env.TOKENS.get("google_refresh_token"));
  const u=new URL("https://accounts.google.com/o/oauth2/v2/auth");
- const params={client_id:env.GOOGLE_CLIENT_ID,redirect_uri:redirectUri(req,env),response_type:"code",scope:"https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.compose",access_type:"offline",state};
- // Request explicit consent only for the first connection; avoid forcing it on routine reconnections.
- if(!alreadyConnected)params.prompt="consent";
+ const params={client_id:env.GOOGLE_CLIENT_ID,redirect_uri:redirectUri(req,env),response_type:"code",scope:"https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.compose",access_type:"offline",include_granted_scopes:"true",state};
+ // Allow an owner-triggered permission refresh when Gmail compose/send scopes need to be re-approved.
+ const forceConsent=new URL(req.url).searchParams.get("consent")==="1";
+ if(!alreadyConnected||forceConsent)params.prompt="consent";
  else params.prompt="select_account";
  for(const [k,v] of Object.entries(params))u.searchParams.set(k,v);
  return Response.redirect(u.toString(),302);
