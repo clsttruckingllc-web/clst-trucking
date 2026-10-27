@@ -121,8 +121,15 @@ export async function onRequest({ request, env }) {
     return json({ error: "Method not allowed" }, 405);
   }
 
-  // ROCK ELD credentials stay server-side in encrypted Cloudflare Pages Secrets.
-  // This endpoint is intentionally available without an interactive login for the current integration phase.
+  // Require a verified Cloudflare Access session before returning live fleet GPS.
+  const accessToken = request.headers.get("Cf-Access-Jwt-Assertion") || "";
+  if (!accessToken) {
+    return json({ error: "Cloudflare Access sign-in is required to view fleet locations." }, 401);
+  }
+  const access = await verifyCloudflareAccessJwt(accessToken, env);
+  if (!access.ok) return json({ error: access.error }, access.status);
+
+  // The upstream ROCK ELD API key remains server-side in encrypted Pages Secrets.
   // Never expose ROCKELD_API_KEY to browser code or responses.
   if (!env.ROCKELD_API_KEY) {
     return json({ error: "ROCKELD_API_KEY is not configured." }, 503);
