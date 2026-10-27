@@ -57,6 +57,60 @@ header,main,footer{position:relative;z-index:1}
 @keyframes eyebrow-glow{from{text-shadow:0 0 0 transparent}to{text-shadow:0 0 16px #ff536366}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 
+
+/* Y2K RETRO REMIX — inspired by early-2000s pink web design */
+:root{color-scheme:light;--bg:#fff1fa;--panel:#fff;--panel2:#ffe0f2;--border:#ff83cb;--text:#64104d;--muted:#9b4d83;--red:#ff36ae;--red2:#ff78cd;--green:#138b68;--yellow:#ffcf4a}
+body{background-color:#ffe8f6;background-image:radial-gradient(circle at 10% 15%,#fff 0 2px,transparent 3px),radial-gradient(circle at 80% 28%,#fff9 0 2px,transparent 4px),linear-gradient(135deg,#ffe5f5,#ffd0eb 42%,#e6faff 100%);background-size:34px 34px,52px 52px,cover;color:#64104d;font-family:Tahoma,Verdana,Arial,sans-serif}
+body:before{background:radial-gradient(circle at var(--glow-x,75%) var(--glow-y,18%),rgba(255,255,255,.72),transparent 28%),radial-gradient(ellipse at 12% 65%,rgba(255,255,255,.6),transparent 32%)}
+header{background:linear-gradient(100deg,#ff43b4,#ff8ed4 48%,#a4f5ff);border-bottom:3px solid #fff;box-shadow:0 4px 0 #e86db8;backdrop-filter:blur(12px)}
+.brand .logo{background:linear-gradient(145deg,#fff,#ff65c1 48%,#c52a91);border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 3px #ff9bdb,0 5px 15px #d32c96aa;color:#fff;text-shadow:1px 2px #a20b70}
+h1{color:#fff;text-shadow:1px 2px #bd268b,0 0 10px #fff;letter-spacing:.3px}
+.subtitle,.connection{color:#75145a}
+nav a{color:#701052;border:1px solid transparent;border-radius:18px}
+nav a:hover{background:#fff;color:#d51b94;border-color:#ff8ad0;box-shadow:0 0 12px #fff}
+main{max-width:1500px}
+.cinema-hero{border:3px ridge #ff9fe0;border-radius:28px;background:radial-gradient(ellipse at 82% 10%,#ff9edc 0,transparent 36%),linear-gradient(125deg,rgba(255,255,255,.96),rgba(255,229,247,.93) 55%,rgba(215,250,255,.95));box-shadow:0 8px 0 #ed8dcc,0 18px 35px #b92b8640}
+.cinema-copy h2{color:#e51a9b;text-shadow:2px 3px #fff,3px 5px #ffb6e2;letter-spacing:-1px}
+.cinema-copy h2 span{background:linear-gradient(90deg,#ff2fac,#b63be5,#20bde0);color:transparent;background-clip:text;-webkit-background-clip:text}
+.cinema-copy p{color:#81336d}
+.eyebrow{color:#d31a95;text-shadow:0 0 8px #ffc5e9}
+.cinema-tags span{background:linear-gradient(#fff,#ffe0f3);border:2px outset #ff9edb;color:#a01875;border-radius:7px;box-shadow:2px 3px 0 #e98bc8}
+.cinema-card{border:3px ridge #ff9edb;border-radius:18px;box-shadow:0 6px 0 #e68bc4,0 12px 22px #a3287840}
+.cinema-card-label span{color:#ffb5e6}
+.cinema-orbit{border-color:#ff54bd66}
+.soundtrack-bar{border:3px ridge #ff8bd2;border-radius:18px;background:linear-gradient(100deg,#fff,#ffe2f4 48%,#dcfaff);box-shadow:0 5px 0 #e884c5,0 12px 25px #a3287830;color:#741452}
+.soundtrack-mark{background:radial-gradient(circle at 30% 25%,#fff,#ff54ba 55%,#a51e83);border:2px solid #fff;box-shadow:0 0 0 3px #ff9edb,0 0 20px #ff4eb6}
+.soundtrack-copy h3{color:#a51478}
+.soundtrack-copy p,.soundtrack-status,.soundtrack-note{color:#9b4d83}
+.soundtrack-note code{color:#c51c8c}
+button,.action-link{border-radius:7px;border:2px outset #ff9fda;box-shadow:0 3px 0 #d967ad;font-weight:900}
+.primary{background:linear-gradient(#ff8bd5,#f52ba8);color:#fff;text-shadow:0 1px #a31870}
+.primary:hover{background:linear-gradient(#ffa8e2,#ff4fbb)}
+.secondary,.action-link{background:linear-gradient(#fff,#ffe3f4);color:#a21879;border-color:#ff9fda}
+.welcome,.panel,.stat,.gps-card,.rate-card,.notice,.status,.ask-answer,.search,.ask-row input,.app-frame{background:linear-gradient(145deg,rgba(255,255,255,.97),rgba(255,232,247,.96));border:2px solid #ffb1df;color:#64104d;box-shadow:0 4px 0 #f3a0d2,0 10px 22px #9e2c7520;backdrop-filter:blur(8px)}
+.welcome{border-radius:22px}
+.panel,.stat,.gps-card,.rate-card{border-radius:17px}
+.stat:before{background:linear-gradient(#ff36ae,#a3f5ff,#ffcf4a);width:5px}
+.stat-number,.amount,.gps-card-heading strong{color:#d91a96}
+.stat-label,th,.detail span:first-child{color:#a04d87}
+.pill{background:#ffe0f2;color:#92176b;border:1px solid #ff9bd6}
+.pill.good{background:#d8fff0;color:#087c5b}
+.pill.bad{background:#ffe0ed;color:#b80b5d}
+table{border-color:#ffc2e4}th,td{border-bottom-color:#ffc2e4}
+.empty{border-color:#f49ad2;color:#9b4d83}
+.gps-card a{color:#d31a95}
+.status.success{color:#087c5b;border-color:#75d8ba}.status.error{color:#b70c59;border-color:#ff83b9}
+.magic-sky{opacity:.85}.magic-sky i{background:#fff;box-shadow:0 0 10px 3px #ff59bc}
+.magic-sky i:nth-child(3n){background:#a7f6ff;box-shadow:0 0 10px 3px #6de5ff}
+.magic-sky i:nth-child(5n){background:#fff1a7;box-shadow:0 0 10px 3px #ffcf4a}
+.magic-divider{color:#d31a95;letter-spacing:.25em;text-shadow:0 1px #fff}
+.magic-divider:before,.magic-divider:after{height:2px;background:linear-gradient(90deg,transparent,#ff64c2,#8eeeff,transparent)}
+@keyframes y2k-shimmer{0%,100%{filter:hue-rotate(0deg)}50%{filter:hue-rotate(18deg)}}
+.cinema-hero:after{background:linear-gradient(112deg,transparent 42%,rgba(255,255,255,.2) 49%,rgba(255,255,255,.72) 50%,transparent 57%)}
+.soundtrack-bar.is-playing{animation:y2k-shimmer 5s ease-in-out infinite}
+@media(max-width:560px){header{background:linear-gradient(120deg,#ff43b4,#ff9cda,#a4f5ff)}.cinema-copy h2{font-size:36px}.soundtrack-bar{background:linear-gradient(145deg,#fff,#ffe0f2)}}
+@media(prefers-reduced-motion:reduce){.soundtrack-bar.is-playing{animation:none}}
+
 </style>
 </head>
 <body>
