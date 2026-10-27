@@ -1,42 +1,32 @@
 # ROCK ELD GPS → ETA setup
 
-This integration adds a server-side Cloudflare Pages Function at `/api/rockeld/locations`. It reads the ROCK ELD API key only from the Cloudflare Pages secret `ROCKELD_API_KEY`; the key is never sent to the browser.
+The dashboard and ETA page call the server-side Cloudflare Pages Function at `/api/rockeld/locations`. The ROCK ELD API key is read only from the encrypted Pages secret `ROCKELD_API_KEY`; it is never sent to the browser.
 
-## What is implemented
+## Company sign-in
+
+The GPS panel uses a simple CLST username and password instead of asking the operator to enter an API token.
+
+In Cloudflare Dashboard → Workers & Pages → `clst-trucking` → Settings → Variables and Secrets, configure these encrypted secrets:
+
+- `ROCKELD_GPS_USERNAME`
+- `ROCKELD_GPS_PASSWORD`
+- `ROCKELD_API_KEY` (the separate upstream ROCK ELD API key)
+
+Do not put any of these values in GitHub or HTML. After changing the secrets, redeploy the Pages project so the values are active.
+
+Open `https://clst-trucking.pages.dev/ai/`, enter the CLST username and password in the ROCK ELD section, then tap **Sign in**. The credentials are held in the current browser tab's session storage and sent only over HTTPS. The server validates them and uses its own `ROCKELD_API_KEY` to call ROCK ELD. The password is not the upstream API key.
+
+## What the endpoint returns
 
 - Reads `GET https://cloud.rockeld.us/api/v0/locations` from the server.
-- Returns a small, sanitized set of truck fields instead of the complete upstream payload.
+- Returns sanitized truck location fields only.
 - Marks GPS reports as `fresh` only when they are no older than 15 minutes; older reports are `stale`.
-- Verifies Cloudflare Access JWT signatures, issuer, audience, and expiry when Access is used.
-- Also supports a separate shared bearer token for free `pages.dev` testing.
-- The ETA page can request the locations and select a truck. Stale/unknown reports cannot be selected; manual ETA still works if GPS is not configured.
-
-## Free test setup (no custom domain)
-
-The endpoint is intentionally closed until an access method is configured.
-
-1. Generate a separate random token in PowerShell or Command Prompt (do not reuse the ROCK ELD API key):
-   ```powershell
-   node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
-   ```
-2. Save the generated token as an encrypted Cloudflare Pages secret from the repository's Windows terminal:
-   ```powershell
-   npx.cmd wrangler@latest pages secret put ROCKELD_GPS_ACCESS_TOKEN --project-name clst-trucking
-   ```
-   Paste the generated token when Wrangler prompts for its value. Do not commit it to GitHub or place it in HTML.
-3. Open `https://clst-trucking.pages.dev/eta.html`. In the ROCK ELD GPS access token field, enter that same token, then tap **Load ROCK ELD GPS locations**.
-4. Choose a truck marked `FRESH`, confirm its displayed location, calculate the remaining road miles, and calculate ETA. GPS is not treated as traffic-aware routing; the route miles still come from the existing OSRM route lookup.
-
-The shared token is entered by the operator in the page, sent only over HTTPS, and is not saved in browser storage. Rotate it by setting a new value for the same Pages secret and use the new value in the page.
-
-## Cloudflare Access alternative
-
-For deployments where a Cloudflare Access application is available, protect the route `/api/rockeld/*` at the edge and set the Pages environment secrets `CF_ACCESS_TEAM_DOMAIN` (for example, `example.cloudflareaccess.com`, without `https://`) and `CF_ACCESS_AUD` (the Access application's audience tag). The function independently verifies the signed Access JWT; checking only for the presence of a JWT header is not considered authentication.
+- The ETA page can select a fresh truck location. A stale/unknown report cannot be selected; manual ETA remains available if GPS is not configured.
 
 ## Safety and ETA limitations
 
-- Never make this endpoint unauthenticated or remove the token/JWT checks. Fleet locations are sensitive.
-- Keep `ROCKELD_API_KEY` and `ROCKELD_GPS_ACCESS_TOKEN` out of source control.
+- The endpoint requires company sign-in or a verified Cloudflare Access JWT; it must not be made public.
+- Keep the ROCK ELD API key and login credentials out of source control.
 - The endpoint uses `Cache-Control: no-store` and does not enable cross-origin access.
 - A report older than 15 minutes is not eligible to fill the ETA origin. A fresh report still needs human review.
-- The current ETA calculator estimates driving/rest time from remaining road miles and configured planning assumptions. It does not include live traffic, weather, border delays, loading delays, or verified driver hours-of-service. Do not promise an arrival time based solely on this prototype.
+- ETA excludes live traffic, weather, border delays, loading delays, and verified driver hours-of-service. Do not promise an arrival time based solely on this estimate.
