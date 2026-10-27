@@ -122,9 +122,17 @@ export async function onRequest({ request, env }) {
   }
 
   // Require a verified Cloudflare Access session before returning live fleet GPS.
-  const accessToken = request.headers.get("Cf-Access-Jwt-Assertion") || "";
+  // Cloudflare Access may provide the JWT as an origin header when the route is
+  // protected, or as the CF_Authorization cookie for a same-origin browser request.
+  const cookieHeader = request.headers.get("Cookie") || "";
+  const accessCookie = cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith("CF_Authorization="));
+  const cookieToken = accessCookie ? decodeURIComponent(accessCookie.slice("CF_Authorization=".length)) : "";
+  const accessToken = request.headers.get("Cf-Access-Jwt-Assertion") || cookieToken;
   if (!accessToken) {
-    return json({ error: "Cloudflare Access sign-in is required to view fleet locations." }, 401);
+    return json({ error: "Cloudflare Access session missing. Sign in to this site through Cloudflare Access, then refresh fleet locations." }, 401);
   }
   const access = await verifyCloudflareAccessJwt(accessToken, env);
   if (!access.ok) return json({ error: access.error }, access.status);
