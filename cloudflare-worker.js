@@ -478,9 +478,15 @@ async function processAutoReplies(env){
     await env.TOKENS.put(key,JSON.stringify({status:"draft",draftId:draft.id||null,reason,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
     results.push({id,status:"draft_for_review",reason,confidence:a.confidence});
    }
-  }catch(err){results.push({id,status:"error",error:errText(err)});}
+  }catch(err){
+   const message=errText(err);
+   // Back off failed messages briefly so one bad email or temporary API error
+   // cannot monopolize every Cron run and block later incoming messages.
+   try{await env.TOKENS.put(key,JSON.stringify({status:"error",reason:message,at:new Date().toISOString()}),{expirationTtl:15*60});}catch(lockError){}
+   results.push({id,status:"error",error:message});
+  }
  }
- return {success:true,checked:scanned,eligible:candidates.length,results};
+ return {success:!results.some(item=>item.status==="error"),checked:scanned,eligible:candidates.length,results};
 }
 async function saveAutoReplyStatusIfDue(env,record){
  // Cron may run every minute. KV writes are quota-limited, so persist status at most
