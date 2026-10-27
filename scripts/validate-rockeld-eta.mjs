@@ -10,10 +10,14 @@ assert.match(endpoint, /ROCKELD_GPS_ACCESS_TOKEN/);
 assert.match(endpoint, /staleAfterMs\s*=\s*15\s*\*\s*60\s*\*\s*1000/);
 assert.match(endpoint, /Cf-Access-Jwt-Assertion/);
 assert.match(page, /fetch\('\/api\/rates\?maxResults=10'/);
-assert.match(page, /function matchLoadNumber\(\)/);
 assert.match(page, /id="load" maxlength="80" required/);
-assert.doesNotMatch(page, /gpsAccessToken|saveGpsTokenButton|clst_rockeld_gps_token|gpsTruckSelect/);
-assert.doesNotMatch(page, /fetch\('\/api\/rockeld\/locations'/);
+assert.match(page, /id="calculateButton"/);
+assert.match(page, /fetch\('\/api\/rockeld\/locations'/);
+assert.match(page, /fetch\('\/api\/rates\?maxResults=10'/);
+assert.match(page, /function loadTruckLocation\(load\)/);
+assert.match(page, /function calculate\(event\)/);
+assert.doesNotMatch(page, /gpsAccessToken|saveGpsTokenButton|clst_rockeld_gps_token|gpsTruckSelect|id="currentLocation"|id="destination"|id="miles"|id="speed"|id="hours"|id="rest"/);
+assert.equal((page.match(/<input\b/g) || []).length, 1, "ETA form should have only the load number input");
 
 // Compile (but do not execute) every inline script in the ETA page.
 const scripts = [...page.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)];
