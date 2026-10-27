@@ -23,7 +23,7 @@ if ($LASTEXITCODE -ne 0) {
 Invoke-Wrangler @("whoami")
 
 Write-Host "Looking for the existing TOKENS KV namespace..."
-$listOutput = & npx --yes @Wrangler kv namespace list --json 2>&1
+$listOutput = & npx --yes @Wrangler kv namespace list 2>&1
 if ($LASTEXITCODE -ne 0) {
   throw "Could not list Cloudflare KV namespaces. Check that your Cloudflare login is authorized."
 }
@@ -34,7 +34,7 @@ try { $namespaces = $jsonText | ConvertFrom-Json } catch {
 $namespace = @($namespaces) | Where-Object { $_.title -eq "TOKENS" } | Select-Object -First 1
 if (-not $namespace) {
   Write-Host "TOKENS namespace not found; creating it..."
-  $createOutput = & npx --yes @Wrangler kv namespace create TOKENS --json 2>&1
+  $createOutput = & npx --yes @Wrangler kv namespace create TOKENS 2>&1
   if ($LASTEXITCODE -ne 0) { throw "Could not create TOKENS KV namespace: $($createOutput -join [Environment]::NewLine)" }
   $createText = ($createOutput | Out-String).Trim()
   try { $namespace = $createText | ConvertFrom-Json } catch {
