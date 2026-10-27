@@ -3,10 +3,16 @@ import { readFileSync } from "node:fs";
 
 const endpoint = readFileSync("functions/api/rockeld/locations.js", "utf8");
 const page = readFileSync("eta.html", "utf8");
+const dashboard = readFileSync("index.html", "utf8");
 
 assert.match(endpoint, /https:\/\/cloud\.rockeld\.us\/api\/v0\/locations/);
 assert.match(endpoint, /env\.ROCKELD_API_KEY/);
-assert.match(endpoint, /ROCKELD_GPS_ACCESS_TOKEN/);
+assert.match(endpoint, /ROCKELD_GPS_USERNAME/);
+assert.match(endpoint, /ROCKELD_GPS_PASSWORD/);
+assert.match(dashboard, /id="eldUsername"/);
+assert.match(dashboard, /id="eldPassword"/);
+assert.match(dashboard, /saveEldCredentialsBtn/);
+assert.doesNotMatch(dashboard, /eldAccessToken|saveEldTokenBtn|ROCK ELD GPS access token/);
 assert.match(endpoint, /staleAfterMs\s*=\s*15\s*\*\s*60\s*\*\s*1000/);
 assert.match(endpoint, /Cf-Access-Jwt-Assertion/);
 assert.match(page, /fetch\('\/api\/rates\?maxResults=10'/);
