@@ -345,7 +345,7 @@ async function processAutoReplies(env){
  const found=await gmail(env,"/messages?maxResults=50&q="+encodeURIComponent(query),token);
  console.log("[smart-auto-reply] Gmail search",JSON.stringify({query,resultSizeEstimate:found.resultSizeEstimate||0,returned:(found.messages||[]).length,baseline}));
  const results=[];
- for(const item of(found.messages||[]).slice(0,12)){
+ for(const item of(found.messages||[]).slice(0,50)){
   const id=String(item.id||"");if(!id)continue;
   const key="smart_reply_v1:"+id;
   if(await env.TOKENS.get(key))continue;
