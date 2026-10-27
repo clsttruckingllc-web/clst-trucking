@@ -94,14 +94,8 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
   </section>
 
 <section class="panel" id="eld">
-    <div class="panel-heading"><div><h3>ROCK ELD · Fleet GPS</h3><div class="muted" style="font-size:12px;margin-top:4px">Company sign-in is sent only to this site's secured endpoint. The upstream ROCK ELD API key stays on the server.</div></div><button class="primary" id="refreshEldBtn" type="button">Refresh truck locations</button></div>
-    <div class="ask-row" style="margin:12px 0">
-      <input id="eldUsername" type="text" autocomplete="username" maxlength="120" placeholder="CLST username" aria-label="CLST ELD username">
-      <input id="eldPassword" type="password" autocomplete="current-password" maxlength="256" placeholder="CLST password" aria-label="CLST ELD password">
-      <button class="primary" id="saveEldCredentialsBtn" type="button">Sign in</button>
-    </div>
-    <div class="muted" style="font-size:12px;margin-bottom:10px">Credentials stay in this browser tab only and are cleared when the tab session ends. Do not enter the ROCK ELD API key here.</div>
-    <div id="eldStatus" class="status">Sign in with your CLST company credentials to load fleet locations.</div>
+    <div class="panel-heading"><div><h3>ROCK ELD · Fleet GPS</h3><div class="muted" style="font-size:12px;margin-top:4px">Fleet locations load automatically through the server using the encrypted ROCK ELD key. Cloudflare Access controls who can view live truck positions.</div></div><button class="primary" id="refreshEldBtn" type="button">Refresh truck locations</button></div>
+    <div id="eldStatus" class="status">Connecting to ROCK ELD through the secured server endpoint…</div>
     <div id="eldVehicles" class="gps-grid"><div class="empty">Fleet locations will appear after sign-in.</div></div>
   </section>
   <section class="panel" id="eta">
@@ -537,17 +531,12 @@ async function askCLST(event) {
 }
 
 
-try{sessionStorage.removeItem('clst_rockeld_gps_token');}catch{}
 async function refreshEldLocations(){
   const btn=$('refreshEldBtn');btn.disabled=true;btn.textContent='Refreshing…';
   $('eldStatus').textContent='Requesting fleet locations through the secured server endpoint…';
   $('eldStatus').className='status';
   try{
-    const user=sessionStorage.getItem('clst_rockeld_gps_username')||'';
-    const pass=sessionStorage.getItem('clst_rockeld_gps_password')||'';
-    const headers={Accept:'application/json'};
-    if(user&&pass)headers.Authorization='Basic '+btoa(unescape(encodeURIComponent(user+':'+pass)));
-    const res=await fetch('/api/rockeld/locations',{headers,credentials:'same-origin',cache:'no-store'});
+    const res=await fetch('/api/rockeld/locations',{headers:{Accept:'application/json'},credentials:'same-origin',cache:'no-store'});
     const data=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(data.error||('ROCK ELD returned HTTP '+res.status));
     const trucks=Array.isArray(data.locations)?data.locations:[];
@@ -560,20 +549,11 @@ async function refreshEldLocations(){
     $('eldStatus').className='status '+(trucks.length?'success':'');
     const frame=document.querySelector('.app-frame');if(frame?.contentWindow)frame.contentWindow.postMessage({type:'CLST_ELD_LOCATIONS',locations:trucks},location.origin);
   }catch(err){
-    $('eldVehicles').innerHTML='<div class="empty">Fleet GPS could not be loaded. The server must authorize this dashboard through company sign-in; the browser must not contain a shared ELD secret.</div>';
+    $('eldVehicles').innerHTML='<div class="empty">Fleet GPS could not be loaded. Confirm that this site is signed in through Cloudflare Access and that the ROCK ELD server secret is configured.</div>';
     $('eldStatus').textContent='ROCK ELD connection needs secure sign-in: '+String(err.message||err);
     $('eldStatus').className='status error';
   }finally{btn.disabled=false;btn.textContent='Refresh truck locations';}
 }
-$('saveEldCredentialsBtn').addEventListener('click',()=>{
-  const user=$('eldUsername').value.trim(),pass=$('eldPassword').value;
-  if(!user||!pass){$('eldStatus').textContent='Enter both your CLST username and password.';$('eldStatus').className='status error';return;}
-  sessionStorage.setItem('clst_rockeld_gps_username',user);
-  sessionStorage.setItem('clst_rockeld_gps_password',pass);
-  $('eldPassword').value='';
-  $('eldStatus').textContent='Company sign-in saved for this tab. Requesting fleet locations…';
-  refreshEldLocations();
-});
 $('refreshEldBtn').addEventListener('click',refreshEldLocations);
 
 $('askForm').addEventListener('submit',askCLST);
