@@ -517,13 +517,13 @@ async function processAutoReplies(env){
    const hardRisk=riskyEmail(a.subject+" "+a.body);
    const loadStatusReview=requiresLoadStatusReview(a.subject+" "+a.body+" "+a.reply);
    const generic=genericAcknowledgement(a.reply);
-    const canSend=a.action==="send"&&a.confidence>=0.92&&!hardRisk&&!loadStatusReview&&!generic&&a.reply.length>=20&&a.reply.length<=1800;
+    const canSend=a.action==="send"&&a.confidence>=0.85&&!hardRisk&&!loadStatusReview&&!generic&&a.reply.length>=20&&a.reply.length<=1800;
    if(canSend){
     const sent=await sendReply(env,m,a.to,a.subject,a.reply,token,myEmail);
     await env.TOKENS.put(key,JSON.stringify({status:"sent",sentId:sent.id||null,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
     results.push({id,status:"sent",confidence:a.confidence});
    }else{
-    const reason=hardRisk?"Sensitive/commitment-related email requires review":loadStatusReview?"Load status/POD must be verified by a person before replying":generic?"Generic acknowledgement rejected; tailored response requires review":a.reason+(a.confidence<0.92?" (confidence below 0.92)":"");
+    const reason=hardRisk?"Sensitive/commitment-related email requires review":loadStatusReview?"Load status/POD must be verified by a person before replying":generic?"Generic acknowledgement rejected; tailored response requires review":a.reason+(a.confidence<0.85?" (confidence below 0.85)":"");
     const draft=await createReplyDraft(env,m,a.to,a.subject,a.reply,token,myEmail);
     // Keep the tailored AI response as a Gmail draft whenever review is required.
     // Do not send a generic acknowledgement that hides the actual message content.
