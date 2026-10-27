@@ -57,12 +57,9 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
     </div>
   </section>
 
-  <section class="panel" id="backgroundMusic">
-    <div class="panel-heading">
-      <div><h3>🎸 Road to Hell</h3><div class="muted" style="font-size:12px;margin-top:4px">Chris Rea · Official Spotify audio player</div></div>
-      <a class="action-link" href="https://open.spotify.com/track/69I024RXLvHAMtJ5inj71G" target="_blank" rel="noopener noreferrer">Open in Spotify ↗</a>
-    </div>
-    <iframe title="Chris Rea - The Road to Hell, Pt. 1 &amp; 2" style="display:block;width:100%;max-width:520px;height:152px;border:0;border-radius:12px" src="https://open.spotify.com/embed/track/69I024RXLvHAMtJ5inj71G?utm_source=generator" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>
+  <section class="panel" id="backgroundMusic" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+    <div><h3>📻 Road to Hell — Radio</h3><div class="muted" style="font-size:12px;margin-top:4px">Chris Rea · Official audio · Autoplay enabled when your browser allows it</div></div>
+    <iframe title="Chris Rea - The Road to Hell Part 2 official audio" style="display:block;width:320px;max-width:100%;height:180px;border:0;border-radius:12px" src="https://www.youtube-nocookie.com/embed/u1ygTDu9aJs?autoplay=1&amp;playsinline=1&amp;rel=0&amp;controls=1" loading="eager" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
   </section>
 
   <div class="notice">
@@ -102,10 +99,9 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
   </section>
 
 <section class="panel" id="eld">
-    <div class="panel-heading"><div><h3>ROCK ELD · Fleet GPS</h3><div class="muted" style="font-size:12px;margin-top:4px">Sign in with your CLST username and password. Credentials stay in this browser session and are sent over HTTPS.</div></div><button class="primary" id="refreshEldBtn" type="button">Refresh truck locations</button></div>
-    <div class="ask-row" style="margin-bottom:12px"><input id="eldUsername" type="text" autocomplete="username" placeholder="CLST username" aria-label="CLST username"><input id="eldPassword" type="password" autocomplete="current-password" placeholder="Password" aria-label="CLST password"><button class="secondary" id="saveEldCredentialsBtn" type="button">Sign in</button></div>
-    <div id="eldStatus" class="status">Checking the secured ROCK ELD connection…</div>
-    <div id="eldVehicles" class="gps-grid"><div class="empty">Loading fleet locations…</div></div>
+    <div class="panel-heading"><div><h3>ROCK ELD · Fleet GPS</h3><div class="muted" style="font-size:12px;margin-top:4px">Live truck locations</div></div><button class="primary" id="refreshEldBtn" type="button">Refresh</button></div>
+    <div id="eldStatus" class="status">Connecting to fleet GPS…</div>
+    <div id="eldVehicles" class="gps-grid"><div class="empty">Loading truck locations…</div></div>
   </section>
   <section class="panel" id="eta">
     <div class="panel-heading"><div><h3>Dispatch ETA · Load planning</h3><div class="muted" style="font-size:12px;margin-top:4px">Choose a Gmail load and use current truck location to estimate delivery.</div></div><a class="action-link" href="./eta.html" target="_blank" rel="noopener">Open ETA full page ↗</a></div>
