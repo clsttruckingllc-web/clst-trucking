@@ -23,8 +23,14 @@ main{max-width:1680px;margin:auto;padding:24px 3% 48px}.welcome,.panel-heading{d
 .rate-card{background:#101116;border:1px solid #33343d;border-radius:12px;padding:17px;min-width:0}.rate-card h4{margin:0 0 10px;font-size:16px;overflow-wrap:anywhere}.pill{display:inline-block;border-radius:20px;padding:5px 9px;background:#2a2b33;color:#d4d4dc;font-size:11px;font-weight:800}.pill.good{color:#9cf0ce;background:#16392f}.pill.bad{color:#ffc1c5;background:#43232a}.amount{font-size:25px;font-weight:900;margin:13px 0;color:#fff}.detail{display:grid;grid-template-columns:minmax(95px,.8fr) minmax(0,1.2fr);gap:12px;padding:9px 0;border-bottom:1px solid #292a31;font-size:12px;line-height:1.5}.detail span:first-child{color:var(--muted)}.detail span:last-child{text-align:right;overflow-wrap:anywhere}.error-box,.warning-box{padding:11px;border-radius:8px;font-size:12px;line-height:1.5;overflow-wrap:anywhere;margin-top:12px}.error-box{border:1px solid #713843;background:#291923;color:#ffb7bf}.warning-box{border:1px solid #75602e;background:#302919;color:#ffe2a0}.empty{border:1px dashed #45464e;color:var(--muted);border-radius:11px;padding:25px 15px;text-align:center;line-height:1.6}
 table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;vertical-align:top;padding:12px;border-bottom:1px solid var(--border);font-size:12px;overflow-wrap:anywhere}th{color:var(--muted)}.table-wrap{overflow-x:auto}
 .gps-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.gps-card{background:linear-gradient(145deg,rgba(23,25,31,.94),rgba(10,11,15,.92));border:1px solid #34353d;border-radius:14px;padding:18px;min-width:0;display:flex;flex-direction:column;gap:9px;overflow-wrap:anywhere}.gps-card-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.gps-card-heading strong{font-size:20px}.gps-card .status{margin:0;padding:5px 8px;font-size:11px}.gps-card a{color:#ff7b86;font-weight:800;text-decoration:none}.gps-card a:hover{text-decoration:underline}.app-frame{width:100%;height:1100px;border:1px solid var(--border);border-radius:12px;background:#0b0c10}footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid var(--border);font-size:12px}
-@media(max-width:850px){header{padding:12px 4%}.gps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rate-grid{grid-template-columns:1fr}.app-frame{height:1450px}}
-@media(max-width:560px){h1{font-size:18px}.stats{grid-template-columns:1fr}.welcome{padding:18px}.panel{padding:14px}.gps-grid{grid-template-columns:1fr}.actions{width:100%}.actions button,.actions .action-link{flex:1;justify-content:center}.app-frame{height:1550px}}
+
+/* Cinematic CLST visual layer */
+.cinema-hero{position:relative;isolation:isolate;overflow:hidden;margin:0 0 20px;padding:clamp(24px,4vw,54px);border:1px solid #4b323b;border-radius:22px;background:radial-gradient(ellipse at 78% 10%,rgba(225,29,46,.22),transparent 35%),linear-gradient(120deg,rgba(8,10,15,.97),rgba(12,13,20,.88));box-shadow:0 28px 80px #0008}
+.cinema-copy{position:relative;z-index:2;max-width:780px}.cinema-copy h2{font-size:clamp(34px,5vw,66px);line-height:1.02;margin:8px 0 14px;letter-spacing:-2px}.cinema-copy h2 span{background:linear-gradient(90deg,#fff,#ff5363 70%,#d6d8e2);color:transparent;background-clip:text;-webkit-background-clip:text}.cinema-copy p{color:#c1c3ce;font-size:clamp(14px,1.5vw,18px);max-width:600px}.cinema-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.cinema-tags span{border:1px solid #ffffff24;background:#ffffff0b;padding:8px 12px;border-radius:30px;font-size:10px;font-weight:900;letter-spacing:.09em}
+.cinema-gallery{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:13px;margin-top:30px;position:relative;z-index:2}.cinema-card{position:relative;min-height:250px;overflow:hidden;border-radius:15px;border:1px solid #ffffff24;background-size:cover;background-position:center;box-shadow:0 15px 35px #0006;transition:transform .35s,border-color .35s}.cinema-card:hover{transform:translateY(-7px) scale(1.015);border-color:#ff5363}.cinema-truck{background-image:url('https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1200&q=85')}.cinema-plane{background-image:url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1000&q=85')}.cinema-robot{background-image:url('https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1000&q=85')}.cinema-card-shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,rgba(4,5,9,.86) 100%)}.cinema-card-label{position:absolute;bottom:18px;left:18px;right:12px;display:flex;flex-direction:column;gap:5px}.cinema-card-label span{font-size:10px;letter-spacing:.15em;color:#ff8791;font-weight:900}.cinema-card-label strong{font-size:clamp(16px,2vw,23px);text-shadow:0 2px 12px #000}.cinema-orbit{position:absolute;z-index:0;border:1px solid #ff4c5d25;border-radius:50%;pointer-events:none}.orbit-one{width:440px;height:440px;right:-100px;top:-230px}.orbit-two{width:600px;height:600px;right:-180px;top:-300px}
+.soundtrack-bar{display:grid;grid-template-columns:auto minmax(190px,1fr) minmax(260px,360px);align-items:center;gap:18px;margin:0 0 22px;padding:16px 20px;border:1px solid #67303a;border-radius:16px;background:linear-gradient(100deg,rgba(40,13,20,.96),rgba(15,16,22,.97));box-shadow:0 16px 42px #0006}.soundtrack-mark{width:48px;height:48px;display:grid;place-items:center;border-radius:50%;background:#e11d2e;color:#fff;font-size:28px;box-shadow:0 0 28px #e11d2e55}.soundtrack-copy h3{font-size:17px}.soundtrack-copy p{margin:4px 0 0;color:var(--muted);font-size:12px}.soundtrack-player{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:9px;background:#050506}.soundtrack-player iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.soundtrack-note{grid-column:2/4;color:#a7a9b2;font-size:11px;margin-top:-8px}
+@media(max-width:850px){header{padding:12px 4%}.cinema-gallery{grid-template-columns:1fr 1fr}.cinema-truck{grid-column:1/-1;min-height:280px}.cinema-card{min-height:220px}.soundtrack-bar{grid-template-columns:auto 1fr}.soundtrack-player{grid-column:1/-1;max-width:420px}.soundtrack-note{grid-column:1/-1;margin-top:0}.gps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rate-grid{grid-template-columns:1fr}.app-frame{height:1450px}}
+@media(max-width:560px){h1{font-size:18px}.cinema-hero{padding:22px 16px}.cinema-copy h2{font-size:38px;letter-spacing:-1px}.cinema-gallery{grid-template-columns:1fr}.cinema-truck{grid-column:auto;min-height:230px}.cinema-card{min-height:210px}.soundtrack-bar{padding:14px;gap:12px}.soundtrack-mark{width:40px;height:40px}.soundtrack-copy h3{font-size:15px}.soundtrack-player{max-width:none}.stats{grid-template-columns:1fr}.welcome{padding:18px}.panel{padding:14px}.gps-grid{grid-template-columns:1fr}.actions{width:100%}.actions button,.actions .action-link{flex:1;justify-content:center}.app-frame{height:1550px}}
 </style>
 </head>
 <body>
@@ -57,15 +63,28 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
     </div>
   </section>
 
-  <section class="panel" id="backgroundMusic">
-    <div class="panel-heading">
-      <div><h3>🎸 Billy Idol — White Wedding</h3><div class="muted" style="font-size:12px;margin-top:4px">Official music video · autoplay is attempted when the page opens</div></div>
-      <span class="pill" id="raceAudioStatus">LOADING PLAYER</span>
+  <section class="cinema-hero" aria-label="CLST cinematic fleet">
+    <div class="cinema-copy">
+      <div class="eyebrow">CLST TRUCKING LLC · BEYOND THE ROAD</div>
+      <h2>Big machines.<br><span>Endless horizons.</span></h2>
+      <p>From highways to the skies and tomorrow’s technology — this is the CLST world.</p>
+      <div class="cinema-tags"><span>🚛 FLEET POWER</span><span>✈️ SKYBOUND</span><span>🤖 NEXT-GEN</span></div>
     </div>
-    <div style="position:relative;width:100%;max-width:900px;margin:0 auto;aspect-ratio:16/9;background:#08090c;border-radius:12px;overflow:hidden">
-      <iframe id="whiteWeddingPlayer" src="https://www.youtube-nocookie.com/embed/AAZQaYKZMTI?autoplay=1&playsinline=1&controls=1&rel=0" title="Billy Idol - White Wedding Pt 1 (Official Music Video)" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="autoplay; encrypted-media; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <div class="cinema-gallery">
+      <article class="cinema-card cinema-truck"><div class="cinema-card-shade"></div><div class="cinema-card-label"><span>01 / THE ROAD</span><strong>Built to move.</strong></div></article>
+      <article class="cinema-card cinema-plane"><div class="cinema-card-shade"></div><div class="cinema-card-label"><span>02 / THE SKY</span><strong>Beyond limits.</strong></div></article>
+      <article class="cinema-card cinema-robot"><div class="cinema-card-shade"></div><div class="cinema-card-label"><span>03 / THE FUTURE</span><strong>Tomorrow, engineered.</strong></div></article>
     </div>
-    <div class="muted" style="font-size:12px;margin-top:10px">If the browser blocks autoplay with sound, tap Play in the video. The official video is hosted by YouTube.</div>
+    <div class="cinema-orbit orbit-one"></div><div class="cinema-orbit orbit-two"></div>
+  </section>
+
+  <section class="soundtrack-bar" id="backgroundMusic">
+    <div class="soundtrack-mark">♫</div>
+    <div class="soundtrack-copy"><div class="eyebrow">CLST SOUNDTRACK</div><h3>Chris Rea — The Road to Hell, Pt. 2</h3><p>Official music video · background soundtrack</p></div>
+    <div class="soundtrack-player">
+      <iframe id="roadToHellPlayer" src="https://www.youtube-nocookie.com/embed/OcW-BSEB3ng?autoplay=1&playsinline=1&controls=1&rel=0" title="Chris Rea - The Road to Hell Pt 2 (Official Music Video)" allow="autoplay; encrypted-media; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <div class="soundtrack-note">If sound doesn't start automatically, tap Play. Browsers may block autoplay with sound.</div>
   </section>
 
   <div class="notice">
@@ -639,15 +658,6 @@ if (params.get('gmail') === 'connected') {
 }
 
 
-// YouTube attempts autoplay on page load; browser policies may require a user tap for sound.
-window.addEventListener('load', () => {
-  const label = $('raceAudioStatus');
-  window.setTimeout(() => {
-    if (label && label.textContent === 'LOADING PLAYER') {
-      label.textContent = 'PLAY IN VIDEO IF NEEDED';
-    }
-  }, 2500);
-});
 
 connection('Ready');
 </script>
