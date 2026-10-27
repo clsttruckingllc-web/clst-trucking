@@ -363,7 +363,7 @@ async function getReplyThreadContext(env,m,token){
  if(!m.threadId)return "";
  try{
   const thread=await gmail(env,"/threads/"+encodeURIComponent(m.threadId)+"?format=full",token);
-  const items=(thread.messages||[]).slice(-8);
+  const items=(thread.messages||[]).filter(item=>{const labels=new Set(item.labelIds||[]);return labels.has("INBOX")&&!labels.has("SPAM")&&!labels.has("TRASH")&&!labels.has("CATEGORY_PROMOTIONS");}).slice(-8);
   const blocks=[];
   for(const item of items){
    const h=item.payload&&item.payload.headers||[];
