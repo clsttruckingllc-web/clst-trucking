@@ -109,7 +109,11 @@ a{color:#ff9ca4}
     rateRecords=flattenRates(data);
   }
   async function loadTruckLocation(load){
-    const response=await fetch('/api/rockeld/locations',{headers:{Accept:'application/json'},cache:'no-store',credentials:'same-origin'});
+    const user=sessionStorage.getItem('clst_rockeld_gps_username')||'';
+    const pass=sessionStorage.getItem('clst_rockeld_gps_password')||'';
+    const headers={Accept:'application/json'};
+    if(user&&pass)headers.Authorization='Basic '+btoa(unescape(encodeURIComponent(user+':'+pass)));
+    const response=await fetch('/api/rockeld/locations',{headers,cache:'no-store',credentials:'same-origin'});
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(data.error||'Secure ROCK ELD access is not configured. Sign in through company access first.');
     const trucks=(Array.isArray(data.locations)?data.locations:[]).filter(t=>t.status==='fresh'&&Number.isFinite(Number(t.latitude))&&Number.isFinite(Number(t.longitude)));
