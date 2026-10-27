@@ -374,7 +374,7 @@ async function processAutoReplies(env){
     continue;
    }
    const hardRisk=riskyEmail(a.subject+" "+a.body);
-   const loadStatusReview=requiresLoadStatusReview(a.subject+" "+a.body);
+   const loadStatusReview=requiresLoadStatusReview(a.subject+" "+a.body+" "+a.reply);
    const generic=genericAcknowledgement(a.reply);
     const canSend=a.action==="send"&&a.confidence>=0.85&&!hardRisk&&!loadStatusReview&&!generic&&a.reply.length>=20&&a.reply.length<=1800;
    if(canSend){
