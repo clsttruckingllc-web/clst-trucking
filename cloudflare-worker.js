@@ -1,7 +1,7 @@
 /**
  * CLST Trucking AI Worker source.
  * Required: KV binding TOKENS; GOOGLE_CLIENT_ID variable; GOOGLE_CLIENT_SECRET,
- * API_KEY, and one AI secret: OPENAI_API_KEY (preferred) or GEMINI_API_KEY. Optional: OPENAI_MODEL, GEMINI_MODEL and RingCentral credentials.
+ * API_KEY and GEMINI_API_KEY for Gmail; OPENAI_API_KEY is reserved for RingCentral voice. Optional: GEMINI_MODEL and voice credentials.
  * Keep Google OAuth callback at /oauth/callback.
  */
 const MODEL = "gemini-3.5-flash-lite";
@@ -458,8 +458,8 @@ async function processAutoReplies(env){
  // The five-minute Cron continues through newer messages over successive runs.
  const candidates=[];
  let pageToken="",scanned=0,resultSizeEstimate=0;
- for(let page=0;page<1&&candidates.length<5;page++){
-  const params=new URLSearchParams({maxResults:"25",q:query});
+ for(let page=0;page<1&&candidates.length<2;page++){
+  const params=new URLSearchParams({maxResults:"10",q:query});
   if(pageToken)params.set("pageToken",pageToken);
   const batch=await gmail(env,"/messages?"+params.toString(),token);
   resultSizeEstimate=batch.resultSizeEstimate||resultSizeEstimate;
@@ -470,7 +470,7 @@ async function processAutoReplies(env){
    if(!candidateId)continue;
    if(await env.TOKENS.get("smart_reply_v1:"+candidateId))continue;
    candidates.push(candidate);
-   if(candidates.length>=5)break;
+   if(candidates.length>=2)break;
   }
   pageToken=batch.nextPageToken||"";
   if(!pageToken)break;
@@ -580,12 +580,12 @@ async function autoReplyStatus(env){
  try{if(await env.TOKENS.get("google_refresh_token"))scopes=await gmailScopeStatus(await googleToken(env));}catch(e){scopes={verified:false,error:errText(e)};}
  return json({
   success:true,
-  configured:!!((env.OPENAI_API_KEY||env.GEMINI_API_KEY)&&env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),
-  aiProvider:env.OPENAI_API_KEY?"openai":env.GEMINI_API_KEY?"gemini":"not_configured",
+  configured:!!(env.GEMINI_API_KEY&&env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),
+  aiProvider:env.GEMINI_API_KEY?"gemini":"not_configured",
   gmailConnected:!!(await env.TOKENS.get("google_refresh_token")),
   gmailScopes:scopes,
   reconnectUrl:"https://clst-gmail-backend.clsttruckingllc.workers.dev/auth/start?consent=1",
-  model:env.OPENAI_API_KEY?(env.OPENAI_MODEL||OPENAI_MODEL):(env.GEMINI_MODEL||MODEL),
+  model:env.GEMINI_MODEL||MODEL,
   lastRun
  });
 }
