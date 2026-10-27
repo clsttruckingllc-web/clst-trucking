@@ -547,7 +547,7 @@ async function processAutoReplies(env){
     await env.TOKENS.put(key,JSON.stringify({status:"sent",sentId:sent.id||null,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
     results.push({id,status:"sent",confidence:a.confidence});
    }else{
-    const reason=hardRisk?"Sensitive/commitment-related email blocked from auto-reply":loadStatusReview?"Load status/POD requires owner response":generic?"Generic AI acknowledgement rejected; no draft created":a.reason+(a.confidence<0.85?" (confidence below 0.85)":"");
+    const reason=hardRisk?"Sensitive/commitment-related email requires review; no draft created and no automatic reply sent":loadStatusReview?"Load status/POD requires owner response; no draft created":generic?"Generic AI acknowledgement rejected; no draft created":a.reason+(a.confidence<0.85?" (confidence below 0.85)":"");
     await env.TOKENS.put(key,JSON.stringify({status:"ignored_owner_action",reason,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
     results.push({id,status:"ignored_owner_action",reason,confidence:a.confidence});
    }
