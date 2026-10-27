@@ -277,9 +277,9 @@ function replyCc(m,to,myEmail){
  const candidates=[head(h,"to"),head(h,"cc")].flatMap(v=>String(v||"").match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi)||[]);
  const excluded=new Set([to,myEmail].map(v=>String(v||"").trim().toLowerCase()).filter(Boolean));
  const cc=[],seen=new Set(excluded);
- for(const address of [...candidates,"vic@clsttrucking.com"]){
+ for(const address of candidates){
   const value=String(address||"").trim(),key=value.toLowerCase();
-  if(!key||seen.has(key))continue;
+  if(key==="vic@clsttrucking.com"||!key||seen.has(key))continue;
   seen.add(key);cc.push(value);
  }
  return cc;
@@ -288,6 +288,7 @@ function autoSkipReason(m){
  const h=m.payload&&m.payload.headers||[];
  const val=n=>head(h,n).trim();
  const from=val("from").toLowerCase(), auto=val("auto-submitted").toLowerCase();
+ if(from.includes("vic@clsttrucking.com"))return "Excluded sender: vic@clsttrucking.com";
  if(!emailAddress(val("from")))return "No valid sender address";
  if(/no[-_.]?reply|do[-_.]?not[-_.]?reply|mailer-daemon|postmaster|notifications?@|alerts?@/.test(from))return "Automated or no-reply sender";
  if(auto && auto!=="no")return "Auto-generated message";
@@ -429,7 +430,7 @@ async function processAutoReplies(env){
  const baselineMs=Date.parse(baseline);
  const profile=await gmail(env,"/profile",token),myEmail=emailAddress(profile.emailAddress);
  if(!myEmail)throw Error("Could not identify the connected Gmail account; automatic replies are paused for safety.");
- const query="in:inbox newer_than:7d -from:me -in:spam -in:trash";
+ const query="in:inbox newer_than:7d -from:me -in:spam -in:trash -category:promotions -category:social -category:updates";
  // Page through recent inbox mail and skip already-processed IDs. Without pagination,
  // the newest 50 processed messages could permanently hide older unprocessed messages.
  const candidates=[];
