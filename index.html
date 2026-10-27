@@ -94,8 +94,8 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
   </section>
 
 <section class="panel" id="eld">
-    <div class="panel-heading"><div><h3>ROCK ELD · Fleet GPS</h3><div class="muted" style="font-size:12px;margin-top:4px">Token is kept only in this browser session and sent to the server over HTTPS; it is not stored in the HTML or GitHub.</div></div><button class="primary" id="refreshEldBtn" type="button">Refresh truck locations</button></div>
-    <div class="ask-row" style="margin-bottom:12px"><input id="eldAccessToken" type="password" autocomplete="off" placeholder="ROCK ELD GPS access token" aria-label="ROCK ELD GPS access token"><button class="secondary" id="saveEldTokenBtn" type="button">Save for this session</button></div>
+    <div class="panel-heading"><div><h3>ROCK ELD · Fleet GPS</h3><div class="muted" style="font-size:12px;margin-top:4px">Sign in with your CLST username and password. Credentials stay in this browser session and are sent over HTTPS.</div></div><button class="primary" id="refreshEldBtn" type="button">Refresh truck locations</button></div>
+    <div class="ask-row" style="margin-bottom:12px"><input id="eldUsername" type="text" autocomplete="username" placeholder="CLST username" aria-label="CLST username"><input id="eldPassword" type="password" autocomplete="current-password" placeholder="Password" aria-label="CLST password"><button class="secondary" id="saveEldCredentialsBtn" type="button">Sign in</button></div>
     <div id="eldStatus" class="status">Checking the secured ROCK ELD connection…</div>
     <div id="eldVehicles" class="gps-grid"><div class="empty">Loading fleet locations…</div></div>
   </section>
@@ -532,41 +532,29 @@ async function askCLST(event) {
 }
 
 
-const ELD_TOKEN_KEY='clst_rockeld_gps_token';
-$('eldAccessToken').value=sessionStorage.getItem(ELD_TOKEN_KEY)||'';
-$('saveEldTokenBtn').addEventListener('click',()=>{
-  const token=$('eldAccessToken').value.trim();
-  if(!token){sessionStorage.removeItem(ELD_TOKEN_KEY);$('eldStatus').textContent='GPS token cleared from this browser session.';$('eldStatus').className='status';return;}
-  sessionStorage.setItem(ELD_TOKEN_KEY,token);
-  $('eldStatus').textContent='Token saved for this browser tab/session. Refreshing fleet locations…';
+const ELD_USER_KEY='clst_rockeld_gps_username';
+const ELD_PASS_KEY='clst_rockeld_gps_password';
+$('eldUsername').value=sessionStorage.getItem(ELD_USER_KEY)||'';
+$('eldPassword').value=sessionStorage.getItem(ELD_PASS_KEY)||'';
+$('saveEldCredentialsBtn').addEventListener('click',()=>{
+  const username=$('eldUsername').value.trim();
+  const password=$('eldPassword').value;
+  if(!username||!password){
+    sessionStorage.removeItem(ELD_USER_KEY);sessionStorage.removeItem(ELD_PASS_KEY);
+    $('eldStatus').textContent='Enter your CLST username and password.';
+    $('eldStatus').className='status error';return;
+  }
+  sessionStorage.setItem(ELD_USER_KEY,username);
+  sessionStorage.setItem(ELD_PASS_KEY,password);
+  $('eldStatus').textContent='Signing in and loading fleet locations…';
   refreshEldLocations();
 });
 function eldHeaders(){
-  const token=sessionStorage.getItem(ELD_TOKEN_KEY)||$('eldAccessToken').value.trim();
-  return token?{Accept:'application/json',Authorization:'Bearer '+token}:{Accept:'application/json'};
-}
-async function refreshEldLocations(){
-  const btn=$('refreshEldBtn');btn.disabled=true;btn.textContent='Refreshing…';
-  $('eldStatus').textContent='Requesting fleet locations through the secured server endpoint…';
-  $('eldStatus').className='status';
-  try{
-    const res=await fetch('/api/rockeld/locations',{headers:eldHeaders(),credentials:'same-origin',cache:'no-store'});
-    const data=await res.json().catch(()=>({}));
-    if(!res.ok)throw new Error(data.error||('ROCK ELD returned HTTP '+res.status));
-    const trucks=Array.isArray(data.locations)?data.locations:[];
-    $('eldVehicles').innerHTML=trucks.length?trucks.map(t=>{
-      const fresh=t.status==='fresh';
-      return '<article class="truck-card"><div class="truck-id">Truck '+esc(t.vehicleId??t.id??'—')+'</div><div class="'+(fresh?'fresh':'stale')+'" style="font-size:11px;font-weight:900;margin-top:5px">'+esc(String(t.status||'unknown').toUpperCase())+(t.ageMinutes===null||t.ageMinutes===undefined?'':' · '+esc(t.ageMinutes)+' min old')+'</div><div class="truck-location">'+esc(t.location||'Location unavailable')+'</div><div class="muted" style="font-size:11px">Speed: '+esc(t.speed??'—')+' · Report: '+esc(t.lastReport||'Unknown')+'</div></article>';
-    }).join(''):'<div class="empty">ROCK ELD returned no vehicle records.</div>';
-    const fresh=trucks.filter(t=>t.status==='fresh'&&t.location).length;
-    $('eldStatus').textContent='ROCK ELD connected · '+trucks.length+' vehicle record(s) · '+fresh+' fresh location(s) within 15 minutes.';
-    $('eldStatus').className='status '+(trucks.length?'success':'');
-    const frame=document.querySelector('.app-frame');if(frame?.contentWindow)frame.contentWindow.postMessage({type:'CLST_ELD_LOCATIONS',locations:trucks},location.origin);
-  }catch(err){
-    $('eldVehicles').innerHTML='<div class="empty">Fleet GPS could not be loaded. The server must authorize this dashboard through company sign-in; the browser must not contain a shared ELD secret.</div>';
-    $('eldStatus').textContent='ROCK ELD connection needs secure sign-in: '+String(err.message||err);
-    $('eldStatus').className='status error';
-  }finally{btn.disabled=false;btn.textContent='Refresh truck locations';}
+  const username=sessionStorage.getItem(ELD_USER_KEY)||$('eldUsername').value.trim();
+  const password=sessionStorage.getItem(ELD_PASS_KEY)||$('eldPassword').value;
+  const headers={Accept:'application/json'};
+  if(username&&password)headers.Authorization='Basic '+btoa(unescape(encodeURIComponent(username+':'+password)));
+  return headers;
 }
 $('refreshEldBtn').addEventListener('click',refreshEldLocations);
 
