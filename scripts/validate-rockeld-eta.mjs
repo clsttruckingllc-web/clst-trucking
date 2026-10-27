@@ -11,6 +11,8 @@ assert.match(endpoint, /staleAfterMs\s*=\s*15\s*\*\s*60\s*\*\s*1000/);
 assert.match(endpoint, /Cf-Access-Jwt-Assertion/);
 assert.match(page, /fetch\('\/api\/rockeld\/locations'/);
 assert.match(page, /clst_rockeld_gps_token/);
+assert.match(page, /id="gpsAccessToken"/);
+assert.match(page, /saveGpsTokenButton/);
 assert.match(page, /Authorization:/);
 assert.match(page, /item\.status !== 'fresh'/);
 
