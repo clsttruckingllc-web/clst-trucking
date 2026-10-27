@@ -531,6 +531,7 @@ async function askCLST(event) {
 }
 
 
+try{sessionStorage.removeItem('clst_rockeld_gps_token');}catch{}
 async function refreshEldLocations(){
   const btn=$('refreshEldBtn');btn.disabled=true;btn.textContent='Refreshing…';
   $('eldStatus').textContent='Requesting fleet locations through the secured server endpoint…';
