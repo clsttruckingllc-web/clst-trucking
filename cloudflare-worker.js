@@ -524,7 +524,7 @@ async function processAutoReplies(env){
     const cleanSubject=String(a.subject||"your email").replace(/^re:\\s*/i,"").replace(/[\r\n]+/g," ").trim().slice(0,180)||"your email";
     const fallback=statusQuestion
      ?"Hello,\n\nWe are checking the latest confirmed information for this load. We do not want to provide an unverified location or ETA.\n\nCLST Trucking LLC"
-     :"Hello,\n\nWe received your email regarding \\""+cleanSubject+"\\". Thank you for contacting CLST Trucking LLC. We will review it and respond as appropriate.\n\nCLST Trucking LLC";
+     :"Hello,\n\nWe received your email about "+cleanSubject+". Thank you for contacting CLST Trucking LLC. We will review it and respond as appropriate.\n\nCLST Trucking LLC";
     const sent=await sendReply(env,m,a.to,a.subject,fallback,token,myEmail);
     await env.TOKENS.put(key,JSON.stringify({status:"sent_fallback_ack",sentId:sent.id||null,reason:"AI could not generate a safe specific answer; sent a non-committal acknowledgement",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
     results.push({id,status:"sent_fallback_ack",reason:"Safe acknowledgement sent"});
