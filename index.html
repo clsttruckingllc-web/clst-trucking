@@ -532,6 +532,69 @@ async function askCLST(event) {
 }
 
 
+async function refreshEldLocations() {
+  const statusEl = $('eldStatus');
+  const vehiclesEl = $('eldVehicles');
+  const button = $('refreshEldBtn');
+  if (button) button.disabled = true;
+  if (statusEl) {
+    statusEl.textContent = 'Connecting securely to ROCK ELD…';
+    statusEl.className = 'status';
+  }
+  try {
+    const response = await fetch('/api/rockeld/locations', {
+      method: 'GET',
+      headers: eldHeaders(),
+      cache: 'no-store',
+      credentials: 'same-origin'
+    });
+    const raw = await response.text();
+    let data;
+    try { data = JSON.parse(raw); }
+    catch { throw new Error('ROCK ELD returned a non-JSON response (HTTP ' + response.status + '). Check the Cloudflare Pages deployment.'); }
+    if (!response.ok || data.error) {
+      const message = String(data.error || ('HTTP ' + response.status));
+      if (response.status === 401) {
+        throw new Error(message + ' Enter your CLST username and password, then press Sign in.');
+      }
+      throw new Error(message + (data.upstreamStatus ? ' (upstream HTTP ' + data.upstreamStatus + ')' : ''));
+    }
+    const locations = Array.isArray(data.locations) ? data.locations : [];
+    if (!locations.length) {
+      vehiclesEl.innerHTML = '<div class="empty">ROCK ELD connected, but no vehicle locations were returned.</div>';
+    } else {
+      const esc = value => String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+      vehiclesEl.innerHTML = locations.map(vehicle => {
+        const id = vehicle.vehicleId || vehicle.id || 'Unknown vehicle';
+        const place = vehicle.location || 'Location not supplied by ROCK ELD';
+        const age = Number.isFinite(Number(vehicle.ageMinutes)) ? Math.max(0, Number(vehicle.ageMinutes)) + ' min ago' : 'Time unavailable';
+        const state = vehicle.status === 'fresh' ? 'Fresh location' : vehicle.status === 'stale' ? 'Location is stale' : 'Location time unknown';
+        const coords = Number.isFinite(Number(vehicle.latitude)) && Number.isFinite(Number(vehicle.longitude))
+          ? '<div class="muted">Coordinates: ' + esc(vehicle.latitude) + ', ' + esc(vehicle.longitude) + '</div>'
+          : '';
+        const mapLink = Number.isFinite(Number(vehicle.latitude)) && Number.isFinite(Number(vehicle.longitude))
+          ? '<a href="https://maps.google.com/?q=' + encodeURIComponent(vehicle.latitude + ',' + vehicle.longitude) + '" target="_blank" rel="noopener noreferrer">Open map</a>'
+          : '';
+        const speed = vehicle.speed !== null && vehicle.speed !== undefined ? '<div class="muted">Speed: ' + esc(vehicle.speed) + '</div>' : '';
+        return '<article class="gps-card"><div class="gps-card-heading"><strong>Truck ' + esc(id) + '</strong><span class="status ' + (vehicle.status === 'fresh' ? 'success' : vehicle.status === 'stale' ? 'error' : '') + '">' + esc(state) + '</span></div><div>' + esc(place) + '</div><div class="muted">Last report: ' + esc(age) + '</div>' + coords + speed + '<div>' + mapLink + '</div></article>';
+      }).join('');
+    }
+    const fresh = locations.filter(v => v.status === 'fresh').length;
+    statusEl.textContent = 'ROCK ELD connected · ' + locations.length + ' vehicle(s) · ' + fresh + ' fresh location(s) · Updated ' + new Date(data.fetchedAt || Date.now()).toLocaleTimeString();
+    statusEl.className = 'status success';
+  } catch (err) {
+    if (statusEl) {
+      statusEl.textContent = err.message || 'Could not retrieve ROCK ELD locations.';
+      statusEl.className = 'status error';
+    }
+    if (vehiclesEl && !vehiclesEl.innerHTML.trim()) {
+      vehiclesEl.innerHTML = '<div class="empty">Fleet locations are not available until the connection succeeds.</div>';
+    }
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
 const ELD_USER_KEY='clst_rockeld_gps_username';
 const ELD_PASS_KEY='clst_rockeld_gps_password';
 $('eldUsername').value=sessionStorage.getItem(ELD_USER_KEY)||'';
