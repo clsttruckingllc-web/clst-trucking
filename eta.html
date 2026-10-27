@@ -3,29 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#101820">
+<meta name="theme-color" content="#e11d2e">
 <title>CLST Trucking · ETA Estimator</title>
 <style>
-:root{color-scheme:dark;--bg:#0d141b;--panel:#151f29;--line:#2b3a47;--text:#f3f6f8;--muted:#aab7c3;--gold:#f4b942;--green:#63d6a2;--red:#ff8e8e}
+:root{color-scheme:dark;--bg:#0d141b;--panel:#151f29;--line:#2b3a47;--text:#f3f6f8;--muted:#aab7c3;--gold:#e11d2e;--green:#63d392;--red:#ff8e8e}
 *{box-sizing:border-box}
 body{margin:0;background:radial-gradient(ellipse at top,#1b2b38 0,#0d141b 58%);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);min-height:100vh}
 main{width:min(980px,100%);margin:0 auto;padding:24px 16px 48px}
 header{display:flex;align-items:center;gap:14px;margin:4px 0 28px}
-.mark{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;background:var(--gold);color:#101820;font-weight:900;font-size:18px}
-.brand{font-size:13px;letter-spacing:.13em;color:var(--gold);font-weight:800}
+.mark{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;background:var(--gold);color:#fff;font-weight:900;font-size:18px}
+.brand{font-size:13px;letter-spacing:.13em;color:#ff5967;font-weight:800}
 h1{font-size:clamp(28px,6vw,42px);line-height:1.08;margin:6px 0 10px}
 h2{font-size:19px;margin:0 0 16px}
 p{color:var(--muted);margin:0}
 .hero{margin-bottom:22px}
-.pill{display:inline-block;border:1px solid #8d6b25;color:#ffdc8a;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:750;margin-bottom:12px}
+.pill{display:inline-block;border:1px solid #6e2730;color:#ff9ca4;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:750;margin-bottom:12px}
 .layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .card{background:rgba(21,31,41,.94);border:1px solid var(--line);border-radius:16px;padding:20px;min-width:0}
 .field{display:flex;flex-direction:column;gap:6px;margin:0 0 15px}
 label{font-size:13px;font-weight:700;color:#d9e2e9}
-input,select{width:100%;min-height:46px;border-radius:9px;border:1px solid #3b4d5c;background:#0e171f;color:var(--text);padding:10px 12px;font:inherit}
-input:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
+input,select{width:100%;min-height:46px;border-radius:9px;border:1px solid #3b3c45;background:#0e0f13;color:var(--text);padding:10px 12px;font:inherit}
+input:focus,select:focus{outline:2px solid #ff3446;outline-offset:1px}
 .help{font-size:12px;color:var(--muted)}
-button{width:100%;min-height:48px;border:0;border-radius:10px;background:var(--gold);color:#151a20;font-weight:850;font-size:15px;cursor:pointer;padding:10px}
+button{width:100%;min-height:48px;border:0;border-radius:10px;background:var(--gold);color:#fff;font-weight:850;font-size:15px;cursor:pointer;padding:10px}
 button:disabled{opacity:.65;cursor:wait}
 .secondary{background:#263746;color:var(--text);border:1px solid #486071;margin-bottom:10px}
 .result{border:1px solid var(--line);background:#0e171f;border-radius:12px;padding:16px;margin-top:14px}
@@ -39,7 +39,7 @@ button:disabled{opacity:.65;cursor:wait}
 .status.ok{color:var(--green)}.status.bad,.error{color:var(--red)}
 .error{font-size:13px;margin-top:12px}
 footer{color:var(--muted);font-size:12px;text-align:center;margin-top:22px}
-a{color:#ffdc8a}
+a{color:#ff9ca4}
 @media(max-width:680px){main{padding:18px 12px 32px}.layout{grid-template-columns:1fr}.card{padding:17px}.hero{margin-bottom:18px}}
 </style>
 </head>
@@ -59,7 +59,7 @@ a{color:#ffdc8a}
     <div class="field"><label for="load">Load number (optional)</label><input id="load" maxlength="80" placeholder="e.g. 102190"></div>
     
     <div class="field"><label for="gpsTruckSelect">Select truck from ROCK ELD (optional)</label><select id="gpsTruckSelect"><option value="">Load GPS trucks first…</option></select><button type="button" id="loadGpsButton" class="secondary">Refresh truck locations</button><span class="help" id="gpsStatus" role="status">Loading recent truck locations automatically. Manual location entry is available if GPS access is not connected.</span></div>
-    <div class="field"><label for="gpsAccessToken">ROCK ELD access token</label><input id="gpsAccessToken" type="password" autocomplete="off" maxlength="500" placeholder="Paste GPS access token"><span class="help">Used in this page only; it is not saved in the HTML or browser storage.</span></div>
+    
     <div class="field"><label for="currentLocation">Truck’s current location *</label><input id="currentLocation" maxlength="220" required placeholder="e.g. Dallas, TX or street address"><span class="help">GPS reports older than 15 minutes are marked stale and cannot be selected. Route lookup sends the chosen location to public OpenStreetMap-based lookup/routing services.</span></div>
     <div class="field"><label for="destination">Delivery location *</label><input id="destination" maxlength="220" required placeholder="Select a load or enter delivery city/address"></div>
     <button type="button" id="routeButton" class="secondary">Find remaining road miles</button>
@@ -183,6 +183,7 @@ a{color:#ffdc8a}
 
   let gpsLocations = [];
   $('loadGpsButton').addEventListener('click', loadRockEldLocations);
+  window.addEventListener('message',event=>{if(event.origin!==location.origin||event.data?.type!=='CLST_ELD_LOCATIONS'||!Array.isArray(event.data.locations))return;gpsLocations=event.data.locations;const select=$('gpsTruckSelect');select.replaceChildren(new Option('Choose a truck…',''));for(const item of gpsLocations){const key=String(item.vehicleId??item.id??'');if(!key)continue;const fresh=item.status==='fresh'&&item.location;const opt=new Option('Truck '+(item.vehicleId??key)+' — '+String(item.status||'unknown').toUpperCase()+(item.ageMinutes==null?'':' · '+item.ageMinutes+' min old')+(item.location?' · '+item.location:''),key);opt.disabled=!fresh;select.add(opt);} $('gpsStatus').textContent='Fleet locations synchronized from the CLST command center. Fresh reports only can be selected.'; $('gpsStatus').className='help status ok';});
   $('gpsTruckSelect').addEventListener('change', () => {
     const selected = gpsLocations.find(item => String(item.vehicleId ?? item.id) === $('gpsTruckSelect').value);
     if (!selected) return;
@@ -205,18 +206,12 @@ a{color:#ffdc8a}
   async function loadRockEldLocations() {
     const button = $('loadGpsButton');
     const select = $('gpsTruckSelect');
-    const token = $('gpsAccessToken').value.trim();
-    if (!token) {
-      $('gpsStatus').textContent = 'Paste the ROCK ELD access token above, then click Refresh truck locations.';
-      $('gpsStatus').className = 'help status bad';
-      return;
-    }
     button.disabled = true;
     button.textContent = 'Loading GPS…';
-    $('gpsStatus').textContent = 'Requesting recent truck locations from the protected ROCK ELD endpoint…';
+    $('gpsStatus').textContent = 'Requesting recent truck locations through the secured company connection…';
     $('gpsStatus').className = 'help';
     try {
-      const headers = { 'Accept': 'application/json', 'Authorization': 'Bearer ' + token };
+      const headers = { 'Accept': 'application/json' };
       const response = await fetch('/api/rockeld/locations', {
         method: 'GET',
         headers,
@@ -257,7 +252,7 @@ a{color:#ffdc8a}
       }
     } catch (error) {
       $('gpsStatus').textContent = String(error.message || error) +
-        ' Company sign-in must be configured once by the site administrator; manual ETA remains available.';
+        ' The secured company sign-in must be configured on the server; manual ETA remains available.';
       $('gpsStatus').className = 'help status bad';
       select.replaceChildren(new Option('GPS unavailable — enter location manually', ''));
     } finally {
