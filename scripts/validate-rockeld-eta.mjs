@@ -7,11 +7,9 @@ const dashboard = readFileSync("index.html", "utf8");
 
 assert.match(endpoint, /https:\/\/cloud\.rockeld\.us\/api\/v0\/locations/);
 assert.match(endpoint, /env\.ROCKELD_API_KEY/);
-assert.match(endpoint, /ROCKELD_GPS_USERNAME/);
-assert.match(endpoint, /ROCKELD_GPS_PASSWORD/);
-assert.match(dashboard, /id="eldUsername"/);
-assert.match(dashboard, /id="eldPassword"/);
-assert.match(dashboard, /saveEldCredentialsBtn/);
+assert.match(endpoint, /verifyCloudflareAccessJwt\(accessToken, env\)/);
+assert.match(endpoint, /Cf-Access-Jwt-Assertion/);
+assert.doesNotMatch(dashboard, /eldUsername|eldPassword|saveEldCredentialsBtn|clst_rockeld_gps_username|clst_rockeld_gps_password/);
 assert.doesNotMatch(dashboard, /eldAccessToken|saveEldTokenBtn|ROCK ELD GPS access token/);
 assert.match(endpoint, /staleAfterMs\s*=\s*15\s*\*\s*60\s*\*\s*1000/);
 assert.match(endpoint, /Cf-Access-Jwt-Assertion/);
