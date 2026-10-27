@@ -98,23 +98,28 @@ async function getPdf(env,msgId,pdf,token){
 }
 async function aiGenerate(env,parts,instruction,jsonMode=true){
  if(env.OPENAI_API_KEY){
-  const inputContent=[];
-  for(const part of parts||[]){
-   if(part.text!==undefined)inputContent.push({type:"input_text",text:String(part.text)});
-   else if(part.inlineData&&part.inlineData.data){
-    inputContent.push({type:"input_file",filename:"document.pdf",file_data:"data:"+(part.inlineData.mimeType||"application/pdf")+";base64,"+part.inlineData.data});
+  try{
+   const inputContent=[];
+   for(const part of parts||[]){
+    if(part.text!==undefined)inputContent.push({type:"input_text",text:String(part.text)});
+    else if(part.inlineData&&part.inlineData.data){
+     inputContent.push({type:"input_file",filename:"document.pdf",file_data:"data:"+(part.inlineData.mimeType||"application/pdf")+";base64,"+part.inlineData.data});
+    }
    }
+   const payload={model:env.OPENAI_MODEL||OPENAI_MODEL,instructions:instruction,input:[{role:"user",content:inputContent}],max_output_tokens:3000,temperature:0.1};
+   if(jsonMode)payload.text={format:{type:"json_object"}};
+   const res=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},body:JSON.stringify(payload)});
+   const d=await res.json().catch(()=>({}));
+   if(!res.ok)throw Error("OpenAI API "+res.status+": "+String(d.error&&d.error.message||"request failed"));
+   const outputText=d.output_text||(d.output||[]).flatMap(o=>o.content||[]).filter(c=>c.type==="output_text").map(c=>c.text||"").join("\n");
+   if(!outputText)throw Error("OpenAI returned an empty response.");
+   return outputText;
+  }catch(err){
+   if(!env.GEMINI_API_KEY)throw err;
+   console.error("[ai] OpenAI failed; falling back to Gemini:",String(err&&err.message||err).slice(0,300));
   }
-  const payload={model:env.OPENAI_MODEL||OPENAI_MODEL,instructions:instruction,input:[{role:"user",content:inputContent}],max_output_tokens:3000,temperature:0.1};
-  if(jsonMode)payload.text={format:{type:"json_object"}};
-  const res=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Authorization":"Bearer "+env.OPENAI_API_KEY,"Content-Type":"application/json"},body:JSON.stringify(payload)});
-  const d=await res.json().catch(()=>({}));
-  if(!res.ok)throw Error("OpenAI API "+res.status+": "+String(d.error&&d.error.message||"request failed"));
-  const outputText=d.output_text||(d.output||[]).flatMap(o=>o.content||[]).filter(c=>c.type==="output_text").map(c=>c.text||"").join("\n");
-  if(!outputText)throw Error("OpenAI returned an empty response.");
-  return outputText;
  }
- if(!env.GEMINI_API_KEY)throw Error("OpenAI is not configured yet. Add OPENAI_API_KEY as a Cloudflare Worker secret. Gemini fallback is also not configured.");
+ if(!env.GEMINI_API_KEY)throw Error("No usable AI provider configured. Set OPENAI_API_KEY or GEMINI_API_KEY.");
  const model=env.GEMINI_MODEL||MODEL,url="https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(model)+":generateContent?key="+encodeURIComponent(env.GEMINI_API_KEY);let last="";
  for(let i=0;i<3;i++){
   const generationConfig={temperature:0.1,maxOutputTokens:3000};if(jsonMode)generationConfig.responseMimeType="application/json";
