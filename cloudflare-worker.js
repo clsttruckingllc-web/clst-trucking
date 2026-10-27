@@ -517,10 +517,20 @@ async function processAutoReplies(env){
  return {success:!results.some(item=>item.status==="error"),checked:scanned,eligible:candidates.length,results};
 }
 async function saveAutoReplyStatusIfDue(env,record){
- // Cron runs every five minutes. Persist every completed run so the protected
- // status endpoint always reflects the latest result, including successful scans
- // that sent no replies and failures that need attention.
+ // Keep KV writes low: Cron runs every five minutes, but a successful status
+ // snapshot only needs refreshing every 15 minutes. Always persist failures so
+ // operational problems remain visible.
  const key="smart_reply_last_run";
+ try{
+  const previousRaw=await env.TOKENS.get(key);
+  if(record.success!==false&&previousRaw){
+   const previous=JSON.parse(previousRaw);
+   const previousAt=Date.parse(previous.finishedAt||previous.startedAt||"");
+   if(Number.isFinite(previousAt)&&Date.now()-previousAt<15*60*1000)return false;
+  }
+ }catch(e){
+  // Best-effort status persistence if the previous record is unreadable.
+ }
  await env.TOKENS.put(key,JSON.stringify(record),{expirationTtl:30*24*60*60});
  return true;
 }
