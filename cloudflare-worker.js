@@ -330,22 +330,13 @@ async function processAutoReplies(env){
     results.push({id,status:"ignored",reason:a.reason});continue;
    }
    if(!a.reply){
-    // Do not silently drop legitimate mail when the model omits its suggested reply.
-    // Broker/load messages receive only a neutral receipt acknowledgement; all other
-    // messages get a safe draft for the owner to review.
-    const brokerContext=/\b(load|rate confirmation|rate con|freight|pickup|delivery|tender|carrier|dispatch|shipment|lane|truckload|broker|load number)\b/i.test(a.subject+" "+a.body);
-    const fallback=brokerContext
-     ?"Hello,\n\nThank you for reaching out to CLST Trucking LLC. We received your message and are reviewing the details. We will follow up shortly.\n\nBest regards,\nCLST Trucking LLC"
-     :"Hello,\n\nThank you for contacting CLST Trucking LLC. We received your message and will review it. We will follow up if additional information is needed.\n\nBest regards,\nCLST Trucking LLC";
-    if(brokerContext){
-     const ack=await sendReply(env,m,a.to,a.subject,fallback,token,myEmail);
-     await env.TOKENS.put(key,JSON.stringify({status:"acknowledged",acknowledgementId:ack.id||null,reason:"AI returned no suggested reply; sent neutral receipt acknowledgement",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
-     results.push({id,status:"acknowledged",reason:"AI returned no suggested reply; sent neutral receipt acknowledgement"});
-    }else{
-     const draft=await createReplyDraft(env,m,a.to,a.subject,fallback,token,myEmail);
-     await env.TOKENS.put(key,JSON.stringify({status:"draft",draftId:draft.id||null,reason:"AI returned no suggested reply; created safe fallback draft",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
-     results.push({id,status:"draft_for_review",reason:"AI returned no suggested reply; safe fallback draft created"});
-    }
+    // Never send a generic acknowledgement when the AI failed to compose a message.
+    // Save a clearly marked draft instead; the owner can review the original email
+    // and write the correct response without sending misleading boilerplate.
+    const fallback="Draft not generated automatically. Please review the original email and compose a reply based on its actual contents.\n\nCLST Trucking LLC";
+    const draft=await createReplyDraft(env,m,a.to,a.subject,fallback,token,myEmail);
+    await env.TOKENS.put(key,JSON.stringify({status:"draft",draftId:draft.id||null,reason:"AI returned no suggested reply; no email was sent",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
+    results.push({id,status:"draft_for_review",reason:"AI returned no suggested reply; no email was sent"});
     continue;
    }
    const hardRisk=riskyEmail(a.subject+" "+a.body);
@@ -357,18 +348,10 @@ async function processAutoReplies(env){
    }else{
     const reason=hardRisk?"Sensitive/commitment-related email requires review":a.reason+(a.confidence<0.92?" (confidence below 0.92)":"");
     const draft=await createReplyDraft(env,m,a.to,a.subject,a.reply,token,myEmail);
-    // For broker/load emails that need human approval, still acknowledge receipt immediately
-    // without quoting a rate, accepting a load, or promising availability.
-    const brokerContext=/\b(load|rate confirmation|rate con|freight|pickup|delivery|tender|carrier|dispatch|shipment|lane|truckload|broker|load number)\b/i.test(a.subject+" "+a.body);
-    let acknowledgementId=null;
-    if(brokerContext){
-     const acknowledgement="Hello,\n\nThank you for reaching out to CLST Trucking LLC. We received your message and are reviewing the load details. We will follow up shortly.\n\nBest regards,\nCLST Trucking LLC";
-     const ack=await sendReply(env,m,a.to,a.subject,acknowledgement,token,myEmail);
-     acknowledgementId=ack.id||null;
-    }
-    const status=acknowledgementId?"acknowledged_with_draft":"draft";
-    await env.TOKENS.put(key,JSON.stringify({status,draftId:draft.id||null,acknowledgementId,reason,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
-    results.push({id,status:acknowledgementId?"acknowledged_and_draft_for_review":"draft_for_review",reason,confidence:a.confidence});
+    // Keep the tailored AI response as a Gmail draft whenever review is required.
+    // Do not send a generic acknowledgement that hides the actual message content.
+    await env.TOKENS.put(key,JSON.stringify({status:"draft",draftId:draft.id||null,reason,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
+    results.push({id,status:"draft_for_review",reason,confidence:a.confidence});
    }
   }catch(err){results.push({id,status:"error",error:errText(err)});}
  }
