@@ -550,7 +550,6 @@ async function processAutoReplies(env){
     await env.TOKENS.put(key,JSON.stringify({status:"sent_fallback_ack",sentId:sent.id||null,reason,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
     results.push({id,status:"sent_fallback_ack",reason,confidence:a.confidence});
    }
-   }
   }catch(err){
    const message=errText(err);
    // Back off failed messages briefly so one bad email or temporary API error
