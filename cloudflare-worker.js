@@ -267,6 +267,13 @@ function genericAcknowledgement(text){
 function riskyEmail(text){
  return /\b(rate quote|quote a rate|bid|bidding|accept (the )?load|book (the )?load|contract|agreement|invoice|payment dispute|claim|cargo damage|accident|injury|lawsuit|legal|insurance|detention|tonu|chargeback|settlement|refund|wire transfer|bank details|ssn|social security|password|login code|verification code|urgent payment)\b/i.test(String(text||""));
 }
+// Load-status and POD requests must never receive an automatically sent promise or guessed update.
+// Keep these messages as drafts until a human verifies the load facts in the TMS/POD records.
+function requiresLoadStatusReview(text){
+ const s=String(text||"");
+ const asksStatus=/\b(status update|delivery status|pickup status|load status|where is (the )?load|is (the )?load (delivered|picked up|on time)|confirm(ed|ation)? (delivery|pickup)|proof of delivery|\bPOD\b|\bBOL\b|bill of lading|delivery confirmation|has (the )?load been (delivered|picked up)|when will (the )?load (deliver|arrive)?)\b/i.test(s);
+ return asksStatus;
+}
 async function createReplyDraft(env,m,to,subject,body,token,myEmail){
  const h=m.payload&&m.payload.headers||[],msgId=head(h,"message-id"),refs=head(h,"references");
  const replySubject=/^re:/i.test(subject)?"Re: "+subject.replace(/^re:\s*/i,""):"Re: "+subject;
@@ -367,14 +374,15 @@ async function processAutoReplies(env){
     continue;
    }
    const hardRisk=riskyEmail(a.subject+" "+a.body);
+   const loadStatusReview=requiresLoadStatusReview(a.subject+" "+a.body);
    const generic=genericAcknowledgement(a.reply);
-    const canSend=a.action==="send"&&a.confidence>=0.85&&!hardRisk&&!generic&&a.reply.length>=20&&a.reply.length<=1800;
+    const canSend=a.action==="send"&&a.confidence>=0.85&&!hardRisk&&!loadStatusReview&&!generic&&a.reply.length>=20&&a.reply.length<=1800;
    if(canSend){
     const sent=await sendReply(env,m,a.to,a.subject,a.reply,token,myEmail);
     await env.TOKENS.put(key,JSON.stringify({status:"sent",sentId:sent.id||null,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
     results.push({id,status:"sent",confidence:a.confidence});
    }else{
-    const reason=hardRisk?"Sensitive/commitment-related email requires review":generic?"Generic acknowledgement rejected; tailored response requires review":a.reason+(a.confidence<0.92?" (confidence below 0.92)":"");
+    const reason=hardRisk?"Sensitive/commitment-related email requires review":loadStatusReview?"Load status/POD must be verified by a person before replying":generic?"Generic acknowledgement rejected; tailored response requires review":a.reason+(a.confidence<0.92?" (confidence below 0.92)":"");
     const draft=await createReplyDraft(env,m,a.to,a.subject,a.reply,token,myEmail);
     // Keep the tailored AI response as a Gmail draft whenever review is required.
     // Do not send a generic acknowledgement that hides the actual message content.
