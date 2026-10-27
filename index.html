@@ -167,6 +167,63 @@ body{background:linear-gradient(180deg,rgba(4,10,18,.74),rgba(4,10,18,.92)),url(
 @media(max-width:600px){.moving-highway{height:150px}.road-surface{height:48px}.drive-truck{bottom:24px;min-width:210px}.drive-truck-two{bottom:52px;min-width:170px}.immersive-road .cinema-gallery{position:relative;z-index:2}}
 @media(prefers-reduced-motion:reduce){.moving-highway,.drive-truck,.road-surface span,.immersive-road:before{animation:none!important}}
 
+
+/* PRIMARY COLORS — remove every faded sepia/retro override */
+:root{
+ color-scheme:dark;
+ --bg:#050505;--panel:#101010;--panel2:#191919;--border:#006bff;
+ --text:#ffffff;--muted:#e4e4e4;--red:#ff1025;--red2:#ff3045;
+ --green:#00ff66;--yellow:#ffea00;
+}
+html,body{background:#050505!important;color:#fff!important;font-family:Arial,Helvetica,sans-serif!important}
+body{
+ background:radial-gradient(ellipse at 15% 0%,#002bff 0,transparent 35%),
+            radial-gradient(ellipse at 95% 10%,#ff1025 0,transparent 28%),
+            linear-gradient(180deg,#050505,#101010 60%,#050505)!important;
+}
+body:before{display:none!important}
+header{background:#050505f5!important;border-bottom:3px solid #006bff!important;box-shadow:0 8px 30px #000!important}
+.logo{background:#ff1025!important;color:#fff!important;border:2px solid #fff!important;box-shadow:0 0 22px #ff102588!important}
+.brand h1,.welcome h2,.cinema-copy h2,.cinema-copy h2 span{color:#fff!important;text-shadow:none!important}
+.subtitle,.eyebrow,.cinema-card-label span,.road-invitation{color:#ffea00!important}
+nav a{color:#fff!important}
+nav a:hover{background:#006bff!important;color:#fff!important}
+.welcome,.panel,.stat,.rate-card,.gps-card,.cinema-hero,.immersive-road,.notice,.status{
+ background:#101010!important;border:2px solid #006bff!important;border-radius:12px!important;box-shadow:0 0 0 1px #006bff22,0 12px 32px #000!important
+}
+.welcome{border-left:8px solid #ff1025!important;background:linear-gradient(105deg,#151515,#050505)!important}
+.welcome .muted,.cinema-copy p,.muted{color:#e4e4e4!important}
+button.primary,.primary{background:#ff1025!important;border:2px solid #ff1025!important;color:#fff!important;box-shadow:none!important}
+button.primary:hover,.primary:hover{background:#d90019!important}
+button.secondary,.secondary,.action-link{background:#006bff!important;border:2px solid #006bff!important;color:#fff!important;box-shadow:none!important}
+input,textarea,select,.search,.ask-row input,.ask-answer{background:#050505!important;color:#fff!important;border:2px solid #006bff!important}
+.cinema-hero,.immersive-road{
+ background:linear-gradient(115deg,#050505 0%,#001c5c 52%,#050505 100%)!important;
+ border:3px solid #ff1025!important;
+}
+.immersive-road:before{filter:saturate(1.8) contrast(1.18)!important;opacity:.32!important}
+.immersive-road:after{background:linear-gradient(180deg,#0000,transparent 30%,#000e),repeating-linear-gradient(112deg,transparent 0 110px,#ffea0040 111px 114px)!important}
+.immersive-road .cinema-copy h2 span{background:none!important;color:#ffea00!important;-webkit-text-fill-color:#ffea00!important}
+.cinema-tags span{background:#006bff!important;border:2px solid #fff!important;color:#fff!important}
+.cinema-card{filter:saturate(1.8) contrast(1.12)!important;border:2px solid #ffea00!important}
+.cinema-card-label strong{color:#fff!important;font-family:Arial,Helvetica,sans-serif!important}
+.moving-highway{opacity:1!important}
+.road-surface{background:linear-gradient(#263341,#050505)!important;border-top:3px solid #ffea00!important}
+.road-surface span{background:#ffea00!important;box-shadow:0 0 12px #ffea00aa!important}
+.drive-truck{filter:drop-shadow(0 0 12px #006bff)!important}
+.detail,th,td{border-color:#303030!important}
+th{background:#006bff!important;color:#fff!important}
+a,.gps-card a{color:#ffea00!important}
+.status.success{color:#00ff66!important;border-color:#00ff66!important}
+.status.error{color:#ff3045!important;border-color:#ff3045!important}
+.pill{background:#006bff!important;color:#fff!important}
+.pill.good{background:#00a843!important;color:#fff!important}
+.pill.bad{background:#ff1025!important;color:#fff!important}
+.empty{background:#101010!important;border:2px dashed #ffea00!important;color:#fff!important}
+footer{color:#fff!important;border-top:2px solid #006bff!important}
+::selection{background:#ffea00!important;color:#050505!important}
+@media(max-width:700px){body{background-attachment:scroll!important}}
+
 </style>
 </head>
 <body>
@@ -189,9 +246,9 @@ body{background:linear-gradient(180deg,rgba(4,10,18,.74),rgba(4,10,18,.92)),url(
 <main>
   <section class="welcome">
     <div>
-      <div class="eyebrow">CLST TRUCKING LLC · FRONTIER SPIRIT</div>
-      <h2>Old-school grit.<br>Modern miles.</h2>
-      <div class="muted">A frontier-era soul with a working trucker’s heart — rugged, dependable, and built to carry the load.</div>
+      <div class="eyebrow">CLST TRUCKING LLC · POWER IN MOTION</div>
+      <h2>BOLD COLORS.<br>BUILT TO MOVE.</h2>
+      <div class="muted">Powerful trucks. Modern technology. Every mile in motion.</div>
     </div>
     <div class="actions">
       <button class="secondary" id="connectBtn">Connect Gmail</button>
@@ -200,7 +257,7 @@ body{background:linear-gradient(180deg,rgba(4,10,18,.74),rgba(4,10,18,.92)),url(
     </div>
   </section>
 
-  <section class="cinema-hero immersive-road" id="roadExperience" aria-label="Immersive retro trucker road experience">
+  <section class="cinema-hero immersive-road" id="roadExperience" aria-label="Modern moving truck convoy">
     <div class="road-light road-light-one" aria-hidden="true"></div>
     <div class="road-light road-light-two" aria-hidden="true"></div>
     <div class="road-horizon" aria-hidden="true"><span></span><span></span><span></span></div>
