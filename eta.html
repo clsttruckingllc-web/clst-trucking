@@ -49,18 +49,16 @@ a{color:#ff9ca4}
 <section class="hero">
   <span class="pill">DISPATCH · LIVE ROUTE ESTIMATE</span>
   <h1>Load ETA Estimator</h1>
-  <p>Rate Confirmations and recent truck locations load automatically. Review the trip details and calculate the estimated arrival.</p>
+  <p>Load Rate Confirmations automatically by load number, then calculate the estimated arrival from the current truck location and route.</p>
 </section>
 <div class="layout">
 <section class="card">
   <h2>Trip details</h2>
   <form id="etaForm">
     <div class="field"><label for="loadSelect">Load from Gmail Rate Confirmations</label><select id="loadSelect"><option value="">Loading saved loads…</option></select><span class="help" id="loadStatus">Loading analyzed loads from the dashboard API…</span></div>
-    <div class="field"><label for="load">Load number (optional)</label><input id="load" maxlength="80" placeholder="e.g. 102190"></div>
+    <div class="field"><label for="load">Load number *</label><input id="load" maxlength="80" required placeholder="Enter the load number from the Rate Confirmation"><span class="help">Enter a load number to match the saved Gmail Rate Confirmation and fill the delivery details.</span></div>
     
-    <div class="field"><label for="gpsTruckSelect">Select truck from ROCK ELD (optional)</label><select id="gpsTruckSelect"><option value="">Load GPS trucks first…</option></select><label for="gpsAccessToken">ROCK ELD GPS access token (session only)</label><input id="gpsAccessToken" type="password" autocomplete="off" placeholder="Enter company GPS access token"><button type="button" id="saveGpsTokenButton" class="secondary">Save token & refresh GPS</button><button type="button" id="loadGpsButton" class="secondary">Refresh truck locations</button><span class="help" id="gpsStatus" role="status">Enter the company GPS access token, or sign in through configured Cloudflare Access. The token is kept only for this browser session. Manual ETA remains available.</span></div>
-    
-    <div class="field"><label for="currentLocation">Truck’s current location *</label><input id="currentLocation" maxlength="220" required placeholder="e.g. Dallas, TX or street address"><span class="help">GPS reports older than 15 minutes are marked stale and cannot be selected. Route lookup sends the chosen location to public OpenStreetMap-based lookup/routing services.</span></div>
+    <div class="field"><label for="currentLocation">Truck’s current location *</label><input id="currentLocation" maxlength="220" required placeholder="e.g. Dallas, TX or street address"><span class="help">Enter the truck’s current city, ZIP code, or address. Protected live GPS will be added in the secured final version.</span></div>
     <div class="field"><label for="destination">Delivery location *</label><input id="destination" maxlength="220" required placeholder="Select a load or enter delivery city/address"></div>
     <button type="button" id="routeButton" class="secondary">Find remaining road miles</button>
     <div id="routeStatus" class="status" role="status">Enter both locations, then calculate the route.</div>
@@ -85,7 +83,7 @@ a{color:#ff9ca4}
       <div class="stat"><span class="help">Appointment</span><strong id="appointmentStatus">—</strong></div>
     </div>
   </div>
-  <div class="notice">Prototype limitation: route miles are calculated from the location you enter, not live truck GPS. ETA excludes live traffic, weather, loading delays, and the driver’s actual hours-of-service status. Confirm with the driver/dispatch before promising an arrival time.</div>
+  <div class="notice">Prototype mode: no GPS token or login is required. Select a saved Rate Confirmation by load number, enter the truck’s current location, and calculate the road route. ETA excludes live traffic, weather, loading delays, and the driver’s actual hours-of-service status. Username/password sign-in and protected live GPS will be added in the final version.</div>
 </section>
 </div>
 <footer>CLST Trucking LLC · OpenStreetMap / OSRM route estimate · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Map data attribution</a></footer>
@@ -94,10 +92,6 @@ a{color:#ff9ca4}
 (function(){
   const $ = id => document.getElementById(id);
   let rateRecords = [];
-  const GPS_TOKEN_KEY='clst_rockeld_gps_token';
-  function gpsHeaders(){const token=sessionStorage.getItem(GPS_TOKEN_KEY)||$('gpsAccessToken').value.trim();return token?{Accept:'application/json',Authorization:'Bearer '+token}:{Accept:'application/json'};}
-  $('gpsAccessToken').value=sessionStorage.getItem(GPS_TOKEN_KEY)||'';
-  $('saveGpsTokenButton').addEventListener('click',()=>{const token=$('gpsAccessToken').value.trim();if(token)sessionStorage.setItem(GPS_TOKEN_KEY,token);else sessionStorage.removeItem(GPS_TOKEN_KEY);$('gpsStatus').textContent=token?'Token saved for this browser session. Refreshing GPS…':'GPS token cleared from this browser session.';$('gpsStatus').className='help status';if(token)loadRockEldLocations();});
   const pad = n => String(n).padStart(2,'0');
   function localInputValue(date){return date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+'T'+pad(date.getHours())+':'+pad(date.getMinutes());}
   $('start').value = localInputValue(new Date());
@@ -151,6 +145,17 @@ a{color:#ff9ca4}
     }
   }
   $('loadSelect').addEventListener('change',()=>showSelectedLoad($('loadSelect').value));
+  function matchLoadNumber(){
+    const value=$('load').value.trim().toLowerCase();
+    if(!value)return;
+    const index=rateRecords.findIndex(r=>String((r.analysis||{}).load_number||'').trim().toLowerCase()===value);
+    if(index>=0){
+      const option=Array.from($('loadSelect').options).find(o=>o.value===String(index));
+      if(option){$('loadSelect').value=String(index);showSelectedLoad(String(index));$('loadStatus').textContent='Matched load '+$('load').value+' to a saved Gmail Rate Confirmation.';}
+    } else {$('loadStatus').textContent='No saved Rate Confirmation matched that load number. You can still enter the delivery location manually.';}
+  }
+  $('load').addEventListener('change',matchLoadNumber);
+  $('load').addEventListener('blur',matchLoadNumber);
 
   async function geocode(query){
     const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us&q='+encodeURIComponent(query);
@@ -185,86 +190,6 @@ a{color:#ff9ca4}
   }
   $('routeButton').addEventListener('click',findRoadMiles);
 
-  let gpsLocations = [];
-  $('loadGpsButton').addEventListener('click', loadRockEldLocations);
-  window.addEventListener('message',event=>{if(event.origin!==location.origin||event.data?.type!=='CLST_ELD_LOCATIONS'||!Array.isArray(event.data.locations))return;gpsLocations=event.data.locations;const select=$('gpsTruckSelect');select.replaceChildren(new Option('Choose a truck…',''));for(const item of gpsLocations){const key=String(item.vehicleId??item.id??'');if(!key)continue;const fresh=item.status==='fresh'&&item.location;const opt=new Option('Truck '+(item.vehicleId??key)+' — '+String(item.status||'unknown').toUpperCase()+(item.ageMinutes==null?'':' · '+item.ageMinutes+' min old')+(item.location?' · '+item.location:''),key);opt.disabled=!fresh;select.add(opt);} $('gpsStatus').textContent='Fleet locations synchronized from the CLST command center. Fresh reports only can be selected.'; $('gpsStatus').className='help status ok';});
-  $('gpsTruckSelect').addEventListener('change', () => {
-    const selected = gpsLocations.find(item => String(item.vehicleId ?? item.id) === $('gpsTruckSelect').value);
-    if (!selected) return;
-    if (selected.status !== 'fresh') {
-      $('gpsStatus').textContent = 'This GPS report is stale or has no timestamp. It cannot be used for a new ETA.';
-      $('gpsStatus').className = 'help status bad';
-      return;
-    }
-    if (!selected.location) {
-      $('gpsStatus').textContent = 'This truck has no readable location name. Enter a location manually instead.';
-      $('gpsStatus').className = 'help status bad';
-      return;
-    }
-    $('currentLocation').value = selected.location;
-    $('gpsStatus').textContent = 'Selected truck ' + (selected.vehicleId ?? selected.id) +
-      ' · report age ' + selected.ageMinutes + ' minute(s). Check the location, then find remaining road miles.';
-    $('gpsStatus').className = 'help status ok';
-  });
-
-  async function loadRockEldLocations() {
-    const button = $('loadGpsButton');
-    const select = $('gpsTruckSelect');
-    button.disabled = true;
-    button.textContent = 'Loading GPS…';
-    $('gpsStatus').textContent = 'Requesting recent truck locations through the secured company connection…';
-    $('gpsStatus').className = 'help';
-    try {
-      const headers = gpsHeaders();
-      const response = await fetch('/api/rockeld/locations', {
-        method: 'GET',
-        headers,
-        credentials: 'same-origin',
-        cache: 'no-store'
-      });
-      const contentType = response.headers.get('content-type') || '';
-      if (!contentType.includes('application/json')) {
-        throw new Error('GPS access requires the company sign-in to be configured for this site.');
-      }
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(data.error || ('ROCK ELD GPS request failed (HTTP ' + response.status + ').'));
-      }
-      gpsLocations = Array.isArray(data.locations) ? data.locations : [];
-      select.replaceChildren(new Option('Choose a truck…', ''));
-      for (const item of gpsLocations) {
-        const key = String(item.vehicleId ?? item.id ?? '');
-        if (!key) continue;
-        const age = item.ageMinutes === null || item.ageMinutes === undefined
-          ? 'age unknown'
-          : item.ageMinutes + ' min old';
-        const state = item.status === 'fresh' ? 'FRESH' : item.status === 'stale' ? 'STALE' : 'UNKNOWN';
-        const label = 'Truck ' + (item.vehicleId ?? key) + ' — ' + state + ' · ' + age +
-          (item.location ? ' · ' + item.location : '');
-        const option = new Option(label, key);
-        option.disabled = item.status !== 'fresh' || !item.location;
-        select.add(option);
-      }
-      if (!gpsLocations.length) {
-        $('gpsStatus').textContent = 'ROCK ELD returned no truck locations. You can still enter the location manually.';
-        $('gpsStatus').className = 'help status bad';
-      } else {
-        const fresh = gpsLocations.filter(item => item.status === 'fresh' && item.location).length;
-        $('gpsStatus').textContent = 'Received ' + gpsLocations.length + ' truck record(s); ' + fresh +
-          ' have a location reported within 15 minutes. Older reports are disabled.';
-        $('gpsStatus').className = 'help status ok';
-      }
-    } catch (error) {
-      $('gpsStatus').textContent = String(error.message || error) +
-        ' The secured company sign-in must be configured on the server; manual ETA remains available.';
-      $('gpsStatus').className = 'help status bad';
-      select.replaceChildren(new Option('GPS unavailable — enter location manually', ''));
-    } finally {
-      button.disabled = false;
-      button.textContent = 'Refresh truck locations';
-    }
-  }
-
   function fmtDate(date){return new Intl.DateTimeFormat(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(date);}
   function fmtDuration(hours){const whole=Math.floor(hours);const mins=Math.round((hours-whole)*60);return mins?whole+' h '+mins+' min':whole+' h';}
   $('etaForm').addEventListener('submit',function(event){
@@ -283,7 +208,6 @@ a{color:#ff9ca4}
     $('resultIntro').textContent='Estimate calculated from the entered road miles and planning assumptions, not live GPS or traffic data.';
   });
   void loadRateConfirmations();
-  void loadRockEldLocations();
 })();
 </script>
 </body>
