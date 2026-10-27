@@ -502,40 +502,32 @@ async function processAutoReplies(env){
     await env.TOKENS.put(key,JSON.stringify({status:"sent_safe_load_ack",sentId:sent.id||null,reason:"Non-binding acknowledgement only; no load/rate acceptance or negotiation",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
     results.push({id,status:"sent_safe_load_ack",reason:"Non-binding load acknowledgement sent; no commitment made"});continue;
    }
-   // ETA and load-status inquiries get a prompt acknowledgement, without inventing a status or leaving a draft.
-   if(isEtaOrLoadStatusQuestion(inboundText)){
-    const profile=await gmail(env,"/profile",token);
-    const sent=await sendReply(env,m,emailAddress(head(m.payload.headers||[],"reply-to")||e.from),e.subject,safeStatusCheckReply(),token,emailAddress(profile.emailAddress));
-    await env.TOKENS.put(key,JSON.stringify({status:"sent_status_check",sentId:sent.id||null,reason:"Acknowledged ETA/status request without inventing unverified facts",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
-    results.push({id,status:"sent_status_check",reason:"ETA/status acknowledgement sent; no unverified status claimed"});continue;
-   }
-   // Other sensitive matters are left for the owner, but never as unsent drafts.
+   // ETA/status inquiries go through evidence-based classification; sensitive matters receive acknowledgement only.
    if(isOtherHighRisk(inboundText)){
-    const reason="Sensitive legal, claim, payment, or safety matter requires owner response; no draft or email sent";
-    await env.TOKENS.put(key,JSON.stringify({status:"ignored_owner_action",reason,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
-    results.push({id,status:"ignored_owner_action",reason});continue;
+    const profile=await gmail(env,"/profile",token);
+    const body="Hello,\\n\\nThank you for your message. We have received it and will review the matter with the appropriate person. This acknowledgement does not confirm any payment, claim, liability, contractual change, or other commitment.\\n\\nCLST Trucking LLC";
+    const sent=await sendReply(env,m,emailAddress(head(m.payload.headers||[],"reply-to")||e.from),e.subject,body,token,emailAddress(profile.emailAddress));
+    await env.TOKENS.put(key,JSON.stringify({status:"sent_sensitive_ack",sentId:sent.id||null,reason:"Neutral receipt acknowledgement only; no sensitive commitment or advice",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
+    results.push({id,status:"sent_sensitive_ack",reason:"Neutral acknowledgement sent; no sensitive commitment made"});continue;
    }
    const a=await classifyReply(env,m,token);
    if(a.action==="ignore"){
-    await env.TOKENS.put(key,JSON.stringify({status:"ignored",reason:a.reason,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
-    results.push({id,status:"ignored",reason:a.reason});continue;
+    const cleanSubject=String(a.subject||"your email").replace(/^re:\\s*/i,"").replace(/[\\r\\n]+/g," ").trim().slice(0,180)||"your email";
+    const body="Hello,\\n\\nWe received your email regarding \\""+cleanSubject+"\\". Thank you for contacting CLST Trucking LLC. We will review it and respond as appropriate.\\n\\nCLST Trucking LLC";
+    const sent=await sendReply(env,m,a.to,a.subject,body,token,myEmail);
+    await env.TOKENS.put(key,JSON.stringify({status:"sent_fallback_ack",sentId:sent.id||null,reason:"AI classified a message as not requiring a substantive reply; sent safe acknowledgement",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
+    results.push({id,status:"sent_fallback_ack",reason:"Safe acknowledgement sent"});continue;
    }
    if(!a.reply){
-    // If AI generation fails, still acknowledge ordinary, low-risk business email.
-    // Never use this fallback for load status/POD, rates, payments, legal matters,
-    // or other messages where an acknowledgement could be mistaken for an answer.
     const riskText=a.subject+" "+a.body;
-    if(!riskyEmail(riskText)&&!requiresLoadStatusReview(riskText)){
-     const cleanSubject=String(a.subject||"your email").replace(/^re:\s*/i,"").replace(/[\r\n]+/g," ").trim().slice(0,180)||"your email";
-     const fallback="Hello,\n\nWe received your email regarding \""+cleanSubject+"\". Thank you for contacting CLST Trucking LLC.\n\nCLST Trucking LLC";
-     const sent=await sendReply(env,m,a.to,a.subject,fallback,token,myEmail);
-     await env.TOKENS.put(key,JSON.stringify({status:"sent_fallback_ack",sentId:sent.id||null,reason:"AI could not generate a tailored reply; sent a safe acknowledgement for a low-risk message",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
-     results.push({id,status:"sent_fallback_ack",reason:"AI failed; safe acknowledgement sent for low-risk email"});
-     continue;
-    }
-    const reason="AI could not safely generate a reply; no draft created and no email sent";
-    await env.TOKENS.put(key,JSON.stringify({status:"ignored_owner_action",reason,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
-    results.push({id,status:"ignored_owner_action",reason});
+    const statusQuestion=isEtaOrLoadStatusQuestion(riskText)||requiresLoadStatusReview(riskText);
+    const cleanSubject=String(a.subject||"your email").replace(/^re:\\s*/i,"").replace(/[\\r\\n]+/g," ").trim().slice(0,180)||"your email";
+    const fallback=statusQuestion
+     ?"Hello,\\n\\nWe are checking the latest confirmed information for this load. We do not want to provide an unverified location or ETA.\\n\\nCLST Trucking LLC"
+     :"Hello,\\n\\nWe received your email regarding \\""+cleanSubject+"\\". Thank you for contacting CLST Trucking LLC. We will review it and respond as appropriate.\\n\\nCLST Trucking LLC";
+    const sent=await sendReply(env,m,a.to,a.subject,fallback,token,myEmail);
+    await env.TOKENS.put(key,JSON.stringify({status:"sent_fallback_ack",sentId:sent.id||null,reason:"AI could not generate a safe specific answer; sent a non-committal acknowledgement",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
+    results.push({id,status:"sent_fallback_ack",reason:"Safe acknowledgement sent"});
     continue;
    }
    const hardRisk=riskyEmail(a.subject+" "+a.body);
@@ -547,9 +539,17 @@ async function processAutoReplies(env){
     await env.TOKENS.put(key,JSON.stringify({status:"sent",sentId:sent.id||null,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
     results.push({id,status:"sent",confidence:a.confidence});
    }else{
-    const reason=hardRisk?"Sensitive/commitment-related email requires review; no draft created and no automatic reply sent":loadStatusReview?"Load status/POD requires owner response; no draft created":generic?"Generic AI acknowledgement rejected; no draft created":a.reason+(a.confidence<0.85?" (confidence below 0.85)":"");
-    await env.TOKENS.put(key,JSON.stringify({status:"ignored_owner_action",reason,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
-    results.push({id,status:"ignored_owner_action",reason,confidence:a.confidence});
+    const statusQuestion=isEtaOrLoadStatusQuestion(a.subject+" "+a.body)||loadStatusReview;
+    const fallback=statusQuestion
+     ?"Hello,\\n\\nWe are checking the latest confirmed information for this load. We do not want to provide an unverified location or ETA.\\n\\nCLST Trucking LLC"
+     :hardRisk
+      ?"Hello,\\n\\nThank you for your message. We have received it and will review the matter with the appropriate person. This acknowledgement does not confirm any payment, claim, liability, contractual change, or other commitment.\\n\\nCLST Trucking LLC"
+      :"Hello,\\n\\nThank you for your message. We have received it and will review the details before responding further.\\n\\nCLST Trucking LLC";
+    const sent=await sendReply(env,m,a.to,a.subject,fallback,token,myEmail);
+    const reason=hardRisk?"Specific reply not auto-sent for sensitive matter; neutral acknowledgement sent":statusQuestion?"No verified status answer available; neutral status acknowledgement sent":generic?"Generic AI reply replaced with safe sent acknowledgement":"AI answer did not meet send criteria; safe acknowledgement sent";
+    await env.TOKENS.put(key,JSON.stringify({status:"sent_fallback_ack",sentId:sent.id||null,reason,confidence:a.confidence,at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
+    results.push({id,status:"sent_fallback_ack",reason,confidence:a.confidence});
+   }
    }
   }catch(err){
    const message=errText(err);
