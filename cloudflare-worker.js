@@ -78,6 +78,20 @@ async function googleToken(env){
  const res=await fetch("https://oauth2.googleapis.com/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({client_id:env.GOOGLE_CLIENT_ID,client_secret:env.GOOGLE_CLIENT_SECRET,refresh_token:refresh,grant_type:"refresh_token"})});
  const d=await res.json().catch(()=>({}));if(!res.ok||!d.access_token)throw Error("Google token failed: "+String(d.error_description||d.error||res.status));return d.access_token;
 }
+async function gmailScopeStatus(token){
+ try{
+  const res=await fetch("https://oauth2.googleapis.com/tokeninfo?access_token="+encodeURIComponent(token));
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok||!data.scope)return {verified:false,error:"Google did not return verifiable OAuth scopes."};
+  const scopes=new Set(String(data.scope).split(/\s+/));
+  return {
+   verified:true,
+   readonly:scopes.has("https://www.googleapis.com/auth/gmail.readonly"),
+   send:scopes.has("https://www.googleapis.com/auth/gmail.send"),
+   compose:scopes.has("https://www.googleapis.com/auth/gmail.compose")
+  };
+ }catch(e){return {verified:false,error:errText(e)};}
+}
 async function gmail(env,path,token){
  const t=token||await googleToken(env),res=await fetch(GMAIL+path,{headers:{Authorization:"Bearer "+t,Accept:"application/json"}});
  const d=await res.json().catch(()=>({}));if(!res.ok)throw Error("Gmail API "+res.status+": "+String(d.error&&d.error.message||"request failed"));return d;
@@ -399,6 +413,11 @@ async function classifyReply(env,m,token){
 async function processAutoReplies(env){
  if(!(env.OPENAI_API_KEY||env.GEMINI_API_KEY)||!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET)throw Error("Auto-reply requires Google OAuth and either OPENAI_API_KEY or GEMINI_API_KEY.");
  const token=await googleToken(env);
+ const scopes=await gmailScopeStatus(token);
+ if(scopes.verified&&(!scopes.readonly||!scopes.send||!scopes.compose)){
+  const missing=[!scopes.readonly?"gmail.readonly":null,!scopes.send?"gmail.send":null,!scopes.compose?"gmail.compose":null].filter(Boolean).join(", ");
+  throw Error("Gmail OAuth is missing required permission(s): "+missing+". Reconnect using https://clst-gmail-backend.clsttruckingllc.workers.dev/auth/start?consent=1");
+ }
  // Establish a one-time activation baseline so enabling automation never replies to old unread mail.
  const baselineKey="smart_reply_started_at";
  let baseline=await env.TOKENS.get(baselineKey);
@@ -523,7 +542,18 @@ async function recordAutoReplyRun(env){
 async function autoReplyStatus(env){
  let lastRun=null;
  try{const raw=await env.TOKENS.get("smart_reply_last_run");if(raw)lastRun=JSON.parse(raw);}catch(e){}
- return json({success:true,configured:!!((env.OPENAI_API_KEY||env.GEMINI_API_KEY)&&env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),aiProvider:env.OPENAI_API_KEY?"openai":env.GEMINI_API_KEY?"gemini":"not_configured",gmailConnected:!!(await env.TOKENS.get("google_refresh_token")),model:env.OPENAI_API_KEY?(env.OPENAI_MODEL||OPENAI_MODEL):(env.GEMINI_MODEL||MODEL),lastRun});
+ let scopes={verified:false,error:"Gmail is not connected."};
+ try{if(await env.TOKENS.get("google_refresh_token"))scopes=await gmailScopeStatus(await googleToken(env));}catch(e){scopes={verified:false,error:errText(e)};}
+ return json({
+  success:true,
+  configured:!!((env.OPENAI_API_KEY||env.GEMINI_API_KEY)&&env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),
+  aiProvider:env.OPENAI_API_KEY?"openai":env.GEMINI_API_KEY?"gemini":"not_configured",
+  gmailConnected:!!(await env.TOKENS.get("google_refresh_token")),
+  gmailScopes:scopes,
+  reconnectUrl:"https://clst-gmail-backend.clsttruckingllc.workers.dev/auth/start?consent=1",
+  model:env.OPENAI_API_KEY?(env.OPENAI_MODEL||OPENAI_MODEL):(env.GEMINI_MODEL||MODEL),
+  lastRun
+ });
 }
 async function runAutoReplies(env){
  try{return json(await recordAutoReplyRun(env));}catch(e){return json({success:false,error:errText(e)},502);}
