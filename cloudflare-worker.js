@@ -430,7 +430,7 @@ async function processAutoReplies(env){
  const baselineMs=Date.parse(baseline);
  const profile=await gmail(env,"/profile",token),myEmail=emailAddress(profile.emailAddress);
  if(!myEmail)throw Error("Could not identify the connected Gmail account; automatic replies are paused for safety.");
- const query="in:inbox newer_than:7d -from:me -in:spam -in:trash -category:promotions -category:social -category:updates";
+ const query="in:inbox newer_than:7d -from:me -in:spam -in:trash";
  // Page through recent inbox mail and skip already-processed IDs. Without pagination,
  // the newest 50 processed messages could permanently hide older unprocessed messages.
  const candidates=[];
