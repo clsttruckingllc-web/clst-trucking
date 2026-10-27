@@ -59,11 +59,16 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
 
   <section class="panel" id="backgroundMusic">
     <div class="panel-heading">
-      <div><h3>📻 Naxi House Radio — LIVE</h3><div class="muted" style="font-size:12px;margin-top:4px">Live house music from Naxi Digital · Autoplay attempted when your browser allows it</div></div>
-      <a class="action-link" href="https://www.naxi.rs/house" target="_blank" rel="noopener noreferrer">Open Naxi House ↗</a>
+      <div><h3>🏁 CLST Racing Sound — ORIGINAL LOOP</h3><div class="muted" style="font-size:12px;margin-top:4px">Original synthesized racing-game energy · Inspired by the era, not copied from the F1 2000 soundtrack · No external music or samples</div></div>
+      <span class="pill good" id="raceAudioStatus">READY</span>
     </div>
-    <iframe title="Naxi House Radio live player" style="display:block;width:100%;height:300px;border:0;border-radius:12px;background:#101116" src="https://www.naxi.rs/house" loading="eager" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-    <div class="muted" style="font-size:12px;margin-top:9px">If playback does not start automatically, tap the radio player or use “Open Naxi House”. Browsers may block autoplay with sound.</div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <button class="primary" id="raceAudioToggle" type="button">▶ Start Racing Audio</button>
+      <label for="raceAudioVolume" class="muted" style="font-size:12px">Volume</label>
+      <input id="raceAudioVolume" type="range" min="0" max="100" value="35" style="width:min(240px,100%)">
+      <span class="muted" style="font-size:12px">Continuous loop · synthesized in your browser</span>
+    </div>
+    <div class="muted" style="font-size:12px;margin-top:10px">The page tries to start audio automatically. If Safari blocks sound before a tap, press “Start Racing Audio” once. Audio loops while this page stays open; use Pause to stop it.</div>
   </section>
 
   <div class="notice">
@@ -635,6 +640,92 @@ if (params.get('gmail') === 'connected') {
   status('Gmail authorization completed. The dashboard will automatically check Gmail for PDFs while this page is open.','success');
   history.replaceState({},document.title,location.pathname);
 }
+
+
+/* Original, procedural racing-game loop. No external track, samples, or copyrighted recording. */
+(() => {
+  const playButton = $('raceAudioToggle');
+  const volumeSlider = $('raceAudioVolume');
+  const stateLabel = $('raceAudioStatus');
+  let ctx = null, master = null, scheduler = null, nextTime = 0, step = 0, playing = false;
+  const bpm = 126, beat = 60 / bpm, stepTime = beat / 4;
+  const bass = [55,55,73.42,55,65.41,65.41,82.41,65.41,49,49,65.41,49,73.42,73.42,98,73.42];
+  const lead = [440,0,523.25,659.25,0,587.33,523.25,0,440,0,392,493.88,0,587.33,523.25,0];
+  function tone(freq, start, duration, type, gain, endFreq) {
+    const osc = ctx.createOscillator(), amp = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, start);
+    if (endFreq) osc.frequency.exponentialRampToValueAtTime(Math.max(1,endFreq), start + duration);
+    amp.gain.setValueAtTime(0.0001, start);
+    amp.gain.exponentialRampToValueAtTime(Math.max(0.0002,gain), start + 0.012);
+    amp.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    osc.connect(amp); amp.connect(master);
+    osc.start(start); osc.stop(start + duration + 0.025);
+  }
+  function noiseHit(start, duration, gain, highpass) {
+    const size = Math.ceil(ctx.sampleRate * duration);
+    const buffer = ctx.createBuffer(1, size, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i=0;i<size;i++) data[i] = Math.random()*2-1;
+    const source = ctx.createBufferSource(), filter = ctx.createBiquadFilter(), amp = ctx.createGain();
+    source.buffer = buffer; filter.type = 'highpass'; filter.frequency.value = highpass;
+    amp.gain.setValueAtTime(gain,start); amp.gain.exponentialRampToValueAtTime(0.0001,start+duration);
+    source.connect(filter); filter.connect(amp); amp.connect(master); source.start(start);
+  }
+  function scheduleStep(s, t) {
+    const pos = s % 16, bar = Math.floor(s / 16) % 4;
+    if (pos % 4 === 0) tone(115,t,0.22,'sine',0.75,42);
+    if (pos === 4 || pos === 12) noiseHit(t,0.13,0.19,1400);
+    if (pos % 2 === 0) noiseHit(t,0.045,pos % 4 === 0 ? 0.055 : 0.028,6500);
+    tone(bass[pos],t,0.14,'sawtooth',0.12,bass[pos]*0.98);
+    if (lead[pos]) {
+      tone(lead[pos] * (bar === 3 && pos > 11 ? 1.5 : 1),t,0.17,'square',0.045);
+      tone(lead[pos]/2,t,0.20,'triangle',0.035);
+    }
+    if (pos === 0 || pos === 8) tone(110,t,0.32,'triangle',0.07,165);
+  }
+  function pump() {
+    while (nextTime < ctx.currentTime + 0.12) {
+      scheduleStep(step++, nextTime);
+      nextTime += stepTime;
+    }
+  }
+  async function start() {
+    try {
+      if (!ctx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) throw new Error('Web Audio is not supported in this browser.');
+        ctx = new AudioCtx();
+        master = ctx.createGain();
+        master.gain.value = Number(volumeSlider.value) / 100;
+        const limiter = ctx.createDynamicsCompressor();
+        limiter.threshold.value = -18; limiter.knee.value = 18; limiter.ratio.value = 5;
+        master.connect(limiter); limiter.connect(ctx.destination);
+      }
+      await ctx.resume();
+      if (playing) return;
+      playing = true; nextTime = ctx.currentTime + 0.06;
+      scheduler = window.setInterval(pump, 25);
+      playButton.textContent = 'Ⅱ Pause Racing Audio';
+      stateLabel.textContent = 'PLAYING'; stateLabel.className = 'pill good';
+    } catch (err) {
+      stateLabel.textContent = 'TAP TO START'; stateLabel.className = 'pill bad';
+      playButton.textContent = '▶ Start Racing Audio';
+    }
+  }
+  function stop() {
+    playing = false;
+    if (scheduler) window.clearInterval(scheduler);
+    scheduler = null;
+    if (ctx && ctx.state === 'running') ctx.suspend();
+    playButton.textContent = '▶ Start Racing Audio';
+    stateLabel.textContent = 'PAUSED'; stateLabel.className = 'pill';
+  }
+  playButton.addEventListener('click', () => playing ? stop() : start());
+  volumeSlider.addEventListener('input', () => { if (master) master.gain.setTargetAtTime(Number(volumeSlider.value)/100,ctx.currentTime,0.04); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && playing) { /* keep the loop scheduled; browser may throttle background tabs */ } });
+  window.addEventListener('load', () => { start(); });
+})();
 
 connection('Ready');
 </script>
