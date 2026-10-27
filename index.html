@@ -703,6 +703,7 @@ if (params.get('gmail') === 'connected') {
         master.connect(limiter); limiter.connect(ctx.destination);
       }
       await ctx.resume();
+      if (ctx.state !== 'running') throw new Error('Audio needs a user tap to start.');
       if (playing) return;
       playing = true; nextTime = ctx.currentTime + 0.06;
       scheduler = window.setInterval(pump, 25);
