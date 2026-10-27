@@ -2,19 +2,17 @@
 
 The dashboard and ETA page call the server-side Cloudflare Pages Function at `/api/rockeld/locations`. The ROCK ELD API key is read only from the encrypted Pages secret `ROCKELD_API_KEY`; it is never sent to the browser.
 
-## Company sign-in
+## Fleet access and server secrets
 
-The GPS panel uses a simple CLST username and password instead of asking the operator to enter an API token.
+The dashboard automatically refreshes locations while it is open. Access to the live GPS endpoint is restricted by a verified Cloudflare Access session; there is no second username/password form in the dashboard.
 
 In Cloudflare Dashboard → Workers & Pages → `clst-trucking` → Settings → Variables and Secrets, configure these encrypted secrets:
 
-- `ROCKELD_GPS_USERNAME`
-- `ROCKELD_GPS_PASSWORD`
-- `ROCKELD_API_KEY` (the separate upstream ROCK ELD API key)
+- `ROCKELD_API_KEY` — the upstream ROCK ELD API key
+- `CF_ACCESS_TEAM_DOMAIN` — your Cloudflare Access team domain, without `https://`
+- `CF_ACCESS_AUD` — the Access application AUD value
 
-Do not put any of these values in GitHub or HTML. After changing the secrets, redeploy the Pages project so the values are active.
-
-Open `https://clst-trucking.pages.dev/ai/`, enter the CLST username and password in the ROCK ELD section, then tap **Sign in**. The credentials are held in the current browser tab's session storage and sent only over HTTPS. The server validates them and uses its own `ROCKELD_API_KEY` to call ROCK ELD. The password is not the upstream API key.
+Do not put these values in GitHub or HTML. After changing secrets, redeploy the Pages project. Configure Cloudflare Access to protect the dashboard and its `/api/rockeld/locations` endpoint. The browser uses its Access session; the server validates the Access JWT and calls ROCK ELD with its own `ROCKELD_API_KEY`.
 
 ## What the endpoint returns
 
@@ -25,7 +23,7 @@ Open `https://clst-trucking.pages.dev/ai/`, enter the CLST username and password
 
 ## Safety and ETA limitations
 
-- The endpoint requires company sign-in or a verified Cloudflare Access JWT; it must not be made public.
+- The endpoint requires a verified Cloudflare Access JWT; it must not be made public.
 - Keep the ROCK ELD API key and login credentials out of source control.
 - The endpoint uses `Cache-Control: no-store` and does not enable cross-origin access.
 - A report older than 15 minutes is not eligible to fill the ETA origin. A fresh report still needs human review.
