@@ -341,13 +341,13 @@ function isOtherHighRisk(text){
  return /\b(payment dispute|claim|cargo damage|accident|injury|lawsuit|legal|insurance|detention|tonu|chargeback|settlement|refund|wire transfer|bank details|ssn|social security|password|login code|verification code|urgent payment|invoice dispute|contract dispute)\b/i.test(String(text||""));
 }
 function safeLoadOfferReply(){
- return "Hello,\\n\\nThank you for sending this load over. We're checking the details and will get back to you shortly if we're interested. This message is not an acceptance of the load or its rate.\\n\\nCLST Trucking LLC";
+ return "Hello,\n\nThank you for sending this load over. We're checking the details and will get back to you shortly if we're interested. This message is not an acceptance of the load or its rate.\n\nCLST Trucking LLC";
 }
 function safeStatusCheckReply(){
- return "Hello,\\n\\nWe're checking the latest confirmed status and ETA. We'll send an update as soon as the information is verified.\\n\\nCLST Trucking LLC";
+ return "Hello,\n\nWe're checking the latest confirmed status and ETA. We'll send an update as soon as the information is verified.\n\nCLST Trucking LLC";
 }
 // Load-status and POD requests must never receive an automatically sent promise or guessed update.
-// Keep these messages as drafts until a human verifies the load facts in the TMS/POD records.
+// Send a neutral acknowledgement when verified load facts are not available.
 function requiresLoadStatusReview(text){
  const s=String(text||"");
  const asksStatus=/\b(status update|delivery status|pickup status|load status|where is (the )?load|current location|truck location|where is (the )?(truck|unit|tractor)|location for truck|is (the )?load (delivered|picked up|on time)|confirm(ed|ation)? (delivery|pickup)|proof of delivery|\bPOD\b|\bBOL\b|bill of lading|delivery confirmation|has (the )?load been (delivered|picked up)|when will (the )?load (deliver|arrive)?)\b/i.test(s);
@@ -513,7 +513,7 @@ async function processAutoReplies(env){
    const a=await classifyReply(env,m,token);
    if(a.action==="ignore"){
     const cleanSubject=String(a.subject||"your email").replace(/^re:\\s*/i,"").replace(/[\r\n]+/g," ").trim().slice(0,180)||"your email";
-    const body="Hello,\n\nWe received your email regarding \\""+cleanSubject+"\\". Thank you for contacting CLST Trucking LLC. We will review it and respond as appropriate.\n\nCLST Trucking LLC";
+    const body="Hello,\n\nWe received your email about "+cleanSubject+". Thank you for contacting CLST Trucking LLC. We will review it and respond as appropriate.\n\nCLST Trucking LLC";
     const sent=await sendReply(env,m,a.to,a.subject,body,token,myEmail);
     await env.TOKENS.put(key,JSON.stringify({status:"sent_fallback_ack",sentId:sent.id||null,reason:"AI classified a message as not requiring a substantive reply; sent safe acknowledgement",at:new Date().toISOString()}),{expirationTtl:90*24*60*60});
     results.push({id,status:"sent_fallback_ack",reason:"Safe acknowledgement sent"});continue;
