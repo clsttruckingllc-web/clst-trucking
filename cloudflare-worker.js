@@ -18,7 +18,7 @@ export default { async fetch(req, env) {
       // Public, non-sensitive liveness probe for deployment checks. Never expose secrets or tokens.
       r = json({service:"CLST Trucking AI Gmail Backend",status:"running",timestamp:new Date().toISOString(),kvAvailable:!!env.TOKENS,geminiConfigured:!!env.GEMINI_API_KEY,googleOAuthConfigured:!!(env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET)});
     } else if (url.pathname === "/" && req.method === "GET") {
-      r = json({service:"CLST Trucking AI Gmail Backend",status:"running",build:"thread-context-auto-reply-20261027",healthEndpoint:"/health",gmailConnected:!!(await env.TOKENS.get("google_refresh_token")),pdfAnalysis:!!env.GEMINI_API_KEY,geminiModel:env.GEMINI_MODEL||MODEL,ringcentralConfigured:!!(env.RINGCENTRAL_CLIENT_ID&&env.RINGCENTRAL_CLIENT_SECRET&&env.RINGCENTRAL_JWT),smartAutoReply:"enabled when a Cloudflare Cron Trigger is configured",reviewMode:"uncertain replies are saved as Gmail drafts",endpoints:["/health","/auth/start","/oauth/callback","/api/messages","/api/rates","/api/ask","/api/autoreply/status","/api/autoreply/run","/api/ringcentral/ask","/api/models","/api/ringcentral/test"]});
+      r = json({service:"CLST Trucking AI Gmail Backend",status:"running",build:"thread-context-auto-reply-scan50-20261027",healthEndpoint:"/health",gmailConnected:!!(await env.TOKENS.get("google_refresh_token")),pdfAnalysis:!!env.GEMINI_API_KEY,geminiModel:env.GEMINI_MODEL||MODEL,ringcentralConfigured:!!(env.RINGCENTRAL_CLIENT_ID&&env.RINGCENTRAL_CLIENT_SECRET&&env.RINGCENTRAL_JWT),smartAutoReply:"enabled when a Cloudflare Cron Trigger is configured",reviewMode:"uncertain replies are saved as Gmail drafts",endpoints:["/health","/auth/start","/oauth/callback","/api/messages","/api/rates","/api/ask","/api/autoreply/status","/api/autoreply/run","/api/ringcentral/ask","/api/models","/api/ringcentral/test"]});
     } else if (url.pathname === "/auth/start" && req.method === "GET") r = await oauthStart(req,env);
     else if (url.pathname === "/oauth/callback" && req.method === "GET") r = await oauthFinish(req,env);
     else if (url.pathname.startsWith("/api/")) {
@@ -162,7 +162,7 @@ async function ask(req,env){
  const question=String(b.question||b.message||"").trim();if(!question)return json({error:"Provide a question."},400);
  const requestedLoad=(question.match(/[0-9]{5,}/)||[])[0]||null;
  const token=await googleToken(env),q=b.query||queryFor(question),found=await gmail(env,"/messages?maxResults=12&q="+encodeURIComponent(q),token),ctx=[],sources=[],pdfAnalyses=[];
- for(const item of(found.messages||[]).slice(0,12)){try{
+ for(const item of(found.messages||[]).slice(0,50)){try{
   const m=await fullMessage(env,item.id,token),e=meta(m),ps=pdfs(m.payload),body=textParts(m.payload).join(" ").replace(/\s+/g," ").slice(0,6000);
   ctx.push("EMAIL: "+e.subject+"\nFROM: "+e.from+"\nDATE: "+e.date+"\nBODY: "+body);
   if(ps.length&&/rate|pay|paid|amount|load|confirmation|pickup|delivery|broker|detention|tonu|total|detail|details|weight|commodity|equipment|miles|instructions|where|when|appointment|shipper|receiver/i.test(question)){
@@ -335,7 +335,7 @@ async function processAutoReplies(env){
  const profile=await gmail(env,"/profile",token),myEmail=emailAddress(profile.emailAddress);
  if(!myEmail)throw Error("Could not identify the connected Gmail account; automatic replies are paused for safety.");
  const query="in:inbox newer_than:2d -from:me -in:spam -in:trash -category:promotions -category:social -category:updates";
- const found=await gmail(env,"/messages?maxResults=12&q="+encodeURIComponent(query),token);
+ const found=await gmail(env,"/messages?maxResults=50&q="+encodeURIComponent(query),token);
  console.log("[smart-auto-reply] Gmail search",JSON.stringify({query,resultSizeEstimate:found.resultSizeEstimate||0,returned:(found.messages||[]).length,baseline}));
  const results=[];
  for(const item of(found.messages||[]).slice(0,12)){
