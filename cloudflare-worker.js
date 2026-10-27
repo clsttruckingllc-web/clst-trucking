@@ -431,12 +431,12 @@ async function processAutoReplies(env){
  const profile=await gmail(env,"/profile",token),myEmail=emailAddress(profile.emailAddress);
  if(!myEmail)throw Error("Could not identify the connected Gmail account; automatic replies are paused for safety.");
  const query="in:inbox newer_than:7d -from:me -in:spam -in:trash";
- // Page through recent inbox mail and skip already-processed IDs. Without pagination,
- // the newest 50 processed messages could permanently hide older unprocessed messages.
+ // Scan a bounded inbox page per Cron invocation to stay within Cloudflare subrequest limits.
+ // The five-minute Cron continues through newer messages over successive runs.
  const candidates=[];
  let pageToken="",scanned=0,resultSizeEstimate=0;
- for(let page=0;page<5&&candidates.length<50;page++){
-  const params=new URLSearchParams({maxResults:"50",q:query});
+ for(let page=0;page<1&&candidates.length<5;page++){
+  const params=new URLSearchParams({maxResults:"25",q:query});
   if(pageToken)params.set("pageToken",pageToken);
   const batch=await gmail(env,"/messages?"+params.toString(),token);
   resultSizeEstimate=batch.resultSizeEstimate||resultSizeEstimate;
@@ -447,7 +447,7 @@ async function processAutoReplies(env){
    if(!candidateId)continue;
    if(await env.TOKENS.get("smart_reply_v1:"+candidateId))continue;
    candidates.push(candidate);
-   if(candidates.length>=50)break;
+   if(candidates.length>=5)break;
   }
   pageToken=batch.nextPageToken||"";
   if(!pageToken)break;
