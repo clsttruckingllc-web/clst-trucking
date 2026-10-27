@@ -224,6 +224,28 @@ footer{color:#fff!important;border-top:2px solid #006bff!important}
 ::selection{background:#ffea00!important;color:#050505!important}
 @media(max-width:700px){body{background-attachment:scroll!important}}
 
+
+/* COLOR MAGIC: живи измешани бои, со чист контраст */
+:root{--bg:#05050b;--panel:#10101c;--panel2:#17172a;--border:#36365d;--text:#fff;--muted:#d0d0e8;--red:#ff1744;--red2:#ff416c;--green:#42ffb0;--yellow:#fff000;--blue:#1687ff;--purple:#a855f7;--cyan:#00e5ff}
+body{background-color:#05050b;background-image:radial-gradient(ellipse at 12% 0%,#ff17442e,transparent 32%),radial-gradient(ellipse at 90% 12%,#1687ff35,transparent 34%),radial-gradient(ellipse at 52% 95%,#a855f729,transparent 38%);background-attachment:fixed;color:#fff}
+header{background:linear-gradient(100deg,#080810f5,#15102af5,#081b30f5)!important;border-bottom:2px solid transparent!important;border-image:linear-gradient(90deg,#ff1744,#fff000,#00e5ff,#a855f7,#ff1744) 1!important}
+.logo{background:linear-gradient(135deg,#ff1744,#ff8a00,#fff000,#00e5ff,#a855f7)!important;color:#080810!important;box-shadow:0 0 24px #00e5ff45,0 0 30px #ff174435!important}
+.cinema-hero,.welcome{background:linear-gradient(120deg,#ff17441c,#1687ff26,#a855f725,#fff00012)!important;border:1px solid #00e5ff80!important}
+.cinema-copy h2 span{background:linear-gradient(90deg,#fff000,#ff1744,#ff55c8,#a855f7,#00e5ff,#42ffb0,#fff000)!important;background-size:300% 100%!important;animation:clst-color-flow 8s linear infinite!important;color:transparent!important;background-clip:text!important;-webkit-background-clip:text!important}
+.cinema-tags span{border-color:#00e5ff80!important;background:linear-gradient(110deg,#ff174426,#1687ff2b,#a855f72b)!important;color:#fff!important}
+.panel,.stat,.gps-card,.rate-card,.cinema-card{border-color:#55558a!important}
+.panel{background:linear-gradient(140deg,#141428f2,#0b1020f5)!important}
+.stat:before{background:linear-gradient(180deg,#ff1744,#fff000,#00e5ff,#a855f7)!important}
+button.primary,.primary{background:linear-gradient(105deg,#ff1744,#ff7a00,#a855f7,#1687ff)!important;color:#fff!important;border:1px solid #ffffff80!important}
+button.secondary,.action-link{background:linear-gradient(110deg,#15152a,#102b46)!important;border-color:#00e5ff80!important;color:#fff!important}
+nav a:hover{background:linear-gradient(90deg,#ff174433,#1687ff44,#a855f744)!important;color:#fff!important}
+.eyebrow,.subtitle{color:#00e5ff!important}
+.amount{color:#fff000!important}
+.status.success{border-color:#42ffb0!important;color:#42ffb0!important}
+.cinema-card:hover{border-color:#fff000!important;box-shadow:0 0 24px #00e5ff35!important}
+@keyframes clst-color-flow{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+@media(prefers-reduced-motion:reduce){.cinema-copy h2 span{animation:none!important}}
+
 </style>
 </head>
 <body>
