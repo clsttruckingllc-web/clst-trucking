@@ -85,6 +85,29 @@ footer{color:#b7a386}
 @media(max-width:700px){body{background-attachment:scroll}.cinema-copy h2{font-size:36px}.soundtrack-bar{background:linear-gradient(145deg,#2b2117,#15100b)!important}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 
+
+/* ROAD MOTION UPGRADE: moving highway, parallax depth, chrome glints */
+#roadExperience .cinema-gallery{perspective:1100px}
+#roadExperience .cinema-card{transform:translateZ(0);background-size:cover;background-position:center;animation:card-drift 11s ease-in-out infinite alternate}
+#roadExperience .cinema-bike{animation-delay:-3.5s}
+#roadExperience .cinema-road-card{animation-delay:-7s}
+#roadExperience:before{animation:highway-drift 24s linear infinite,road-breathe 8s ease-in-out infinite alternate}
+#roadExperience:after{background:linear-gradient(180deg,#100a0520,transparent 36%,#090704d9),repeating-linear-gradient(112deg,transparent 0 110px,#e8c58b13 111px 113px);animation:road-glide 8s linear infinite}
+#roadExperience .road-horizon span{animation:lane-pulse 2.8s ease-in-out infinite}
+#roadExperience .road-horizon span:nth-child(2){animation-delay:-.9s}
+#roadExperience .road-horizon span:nth-child(3){animation-delay:-1.8s}
+#roadExperience .road-light{animation:light-sweep 7s ease-in-out infinite alternate}
+#roadExperience .road-light-two{animation-delay:-3.5s}
+@keyframes highway-drift{0%{background-position:center calc(50% + 18px)}100%{background-position:center calc(50% - 18px)}}
+@keyframes road-breathe{from{filter:saturate(.82) contrast(1.05)}to{filter:saturate(1.08) contrast(1.13)}}
+@keyframes road-glide{from{background-position:0 0,0 0}to{background-position:0 0,220px 0}}
+@keyframes card-drift{from{background-position:center 48%;filter:saturate(.78)}to{background-position:center 54%;filter:saturate(1.08)}}
+@keyframes lane-pulse{0%,100%{opacity:.18;transform:scaleX(.8)}50%{opacity:.85;transform:scaleX(1.12)}}
+@keyframes light-sweep{from{transform:translateX(-12vw);opacity:.2}to{transform:translateX(30vw);opacity:.85}}
+.soundtrack-bar.is-playing{border-color:#b98c54;box-shadow:0 0 0 1px #b98c5433,0 16px 42px #0008}
+.soundtrack-bar.is-playing .soundtrack-mark{background:linear-gradient(135deg,#c99555,#71451f);box-shadow:0 0 28px #c9955566}
+@media(prefers-reduced-motion:reduce){#roadExperience:before,#roadExperience:after,#roadExperience .cinema-card,#roadExperience .road-horizon span,#roadExperience .road-light{animation:none!important}}
+
 /* IMMERSIVE ROAD EXPERIENCE — motion reacts to scroll and pointer */
 .immersive-road{min-height:600px;display:grid;grid-template-columns:minmax(0,1fr);align-content:center;gap:14px;isolation:isolate;overflow:hidden}
 .immersive-road:before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,#090704f2 0%,#120d08d9 44%,#100b08a8 100%),url("https://images.unsplash.com/photo-1501706362039-c6e08c7e6d3a?auto=format&fit=crop&w=2200&q=85") center 45%/cover;transform:scale(1.04) translateY(var(--road-parallax,0px));will-change:transform;filter:saturate(.78) contrast(1.08)}
@@ -172,10 +195,10 @@ footer{color:#b7a386}
 
   <section class="soundtrack-bar" id="backgroundMusic">
     <div class="soundtrack-mark" aria-hidden="true"><span class="soundtrack-note-icon">♫</span><span class="soundtrack-eq"><i></i><i></i><i></i><i></i></span></div>
-    <div class="soundtrack-copy"><div class="eyebrow">CLST SOUNDTRACK</div><h3>The Road to Hell · Background Audio</h3><p>Local audio file · no YouTube player</p></div>
+    <div class="soundtrack-copy"><div class="eyebrow">CLST SOUNDTRACK</div><h3>The Road to Hell · Background Audio</h3><p>Original track when available · otherwise live diesel + highway ambience</p></div>
     <div class="soundtrack-controls">
-      <button class="primary" id="soundtrackToggle" type="button">▶ Play soundtrack</button>
-      <span id="soundtrackStatus" class="soundtrack-status" role="status">MP3 file not uploaded yet</span>
+      <button class="primary" id="soundtrackToggle" type="button">▶ Start road soundtrack</button>
+      <span id="soundtrackStatus" class="soundtrack-status" role="status">Tap to start · engine + open-road ambience</span>
     </div>
     <audio id="clstBackgroundAudio" src="./audio/road-to-hell.mp3" preload="auto" loop playsinline></audio>
   </section>
@@ -320,50 +343,92 @@ const $ = id => document.getElementById(id);
 const soundtrack = $('clstBackgroundAudio');
 const soundtrackToggle = $('soundtrackToggle');
 const soundtrackStatus = $('soundtrackStatus');
+let roadAudioContext = null;
+let roadAudioNodes = [];
+let roadNoiseSource = null;
 function setSoundtrackStatus(message) {
   if (soundtrackStatus) soundtrackStatus.textContent = message;
+}
+function stopRoadAmbience() {
+  roadAudioNodes.forEach(node => { try { node.stop?.(); } catch {} try { node.disconnect?.(); } catch {} });
+  roadAudioNodes = [];
+  if (roadNoiseSource) { try { roadNoiseSource.stop(); } catch {} try { roadNoiseSource.disconnect(); } catch {} roadNoiseSource = null; }
+  if (roadAudioContext) { roadAudioContext.close().catch(() => {}); roadAudioContext = null; }
+}
+async function startRoadAmbience() {
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) { setSoundtrackStatus('This browser does not support road ambience'); return; }
+  stopRoadAmbience();
+  roadAudioContext = new AudioCtx();
+  const ctx = roadAudioContext;
+  await ctx.resume();
+  const master = ctx.createGain();
+  master.gain.value = 0.0001;
+  master.connect(ctx.destination);
+  master.gain.setTargetAtTime(0.14, ctx.currentTime, 1.1);
+  const engine = ctx.createOscillator();
+  engine.type = 'sawtooth';
+  engine.frequency.value = 46;
+  const engineFilter = ctx.createBiquadFilter();
+  engineFilter.type = 'lowpass';
+  engineFilter.frequency.value = 125;
+  const engineGain = ctx.createGain();
+  engineGain.gain.value = 0.16;
+  engine.connect(engineFilter); engineFilter.connect(engineGain); engineGain.connect(master); engine.start();
+  const pulse = ctx.createOscillator();
+  pulse.type = 'sine';
+  pulse.frequency.value = 1.7;
+  const pulseGain = ctx.createGain();
+  pulseGain.gain.value = 0.035;
+  pulse.connect(pulseGain); pulseGain.connect(engineGain.gain); pulse.start();
+  const buffer = ctx.createBuffer(1, ctx.sampleRate * 3, ctx.sampleRate);
+  const channel = buffer.getChannelData(0);
+  for (let i = 0; i < channel.length; i++) channel[i] = (Math.random() * 2 - 1) * 0.22;
+  roadNoiseSource = ctx.createBufferSource();
+  roadNoiseSource.buffer = buffer;
+  roadNoiseSource.loop = true;
+  const roadFilter = ctx.createBiquadFilter();
+  roadFilter.type = 'lowpass';
+  roadFilter.frequency.value = 520;
+  const roadGain = ctx.createGain();
+  roadGain.gain.value = 0.08;
+  roadNoiseSource.connect(roadFilter); roadFilter.connect(roadGain); roadGain.connect(master); roadNoiseSource.start();
+  roadAudioNodes = [engine, pulse];
+  $('backgroundMusic')?.classList.add('is-playing');
+  soundtrackToggle.textContent = '❚❚ Stop road soundtrack';
+  setSoundtrackStatus('Road ambience playing · soft diesel + highway');
 }
 async function startSoundtrack() {
   if (!soundtrack) return;
   try {
-    soundtrack.volume = 0.38;
+    soundtrack.volume = 0.34;
     await soundtrack.play();
     $('backgroundMusic')?.classList.add('is-playing');
     if (soundtrackToggle) soundtrackToggle.textContent = '❚❚ Pause soundtrack';
-    setSoundtrackStatus('Playing in background');
+    setSoundtrackStatus('Playing The Road to Hell');
   } catch {
-    setSoundtrackStatus('MP3 file is missing from the site');
+    await startRoadAmbience();
   }
 }
 if (soundtrackToggle && soundtrack) {
   soundtrackToggle.addEventListener('click', async () => {
-    if (!soundtrack.paused) {
+    if (!soundtrack.paused || roadAudioContext) {
       soundtrack.pause();
+      stopRoadAmbience();
       $('backgroundMusic')?.classList.remove('is-playing');
-      soundtrackToggle.textContent = '▶ Play soundtrack';
-      setSoundtrackStatus('Paused');
+      soundtrackToggle.textContent = '▶ Start road soundtrack';
+      setSoundtrackStatus('Sound paused');
     } else {
       await startSoundtrack();
     }
   });
-  soundtrack.addEventListener('pause', () => { $('backgroundMusic')?.classList.remove('is-playing'); });
+  soundtrack.addEventListener('pause', () => { if (!roadAudioContext) $('backgroundMusic')?.classList.remove('is-playing'); });
   soundtrack.addEventListener('playing', () => { $('backgroundMusic')?.classList.add('is-playing'); });
   soundtrack.addEventListener('error', () => {
-    $('backgroundMusic')?.classList.remove('is-playing');
-    setSoundtrackStatus('MP3 file is missing from the site');
-    soundtrackToggle.textContent = '▶ Play soundtrack';
+    setSoundtrackStatus('Original MP3 unavailable · tap to start road ambience');
+    soundtrackToggle.textContent = '▶ Start road soundtrack';
   });
-  window.addEventListener('load', () => { startSoundtrack(); });
-  // Start audio on the first visitor gesture if the browser blocked autoplay.
-  const unlockSoundtrack = () => {
-    if (soundtrack.paused) void startSoundtrack();
-    window.removeEventListener('pointerdown', unlockSoundtrack);
-    window.removeEventListener('keydown', unlockSoundtrack);
-    window.removeEventListener('touchstart', unlockSoundtrack);
-  };
-  window.addEventListener('pointerdown', unlockSoundtrack, { once: true, passive: true });
-  window.addEventListener('keydown', unlockSoundtrack, { once: true });
-  window.addEventListener('touchstart', unlockSoundtrack, { once: true, passive: true });
+  // Browsers block unsolicited sound; start on a deliberate tap, not on page load.
 }
 let pdfRecords = [];
 let emailRecords = [];
