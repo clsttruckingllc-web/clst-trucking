@@ -128,8 +128,17 @@ export async function onRequest({ request, env }) {
   const accessCookie = cookieHeader
     .split(";")
     .map((part) => part.trim())
-    .find((part) => part.startsWith("CF_Authorization="));
-  const cookieToken = accessCookie ? decodeURIComponent(accessCookie.slice("CF_Authorization=".length)) : "";
+    .find((part) => /^CF_Authorization(?:[-_][^=]+)?=/i.test(part));
+  let cookieToken = "";
+  if (accessCookie) {
+    const separator = accessCookie.indexOf("=");
+    const rawCookieToken = separator >= 0 ? accessCookie.slice(separator + 1) : "";
+    try {
+      cookieToken = decodeURIComponent(rawCookieToken);
+    } catch {
+      cookieToken = rawCookieToken;
+    }
+  }
   const accessToken = request.headers.get("Cf-Access-Jwt-Assertion") || cookieToken;
   if (!accessToken) {
     return json({ error: "Cloudflare Access session missing. Sign in to this site through Cloudflare Access, then refresh fleet locations." }, 401);
