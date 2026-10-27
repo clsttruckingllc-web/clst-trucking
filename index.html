@@ -1,92 +1,98 @@
 <!doctype html>
-<html lang="mk">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#b5121b">
-<meta name="description" content="CLST Trucking — работниците го движат светот.">
-<title>CLST TRUCKING — Работниците на патот</title>
+<meta name="theme-color" content="#102746">
+<meta name="description" content="CLST Trucking LLC — American trucking built on hard work, reliability, and the freedom of the open road.">
+<title>CLST Trucking LLC | Driven by America</title>
 <style>
-:root{--red:#b5121b;--red-dark:#790d14;--gold:#ffd84d;--cream:#fff1cf;--ink:#171313}
+:root{--navy:#102746;--blue:#1b426d;--red:#c8323e;--white:#fff;--ice:#f2f5f8;--gold:#e5bd69;--ink:#142033}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
-header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px clamp(18px,5vw,76px);background:var(--red);color:var(--gold);border-bottom:5px solid var(--gold)}
-.brand{display:flex;align-items:center;gap:13px;font-weight:950;letter-spacing:.08em}
-.emblem{font-size:42px;line-height:1}
-.brand small{display:block;font-size:10px;letter-spacing:.2em;margin-top:4px;color:var(--cream)}
-nav{display:flex;gap:20px;flex-wrap:wrap}
-nav a{color:var(--cream);text-decoration:none;text-transform:uppercase;font-size:11px;font-weight:900;letter-spacing:.12em}
+body{margin:0;background:var(--white);color:var(--ink);font-family:Inter,Arial,Helvetica,sans-serif}
+a{color:inherit}
+header{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px clamp(20px,6vw,88px);background:var(--navy);color:white;border-bottom:3px solid var(--red)}
+.brand{display:flex;align-items:center;gap:13px;font-weight:900;letter-spacing:.07em;font-size:18px}
+.logo{display:grid;place-items:center;width:48px;height:48px;border:2px solid #ffffffa8;border-radius:50%;color:white;font-size:22px;background:linear-gradient(145deg,var(--red) 0 48%,var(--navy) 49%)}
+.brand small{display:block;margin-top:4px;color:#c7d4e4;font-size:9px;letter-spacing:.22em}
+nav{display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+nav a{text-decoration:none;text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:.13em;color:#e7edf5}
 nav a:hover{color:var(--gold)}
-.hero{position:relative;overflow:hidden;min-height:590px;padding:clamp(48px,9vw,120px) clamp(20px,8vw,120px) 0;background:var(--red);color:var(--cream)}
-.hero:before{content:"★";position:absolute;right:5%;top:2%;font-size:clamp(200px,42vw,560px);line-height:1;color:#ffffff0b;pointer-events:none}
-.kicker{font-size:12px;letter-spacing:.24em;font-weight:950;color:var(--gold);text-transform:uppercase}
-h1{position:relative;z-index:1;max-width:900px;margin:18px 0;font-size:clamp(48px,8.5vw,112px);line-height:.88;letter-spacing:-.065em;text-transform:uppercase}
-h1 span{color:var(--gold)}
-.hero p{position:relative;z-index:1;max-width:570px;font-size:clamp(16px,2vw,21px);line-height:1.6;color:#fff0d7}
-.banner{display:inline-block;margin-top:12px;padding:14px 19px;background:var(--gold);color:var(--red-dark);font-weight:950;letter-spacing:.1em;text-transform:uppercase}
-.road{position:relative;height:180px;margin:46px calc(clamp(20px,8vw,120px)*-1) 0;background:var(--ink);border-top:7px solid var(--gold);overflow:hidden}
-.road:after{content:"";position:absolute;top:86px;left:0;width:200%;border-top:5px dashed var(--gold);animation:roadmove 3s linear infinite}
-.truck{position:absolute;z-index:2;left:-260px;bottom:24px;width:240px;height:85px;animation:truckmove 12s linear infinite}
-.truck.second{bottom:13px;transform:scale(.72);animation-delay:-6s;opacity:.75}
-.cab{position:absolute;right:0;bottom:17px;width:65px;height:49px;background:var(--gold);border:4px solid var(--ink);border-radius:4px 12px 2px 2px}
-.cab:before{content:"";position:absolute;right:7px;top:7px;width:25px;height:19px;background:var(--red);border:3px solid var(--ink)}
-.trailer{position:absolute;left:0;bottom:17px;width:174px;height:62px;background:var(--cream);border:4px solid var(--ink)}
-.trailer:after{content:"CLST";position:absolute;inset:0;display:grid;place-items:center;color:var(--red);font-size:27px;font-weight:1000;letter-spacing:.08em}
-.wheel{position:absolute;bottom:0;width:28px;height:28px;border-radius:50%;background:var(--gold);border:7px solid var(--ink);box-shadow:inset 0 0 0 2px var(--cream)}
-.w1{left:22px}.w2{left:133px}.w3{right:13px}
-section{padding:76px clamp(20px,8vw,120px)}
-.section-head{max-width:800px;margin:0 auto 36px;text-align:center}
-.section-head .star{font-size:40px;color:var(--red)}
-h2{font-size:clamp(30px,5vw,58px);line-height:1;margin:12px 0;text-transform:uppercase;letter-spacing:-.04em}
-.section-head p{font-size:17px;line-height:1.7}
-.values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;background:var(--red);border:3px solid var(--red)}
-.value{padding:28px;background:var(--cream);min-height:190px}
-.value b{display:block;font-size:35px;color:var(--red);margin-bottom:12px}
-.value h3{margin:0 0 10px;text-transform:uppercase;font-size:18px}
-.value p{margin:0;line-height:1.6;color:#4c3b36}
-.manifesto{background:var(--gold);text-align:center}
-.manifesto blockquote{max-width:950px;margin:0 auto;font-size:clamp(25px,4vw,47px);font-weight:950;line-height:1.15;text-transform:uppercase}
-.manifesto cite{display:block;margin-top:22px;font-size:12px;letter-spacing:.2em;font-style:normal;color:var(--red-dark)}
-footer{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;padding:28px clamp(20px,5vw,76px);background:var(--ink);color:var(--cream);font-size:12px;letter-spacing:.08em}
-footer strong{color:var(--gold)}
-@keyframes truckmove{from{left:-260px}to{left:110%}}
-@keyframes roadmove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@media(max-width:700px){header{align-items:flex-start;flex-direction:column}.hero{min-height:530px;padding-top:65px}.road{height:145px;margin-top:38px}.values{grid-template-columns:1fr}.value{min-height:auto}.truck{transform:scale(.8);transform-origin:left bottom}.truck.second{transform:scale(.58);transform-origin:left bottom}}
+.hero{position:relative;isolation:isolate;overflow:hidden;min-height:640px;padding:clamp(64px,9vw,120px) clamp(22px,8vw,124px) 0;background:linear-gradient(112deg,#102746 0%,#17385f 62%,#21476d 100%);color:white}
+.hero:before{content:"";position:absolute;z-index:-1;right:-8%;top:-22%;width:56%;height:145%;transform:rotate(18deg);opacity:.13;background:repeating-linear-gradient(to bottom,#fff 0 24px,transparent 24px 48px)}
+.hero:after{content:"★";position:absolute;z-index:-1;right:8%;top:12%;font-size:clamp(180px,32vw,440px);line-height:1;color:#ffffff0b}
+.eyebrow{display:flex;align-items:center;gap:12px;color:var(--gold);font-size:11px;font-weight:900;letter-spacing:.24em;text-transform:uppercase}
+.eyebrow:before{content:"";width:36px;height:3px;background:var(--red)}
+h1{max-width:900px;margin:24px 0 20px;font-size:clamp(48px,8vw,108px);line-height:.91;letter-spacing:-.065em;text-transform:uppercase}
+h1 span{color:#f0c66e}
+.hero p{max-width:560px;color:#dce5ef;font-size:clamp(16px,2vw,20px);line-height:1.7}
+.cta{display:inline-flex;align-items:center;gap:12px;margin-top:18px;padding:15px 20px;background:var(--red);color:white;text-decoration:none;text-transform:uppercase;font-size:11px;font-weight:900;letter-spacing:.15em;border-radius:3px;box-shadow:0 8px 25px #050e1d38}
+.cta:hover{background:#e14450}
+.stats{position:relative;display:flex;gap:0;flex-wrap:wrap;margin-top:54px;border-top:1px solid #ffffff38;max-width:750px}
+.stat{padding:20px 34px 24px 0;margin-right:34px}
+.stat strong{display:block;color:white;font-size:24px;letter-spacing:-.03em}
+.stat span{display:block;margin-top:5px;color:#c7d4e4;font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+.road-scene{position:relative;height:190px;margin:36px calc(clamp(22px,8vw,124px)*-1) 0;background:#0b1421;border-top:4px solid var(--gold);overflow:hidden}
+.road-scene:before{content:"";position:absolute;top:99px;left:0;width:200%;border-top:5px dashed #f4d17c;animation:road 3.2s linear infinite}
+.truck{position:absolute;left:-300px;bottom:26px;width:280px;height:91px;animation:drive 15s linear infinite}
+.truck.two{bottom:14px;transform:scale(.72);animation-delay:-7.5s;opacity:.72}
+.trailer{position:absolute;left:0;bottom:18px;width:198px;height:66px;border:4px solid #0b1421;border-radius:3px;background:linear-gradient(to bottom,#f9fbff 0 28%,#c8323e 28% 43%,#f9fbff 43% 58%,#c8323e 58% 73%,#f9fbff 73%);box-shadow:0 5px 0 #0003}
+.trailer:after{content:"CLST";position:absolute;inset:0;display:grid;place-items:center;font-size:26px;font-weight:1000;letter-spacing:.12em;color:var(--navy);text-shadow:0 1px white}
+.cab{position:absolute;right:0;bottom:18px;width:76px;height:55px;background:var(--red);border:4px solid #0b1421;border-radius:4px 13px 3px 3px}
+.cab:before{content:"";position:absolute;right:8px;top:7px;width:29px;height:21px;background:#a8d8ed;border:3px solid #0b1421;border-radius:2px}
+.cab:after{content:"";position:absolute;left:-6px;bottom:5px;width:8px;height:11px;background:var(--gold)}
+.wheel{position:absolute;bottom:0;width:29px;height:29px;border-radius:50%;background:#111b2b;border:7px solid #778395;box-shadow:inset 0 0 0 2px #e4e9ef}
+.w1{left:24px}.w2{left:151px}.w3{right:14px}
+section.content{padding:84px clamp(22px,8vw,124px)}
+.intro{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(30px,7vw,100px);align-items:center}
+.kicker{color:var(--red);font-size:10px;font-weight:900;letter-spacing:.22em;text-transform:uppercase}
+h2{margin:13px 0;font-size:clamp(32px,5vw,58px);line-height:1;letter-spacing:-.055em;text-transform:uppercase;color:var(--navy)}
+.intro p{font-size:17px;line-height:1.8;color:#4c596b}
+.values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:42px}
+.value{padding:29px 26px 30px;border:1px solid #dce3eb;border-top:4px solid var(--red);background:white;box-shadow:0 14px 35px #14203308}
+.value .number{color:var(--red);font-size:12px;font-weight:900;letter-spacing:.15em}
+.value h3{margin:16px 0 10px;color:var(--navy);font-size:20px;text-transform:uppercase}
+.value p{margin:0;color:#586577;line-height:1.7;font-size:14px}
+.quote{padding:76px 22px;text-align:center;background:var(--ice);border-top:1px solid #dce3eb;border-bottom:1px solid #dce3eb}
+.quote blockquote{max-width:900px;margin:0 auto;color:var(--navy);font-size:clamp(26px,4.4vw,48px);line-height:1.15;font-weight:900;letter-spacing:-.04em}
+.quote cite{display:block;margin-top:22px;color:var(--red);font-size:10px;font-style:normal;font-weight:900;letter-spacing:.22em;text-transform:uppercase}
+footer{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;padding:28px clamp(20px,6vw,88px);background:#0b1b30;color:#d9e2ed;font-size:10px;letter-spacing:.13em;text-transform:uppercase}
+footer strong{color:white;font-size:13px}
+.flag-mark{display:inline-flex;gap:4px;align-items:center;color:var(--gold)}
+@keyframes drive{from{left:-300px}to{left:110%}}
+@keyframes road{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(max-width:720px){header{align-items:flex-start;flex-direction:column}nav{gap:16px}.hero{min-height:610px;padding-top:65px}.stats{gap:8px}.stat{padding-right:14px;margin-right:10px}.intro{grid-template-columns:1fr}.values{grid-template-columns:1fr}.road-scene{height:160px;margin-top:30px}.truck{transform:scale(.82);transform-origin:left bottom}.truck.two{transform:scale(.58);transform-origin:left bottom}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand"><span class="emblem" aria-hidden="true">☭</span><div>CLST TRUCKING<small>РАБОТНИЦИТЕ НА ПАТОТ</small></div></div>
-  <nav aria-label="Главна навигација"><a href="#ideja">Идејата</a><a href="#principi">Принципи</a><a href="#zavet">Завет</a></nav>
+  <a class="brand" href="#" aria-label="CLST Trucking home" style="text-decoration:none"><span class="logo" aria-hidden="true">★</span><span>CLST TRUCKING LLC<small>AMERICAN ROADS. RELIABLE SERVICE.</small></span></a>
+  <nav aria-label="Main navigation"><a href="#about">Who We Are</a><a href="#values">Our Values</a><a href="#commitment">Our Commitment</a></nav>
 </header>
 <main>
   <section class="hero">
-    <div class="kicker">Единство · Работа · Напредок</div>
-    <h1>Светот го<br><span>движат</span><br>работниците.</h1>
-    <p>Секој пат има своја приказна. Секој товар има своја цел. А зад секоја испорачана милја стојат луѓе, труд и заедништво.</p>
-    <div class="banner">Сите тркала — напред!</div>
-    <div class="road" aria-label="Камиони што се движат по пат">
+    <div class="eyebrow">Built on hard work. Driven by freedom.</div>
+    <h1>Made for the<br><span>open road.</span></h1>
+    <p>From one mile to the next, America keeps moving. CLST Trucking stands for dependable work, honest service, and the people who keep freight moving forward.</p>
+    <a class="cta" href="#about">The road ahead <span aria-hidden="true">→</span></a>
+    <div class="stats"><div class="stat"><strong>Every Mile</strong><span>Purpose in motion</span></div><div class="stat"><strong>One Team</strong><span>Built on trust</span></div><div class="stat"><strong>Forward</strong><span>Always moving</span></div></div>
+    <div class="road-scene" aria-label="Illustration of CLST trucks traveling on an American highway">
       <div class="truck"><div class="trailer"></div><div class="cab"></div><i class="wheel w1"></i><i class="wheel w2"></i><i class="wheel w3"></i></div>
-      <div class="truck second"><div class="trailer"></div><div class="cab"></div><i class="wheel w1"></i><i class="wheel w2"></i><i class="wheel w3"></i></div>
+      <div class="truck two"><div class="trailer"></div><div class="cab"></div><i class="wheel w1"></i><i class="wheel w2"></i><i class="wheel w3"></i></div>
     </div>
   </section>
-  <section id="ideja">
-    <div class="section-head"><div class="star">★</div><h2>Една класа.<br>Еден пат.</h2><p>Почит за секој возач, механичар, диспечер и работник што го одржува светот во движење.</p></div>
-  </section>
-  <section id="principi" style="padding-top:0">
-    <div class="values">
-      <article class="value"><b>01</b><h3>Заедништво</h3><p>Никој не го поминува патот сам. Силата е во луѓето што си помагаат.</p></article>
-      <article class="value"><b>02</b><h3>Достоинство</h3><p>Чесниот труд заслужува почит, без разлика кој е зад воланот или во магацинот.</p></article>
-      <article class="value"><b>03</b><h3>Напредок</h3><p>Со дисциплина, солидарност и визија, секоја следна милја носи нова можност.</p></article>
+  <section class="content" id="about">
+    <div class="intro"><div><div class="kicker">The American trucking spirit</div><h2>Real people.<br>Real work.<br>Real commitment.</h2></div><p>Behind every delivery is a team that takes pride in doing the job right. We believe reliability is earned, respect matters, and progress comes from showing up mile after mile.</p></div>
+    <div class="values" id="values">
+      <article class="value"><span class="number">01 / RELIABILITY</span><h3>Keep your word</h3><p>Good service starts with accountability, clear communication, and doing what you say you will do.</p></article>
+      <article class="value"><span class="number">02 / RESPECT</span><h3>People first</h3><p>Drivers, partners, and customers deserve respect. Every role matters in keeping the road moving.</p></article>
+      <article class="value"><span class="number">03 / PROGRESS</span><h3>Always forward</h3><p>We meet each new mile with focus, determination, and the drive to keep getting better.</p></article>
     </div>
   </section>
-  <section class="manifesto" id="zavet">
-    <blockquote>„Ниту еден пат не е предолг кога го градиме заедно.“</blockquote>
-    <cite>— CLST TRUCKING · РАБОТАТА НÈ ПОВРЗУВА</cite>
-  </section>
+  <section class="quote" id="commitment"><blockquote>“The country moves forward when the people behind the wheel move forward.”</blockquote><cite>CLST Trucking LLC · Driven by hard work</cite></section>
 </main>
-<footer><strong>☭ CLST TRUCKING</strong><span>ЕДИНСТВО · ТРУД · СОЛИДАРНОСТ</span><span>© CLST TRUCKING LLC</span></footer>
+<footer><strong>★ CLST TRUCKING LLC</strong><span class="flag-mark">RED · WHITE · BLUE</span><span>Built for the long haul.</span></footer>
 </body>
 </html>
