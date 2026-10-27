@@ -385,7 +385,7 @@ async function classifyReply(env,m,token){
  return {action,confidence,reason:String(a.reason||"No reason supplied").slice(0,400),reply:String(a.reply||"").trim().slice(0,5000),subject,from,to,body};
 }
 async function processAutoReplies(env){
- if(!env.GEMINI_API_KEY||!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET)throw Error("Auto-reply requires Google OAuth and Gemini configuration.");
+ if(!(env.OPENAI_API_KEY||env.GEMINI_API_KEY)||!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET)throw Error("Auto-reply requires Google OAuth and either OPENAI_API_KEY or GEMINI_API_KEY.");
  const token=await googleToken(env);
  // Establish a one-time activation baseline so enabling automation never replies to old unread mail.
  const baselineKey="smart_reply_started_at";
@@ -485,7 +485,7 @@ async function recordAutoReplyRun(env){
 async function autoReplyStatus(env){
  let lastRun=null;
  try{const raw=await env.TOKENS.get("smart_reply_last_run");if(raw)lastRun=JSON.parse(raw);}catch(e){}
- return json({success:true,configured:!!((env.OPENAI_API_KEY||env.GEMINI_API_KEY)&&env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),aiProvider:env.OPENAI_API_KEY?"openai":env.GEMINI_API_KEY?"gemini":"not_configured",gmailConnected:!!(await env.TOKENS.get("google_refresh_token")),model:env.GEMINI_MODEL||MODEL,lastRun});
+ return json({success:true,configured:!!((env.OPENAI_API_KEY||env.GEMINI_API_KEY)&&env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),aiProvider:env.OPENAI_API_KEY?"openai":env.GEMINI_API_KEY?"gemini":"not_configured",gmailConnected:!!(await env.TOKENS.get("google_refresh_token")),model:env.OPENAI_API_KEY?(env.OPENAI_MODEL||OPENAI_MODEL):(env.GEMINI_MODEL||MODEL),lastRun});
 }
 async function runAutoReplies(env){
  try{return json(await recordAutoReplyRun(env));}catch(e){return json({success:false,error:errText(e)},502);}
