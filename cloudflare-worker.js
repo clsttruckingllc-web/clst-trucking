@@ -4,7 +4,7 @@
  * API_KEY, and one AI secret: OPENAI_API_KEY (preferred) or GEMINI_API_KEY. Optional: OPENAI_MODEL, GEMINI_MODEL and RingCentral credentials.
  * Keep Google OAuth callback at /oauth/callback.
  */
-const MODEL = "gemini-2.5-flash-lite";
+const MODEL = "gemini-3.5-flash-lite";
 const OPENAI_MODEL = "gpt-4.1-mini";
 const GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me";
 const RC = "https://platform.ringcentral.com";
