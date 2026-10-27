@@ -135,7 +135,7 @@ async function aiGenerate(env,parts,instruction,jsonMode=true){
   }
  }
  if(!env.GEMINI_API_KEY)throw Error("No usable AI provider configured. Set OPENAI_API_KEY or GEMINI_API_KEY.");
- const model=env.GEMINI_MODEL||MODEL,url="https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(model)+":generateContent?key="+encodeURIComponent(env.GEMINI_API_KEY);let last="";
+ const configuredGeminiModel=env.GEMINI_MODEL||MODEL;const model=configuredGeminiModel==="gemini-2.5-flash-lite"?MODEL:configuredGeminiModel,url="https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(model)+":generateContent?key="+encodeURIComponent(env.GEMINI_API_KEY);let last="";
  for(let i=0;i<3;i++){
   const generationConfig={temperature:0.1,maxOutputTokens:3000};if(jsonMode)generationConfig.responseMimeType="application/json";
   const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({systemInstruction:{parts:[{text:instruction}]},contents:[{role:"user",parts}],generationConfig})});
