@@ -10,7 +10,13 @@
   "theme_color": "#e11d2e",
   "icons": [
     {
-      "src": "/assets/clst-icon.svg",
+      "src": "/assets/clst-icon-180.png?v=2",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/clst-icon.svg?v=2",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
