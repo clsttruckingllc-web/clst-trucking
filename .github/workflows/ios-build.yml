@@ -1,4 +1,4 @@
-name: Build CLST iOS (simulator check)
+name: Build CLST iOS unsigned IPA
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ on:
       - ".github/workflows/ios-build.yml"
 
 jobs:
-  build-ios-simulator:
+  build-ios-device:
     runs-on: macos-15
     steps:
       - name: Check out source
@@ -19,30 +19,29 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: Build iOS Simulator app
+      - name: Build iPhone app (unsigned, for local sideload signing)
         working-directory: native-ios
         run: |
           xcodebuild \
             -project CLSTTruckingiOS.xcodeproj \
             -scheme CLSTTruckingiOS \
             -configuration Release \
-            -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath "$RUNNER_TEMP/CLSTDerivedData" \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/CLSTDeviceData" \
             CODE_SIGNING_ALLOWED=NO \
             build
 
-      - name: Package simulator build for inspection
-        if: success()
+      - name: Package unsigned IPA
         run: |
-          cd "$RUNNER_TEMP/CLSTDerivedData/Build/Products/Release-iphonesimulator"
-          /usr/bin/ditto -c -k --sequesterRsrc --keepParent CLSTTruckingiOS.app "$GITHUB_WORKSPACE/CLSTTruckingiOS-Simulator.zip"
+          mkdir -p "$RUNNER_TEMP/CLSTPayload/Payload"
+          cp -R "$RUNNER_TEMP/CLSTDeviceData/Build/Products/Release-iphoneos/CLSTTruckingiOS.app" "$RUNNER_TEMP/CLSTPayload/Payload/"
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$RUNNER_TEMP/CLSTPayload/Payload" "$GITHUB_WORKSPACE/CLSTTruckingiOS-unsigned.ipa"
 
-      - name: Upload simulator build artifact
-        if: success()
+      - name: Upload unsigned IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CLSTTruckingiOS-simulator-only
-          path: CLSTTruckingiOS-Simulator.zip
+          name: CLSTTruckingiOS-unsigned-IPA
+          path: CLSTTruckingiOS-unsigned.ipa
           if-no-files-found: error
           retention-days: 7
