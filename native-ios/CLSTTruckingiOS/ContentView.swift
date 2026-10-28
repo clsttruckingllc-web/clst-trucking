@@ -1,5 +1,6 @@
 import SwiftUI
 import WebKit
+import UIKit
 
 private let dashboardURL = URL(string: "https://clst-trucking.pages.dev/")!
 
@@ -54,7 +55,6 @@ private struct DashboardWebView: UIViewRepresentable {
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
         webView.allowsBackForwardNavigationGestures = true
-        webView.isInspectable = false
         webView.scrollView.contentInsetAdjustmentBehavior = .automatic
         webView.load(URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 45))
         return webView
