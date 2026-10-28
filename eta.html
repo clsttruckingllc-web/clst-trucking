@@ -103,7 +103,7 @@ a{color:#ff9ca4}
     return {lat:Number(results[0].lat),lon:Number(results[0].lon)};
   }
   async function loadRates(){
-    const response=await fetch('/api/rates?maxResults=10',{headers:{Accept:'application/json'},cache:'no-store',credentials:'same-origin'});
+    const response=await fetch('/api/rates?maxResults=50',{headers:{Accept:'application/json'},cache:'no-store',credentials:'same-origin'});
     const data=await response.json().catch(()=>({}));
     if(!response.ok||data.success===false||!Array.isArray(data.rates))throw new Error(data.error||'Saved Gmail Rate Confirmations are unavailable.');
     rateRecords=flattenRates(data);
@@ -116,7 +116,13 @@ a{color:#ff9ca4}
     const response=await fetch('/api/rockeld/locations',{headers,cache:'no-store',credentials:'same-origin'});if(response.status===401){location.href='/gps-login.html';throw new Error('GPS sign-in required.');}
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(data.error||'Secure ROCK ELD access is not configured. Sign in through company access first.');
-    const trucks=(Array.isArray(data.locations)?data.locations:[]).filter(t=>t.status==='fresh'&&Number.isFinite(Number(t.latitude))&&Number.isFinite(Number(t.longitude)));
+    const trucks=(Array.isArray(data.locations)?data.locations:[]).map(t=>({...t,
+      latitude:Number(t.latitude??t.lat??t.latitudeDegrees),
+      longitude:Number(t.longitude??t.lon??t.lng??t.longitudeDegrees),
+      status:String(t.status||'').toLowerCase(),
+      ageMinutes:Number(t.ageMinutes??t.age_minutes??NaN)
+    })).filter(t=>Number.isFinite(t.latitude)&&Number.isFinite(t.longitude)&&
+      (t.status==='fresh'||(Number.isFinite(t.ageMinutes)&&t.ageMinutes<=15)));
     if(!trucks.length)throw new Error('ROCK ELD has no fresh truck locations within the last 15 minutes.');
     const a=load.analysis||{};
     const truckHint=[a.truck_number,a.truck,a.truck_id,a.vehicle_id,a.vehicleId,a.unit_number].filter(Boolean).map(String);
@@ -139,7 +145,7 @@ a{color:#ff9ca4}
       const load=rateRecords.find(r=>String((r.analysis||{}).load_number||'').trim().toLowerCase()===loadNumber.toLowerCase());
       if(!load)throw new Error('No saved Gmail Rate Confirmation matched load '+loadNumber+'.');
       const analysis=load.analysis||{};
-      const destination=String(analysis.delivery_location||analysis.delivery_address||analysis.destination||'').trim();
+      const destination=String(analysis.delivery_location||analysis.delivery_address||analysis.delivery_city_state||analysis.destination||analysis.delivery||'').trim();
       if(!destination)throw new Error('The Rate Confirmation does not contain a delivery location.');
       const truck=await loadTruckLocation(load);
       const destinationPoint=await geocode(destination);
@@ -149,7 +155,7 @@ a{color:#ff9ca4}
       const route=await routeResponse.json();
       if(route.code!=='Ok'||!route.routes?.length)throw new Error('No driving route was found between the truck and delivery location.');
       const miles=route.routes[0].distance/1609.344;
-      const speed=Number(truck.speed);
+      const speed=Number(truck.speed??truck.speedMph??truck.speed_mph);
       const mph=Number.isFinite(speed)&&speed>3?Math.min(speed,65):50;
       const drivingHours=miles/mph;
       const dailyHours=10,restHours=10;
