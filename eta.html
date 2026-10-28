@@ -94,6 +94,13 @@ a{color:#ff9ca4}
   }
   function fmtDate(date){return new Intl.DateTimeFormat(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(date);}
   function fmtDuration(hours){const whole=Math.floor(hours),mins=Math.round((hours-whole)*60);return mins?whole+' h '+mins+' min':whole+' h';}
+  async function fetchWithTimeout(url,options={},label='Request',timeoutMs=12000){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),timeoutMs);
+    try{return await fetch(url,{...options,signal:controller.signal});}
+    catch(error){if(error&&error.name==='AbortError')throw new Error(label+' timed out after '+Math.round(timeoutMs/1000)+' seconds. Please try again.');throw error;}
+    finally{clearTimeout(timer);}
+  }
   async function geocode(query){
     const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us&q='+encodeURIComponent(query);
     const response=await fetch(url,{headers:{Accept:'application/json'},cache:'no-store'});
@@ -103,7 +110,7 @@ a{color:#ff9ca4}
     return {lat:Number(results[0].lat),lon:Number(results[0].lon)};
   }
   async function loadRates(){
-    const response=await fetch('/api/rates?maxResults=50',{headers:{Accept:'application/json'},cache:'no-store',credentials:'same-origin'});
+    const response=await fetchWithTimeout('/api/rates?maxResults=50',{headers:{Accept:'application/json'},cache:'no-store',credentials:'same-origin'},'Gmail Rate Confirmations request',12000);
     const data=await response.json().catch(()=>({}));
     if(!response.ok||data.success===false||!Array.isArray(data.rates))throw new Error(data.error||'Saved Gmail Rate Confirmations are unavailable.');
     rateRecords=flattenRates(data);
@@ -113,7 +120,7 @@ a{color:#ff9ca4}
     const pass=sessionStorage.getItem('clst_rockeld_gps_password')||'';
     const headers={Accept:'application/json'};
     if(user&&pass)headers.Authorization='Basic '+btoa(unescape(encodeURIComponent(user+':'+pass)));
-    const response=await fetch('/api/rockeld/locations',{headers,cache:'no-store',credentials:'same-origin'});if(response.status===401){location.href='/gps-login.html';throw new Error('GPS sign-in required.');}
+    const response=await fetchWithTimeout('/api/rockeld/locations',{headers,cache:'no-store',credentials:'same-origin'},'ROCK ELD GPS request',12000);if(response.status===401){location.href='/gps-login.html';throw new Error('GPS sign-in required.');}
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(data.error||'Secure ROCK ELD access is not configured. Sign in through company access first.');
     const trucks=(Array.isArray(data.locations)?data.locations:[]).map(t=>({...t,
@@ -141,16 +148,20 @@ a{color:#ff9ca4}
     try{
       const loadNumber=$('load').value.trim();
       if(!loadNumber)throw new Error('Enter the load number.');
+      $('status').textContent='Step 1/4: loading saved Gmail Rate Confirmations…';
       await loadRates();
       const load=rateRecords.find(r=>String((r.analysis||{}).load_number||'').trim().toLowerCase()===loadNumber.toLowerCase());
       if(!load)throw new Error('No saved Gmail Rate Confirmation matched load '+loadNumber+'.');
       const analysis=load.analysis||{};
       const destination=String(analysis.delivery_location||analysis.delivery_address||analysis.delivery_city_state||analysis.destination||analysis.delivery||'').trim();
       if(!destination)throw new Error('The Rate Confirmation does not contain a delivery location.');
+      $('status').textContent='Step 2/4: checking the latest ROCK ELD truck location…';
       const truck=await loadTruckLocation(load);
+      $('status').textContent='Step 3/4: locating the delivery address…';
       const destinationPoint=await geocode(destination);
+      $('status').textContent='Step 4/4: calculating the road route and ETA…';
       const routeUrl='https://router.project-osrm.org/route/v1/driving/'+Number(truck.longitude)+','+Number(truck.latitude)+';'+destinationPoint.lon+','+destinationPoint.lat+'?overview=false&steps=false';
-      const routeResponse=await fetch(routeUrl,{headers:{Accept:'application/json'},cache:'no-store'});
+      const routeResponse=await fetchWithTimeout(routeUrl,{headers:{Accept:'application/json'},cache:'no-store'},'Road-route calculation',15000);
       if(!routeResponse.ok)throw new Error('The road-route service is unavailable. Please try again.');
       const route=await routeResponse.json();
       if(route.code!=='Ok'||!route.routes?.length)throw new Error('No driving route was found between the truck and delivery location.');
