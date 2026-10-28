@@ -58,6 +58,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
       <div class="muted">Gmail rate confirmations, AI load intelligence, live ELD locations, ETA planning and RingCentral tools — together in one workspace.</div>
     </div>
     <div class="actions">
+      <button class="secondary" id="installAppBtn" type="button">⬇ Install App</button>
       <button class="secondary" id="connectBtn">Connect Gmail</button>
       <a class="secondary action-link" href="./eta.html">ETA Estimator</a>
       <button class="primary" id="analyzeBtn">Analyze Gmail PDFs</button>
@@ -594,6 +595,51 @@ if (params.get('gmail') === 'connected') {
 }
 
 connection('Ready');
+
+// Native PWA installation where supported. iPhone/iPad requires Apple's Share menu.
+let deferredInstallPrompt = null;
+const installAppBtn = $('installAppBtn');
+const isAppleMobile = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isStandaloneApp = window.matchMedia('(display-mode: standalone)').matches ||
+  window.navigator.standalone === true;
+
+if (isStandaloneApp && installAppBtn) {
+  installAppBtn.textContent = '✓ App Installed';
+  installAppBtn.disabled = true;
+}
+window.addEventListener('beforeinstallprompt', event => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+});
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  if (installAppBtn) {
+    installAppBtn.textContent = '✓ App Installed';
+    installAppBtn.disabled = true;
+  }
+});
+installAppBtn?.addEventListener('click', async () => {
+  if (isStandaloneApp) {
+    alert('CLST Trucking AI is already installed on this device.');
+    return;
+  }
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    const result = await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    if (result?.outcome === 'accepted') {
+      installAppBtn.textContent = '✓ App Installed';
+      installAppBtn.disabled = true;
+    }
+    return;
+  }
+  if (isAppleMobile) {
+    alert('To install CLST Trucking AI on your iPhone: tap Share in Safari, choose Add to Home Screen, then tap Add. iPhone requires this confirmation; this button cannot approve it for you.');
+  } else {
+    alert('To install CLST Trucking AI, open this page in your browser menu and choose Install App or Add to Home Screen. If the option is missing, wait for the page to finish loading or use a supported browser.');
+  }
+});
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
