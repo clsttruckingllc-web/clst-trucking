@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "CLST Trucking AI",
+  "short_name": "CLST Trucking",
+  "description": "CLST Trucking operations dashboard",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#090a0d",
+  "theme_color": "#e11d2e",
+  "icons": [
+    {
+      "src": "/assets/clst-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
