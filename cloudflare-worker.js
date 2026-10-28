@@ -39,7 +39,10 @@ export default { async fetch(req, env) {
     const h=new Headers(r.headers); for(const [k,v] of Object.entries(cors))h.set(k,v);
     return new Response(r.body,{status:r.status,headers:h});
   } catch(e) { return json({error:errText(e)},500,cors); }
-}, async scheduled(event,env,ctx) { ctx.waitUntil(recordAutoReplyRun(env)); }
+}, async scheduled(event,env,ctx) {
+    // TEMPORARY PAUSE: scheduled automatic email replies are disabled until explicitly re-enabled.
+    console.log("[auto-reply] paused by code safety switch; scheduled run skipped.");
+  }
 };
 
 function json(x,status=200,headers={}) { return new Response(JSON.stringify(x),{status,headers:{"Content-Type":"application/json; charset=utf-8",...headers}}); }
