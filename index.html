@@ -26,6 +26,13 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
 @media(max-width:850px){header{padding:12px 4%}.gps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rate-grid{grid-template-columns:1fr}.app-frame{height:1450px}}
 @media(max-width:560px){h1{font-size:18px}.stats{grid-template-columns:1fr}.welcome{padding:18px}.panel{padding:14px}.gps-grid{grid-template-columns:1fr}.actions{width:100%}.actions button,.actions .action-link{flex:1;justify-content:center}.app-frame{height:1550px}}
 </style>
+
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/assets/clst-icon.svg">
+<link rel="apple-touch-icon" href="/assets/clst-icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CLST Trucking">
 </head>
 <body>
 <header>
@@ -587,6 +594,15 @@ if (params.get('gmail') === 'connected') {
 }
 
 connection('Ready');
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => {
+      console.warn('CLST offline shell registration unavailable:', err);
+    });
+  });
+}
+
 </script>
 </body>
 </html>
