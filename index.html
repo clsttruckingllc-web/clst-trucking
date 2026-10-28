@@ -22,7 +22,7 @@ main{max-width:1450px;margin:auto;padding:28px 4% 55px}.welcome,.panel-heading{d
 .rate-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.ask-row{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}.ask-row input{flex:1;min-width:220px;background:#0b0c10;border:1px solid var(--border);border-radius:9px;padding:12px;color:var(--text)}.ask-answer{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;background:#0b0c10;border:1px solid var(--border);border-radius:10px;padding:15px;min-height:54px;margin-top:14px}.ask-sources{font-size:12px;color:var(--muted);margin-top:10px;overflow-wrap:anywhere}
 .rate-card{background:rgba(16,17,22,.94);border:1px solid #454650;border-radius:12px;padding:17px;min-width:0}.rate-card h4{margin:0 0 10px;font-size:16px;overflow-wrap:anywhere}.pill{display:inline-block;border-radius:20px;padding:5px 9px;background:#2a2b33;color:#d4d4dc;font-size:11px;font-weight:800}.pill.good{color:#9cf0ce;background:#16392f}.pill.bad{color:#ffc1c5;background:#43232a}.amount{font-size:25px;font-weight:900;margin:13px 0;color:#fff}.detail{display:grid;grid-template-columns:minmax(95px,.8fr) minmax(0,1.2fr);gap:12px;padding:9px 0;border-bottom:1px solid #292a31;font-size:12px;line-height:1.5}.detail span:first-child{color:var(--muted)}.detail span:last-child{text-align:right;overflow-wrap:anywhere}.error-box,.warning-box{padding:11px;border-radius:8px;font-size:12px;line-height:1.5;overflow-wrap:anywhere;margin-top:12px}.error-box{border:1px solid #713843;background:#291923;color:#ffb7bf}.warning-box{border:1px solid #75602e;background:#302919;color:#ffe2a0}.empty{border:1px dashed #45464e;color:var(--muted);border-radius:11px;padding:25px 15px;text-align:center;line-height:1.6}
 table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;vertical-align:top;padding:12px;border-bottom:1px solid var(--border);font-size:12px;overflow-wrap:anywhere}th{color:var(--muted)}.table-wrap{overflow-x:auto}
-.gps-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.truck-card{background:rgba(13,14,18,.94);border:1px solid #454650;border-radius:12px;padding:15px;min-width:0}.truck-id{font-size:18px;font-weight:900}.truck-location{font-size:12px;color:var(--muted);margin:8px 0;overflow-wrap:anywhere}.fresh{color:var(--green)}.stale{color:#ff9da4}.app-frame{width:100%;height:1100px;border:1px solid var(--border);border-radius:12px;background:#0b0c10}footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid var(--border);font-size:12px}
+.gps-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.truck-card{background:rgba(13,14,18,.94);border:1px solid #454650;border-radius:12px;padding:15px;min-width:0}.truck-id{font-size:18px;font-weight:900}.truck-location{font-size:12px;color:var(--muted);margin:8px 0;overflow-wrap:anywhere}.fresh{color:var(--green)}.stale{color:#ff9da4}.app-frame{width:100%;height:1100px;border:1px solid var(--border);border-radius:12px;background:#0b0c10}.install-btn{background:linear-gradient(135deg,#f5f8ff,#b7dcff);color:#081525;border:1px solid #e6f4ff;box-shadow:0 8px 26px #65b9ff35}.install-modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;background:#02050bdc;backdrop-filter:blur(12px)}.install-modal.open{display:flex}.install-card{width:min(100%,440px);padding:25px;border:1px solid #35516e;border-radius:22px;background:linear-gradient(160deg,#111d2d,#090d15);box-shadow:0 28px 90px #000b;text-align:center}.install-app-icon{width:86px;height:86px;border-radius:22px;box-shadow:0 12px 35px #0008;margin:0 auto 15px;display:block}.install-card h2{font-size:25px;margin-bottom:7px}.install-card p{color:#c0cad8;font-size:14px}.install-steps{margin:18px 0;text-align:left;background:#101a28;border:1px solid #273c54;border-radius:13px;padding:14px 16px;color:#e6edf7;font-size:13px}.install-steps li{padding:5px 0}.install-close{margin-top:10px;background:transparent;color:#b9c7d9;border-color:#34455b;width:100%}.install-small{font-size:11px!important;color:#8595aa!important;margin-top:12px!important}footer{text-align:center;color:var(--muted);padding:22px;border-top:1px solid var(--border);font-size:12px}
 @media(max-width:850px){header{padding:12px 4%}.gps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rate-grid{grid-template-columns:1fr}.app-frame{height:1450px}}
 @media(max-width:560px){h1{font-size:18px}.stats{grid-template-columns:1fr}.welcome{padding:18px}.panel{padding:14px}.gps-grid{grid-template-columns:1fr}.actions{width:100%}.actions button,.actions .action-link{flex:1;justify-content:center}.app-frame{height:1550px}}
 </style>
@@ -58,6 +58,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
       <div class="muted">Gmail rate confirmations, AI load intelligence, live ELD locations, ETA planning and RingCentral tools — together in one workspace.</div>
     </div>
     <div class="actions">
+      <button class="install-btn" id="installAppBtn" type="button">⬇ Install CLST App</button>
       <button class="secondary" id="connectBtn">Connect Gmail</button>
       <a class="secondary action-link" href="./eta.html">ETA Estimator</a>
       <button class="primary" id="analyzeBtn">Analyze Gmail PDFs</button>
@@ -131,12 +132,59 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
   </section>
 </main>
 
+<div class="install-modal" id="installModal" role="dialog" aria-modal="true" aria-labelledby="installTitle">
+  <div class="install-card">
+    <img class="install-app-icon" src="/assets/clst-icon.svg?v=2" alt="CLST Trucking AI app icon">
+    <div class="eyebrow">CLST TRUCKING LLC</div>
+    <h2 id="installTitle">Bring CLST to your Home Screen</h2>
+    <p id="installIntro">Your dispatch command center, one tap away.</p>
+    <div class="install-steps" id="installSteps"><ol><li>Tap the Share button in Safari.</li><li>Choose <strong>Add to Home Screen</strong>.</li><li>Tap <strong>Add</strong> to finish.</li></ol></div>
+    <button class="primary" id="nativeInstallBtn" type="button" style="display:none;width:100%">Install CLST Trucking AI</button>
+    <button class="install-close" id="closeInstallBtn" type="button">Back to CLST</button>
+    <p class="install-small">Secure install flow · No App Store account needed for this web app</p>
+  </div>
+</div>
 <footer>CLST Trucking LLC · CLST Trucking AI</footer>
 
 <script>
 'use strict';
 
 const $ = id => document.getElementById(id);
+let deferredInstallPrompt = null;
+const installModal = $('installModal');
+function openInstallModal(){
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  if (standalone) {
+    $('installTitle').textContent = 'CLST is already installed';
+    $('installIntro').textContent = 'You are already using CLST Trucking AI from your Home Screen.';
+    $('installSteps').innerHTML = '<p style="margin:0">You are all set. Open CLST from your Home Screen any time.</p>';
+    $('nativeInstallBtn').style.display = 'none';
+  } else if (deferredInstallPrompt) {
+    $('installTitle').textContent = 'Install CLST Trucking AI';
+    $('installIntro').textContent = 'Add the app to your device in one quick step.';
+    $('installSteps').innerHTML = '<p style="margin:0">Tap the button below and confirm the install prompt from your browser.</p>';
+    $('nativeInstallBtn').style.display = 'block';
+  } else if (ios) {
+    $('installTitle').textContent = 'Add CLST to your Home Screen';
+    $('installIntro').textContent = 'Almost there — Safari needs one quick confirmation.';
+    $('installSteps').innerHTML = '<ol><li>Open this page in <strong>Safari</strong> (not an in-app browser).</li><li>Tap <strong>Share</strong> <span aria-label="share">⎋</span> at the bottom of the screen.</li><li>Scroll and choose <strong>Add to Home Screen</strong>.</li><li>Tap <strong>Add</strong>. The CLST 🥏 icon will appear on your Home Screen.</li></ol>';
+    $('nativeInstallBtn').style.display = 'none';
+  } else {
+    $('installTitle').textContent = 'Install CLST Trucking AI';
+    $('installIntro').textContent = 'Add CLST to your Home Screen for app-like access.';
+    $('installSteps').innerHTML = '<p style="margin:0">Open your browser menu and choose <strong>Install app</strong> or <strong>Add to Home screen</strong>, if available.</p>';
+    $('nativeInstallBtn').style.display = 'none';
+  }
+  installModal.classList.add('open');
+}
+function closeInstallModal(){installModal.classList.remove('open');}
+window.addEventListener('beforeinstallprompt', event => {event.preventDefault();deferredInstallPrompt=event;});
+window.addEventListener('appinstalled', () => {deferredInstallPrompt=null;$('installTitle').textContent='CLST installed successfully';$('installIntro').textContent='Find CLST Trucking AI on your Home Screen.';$('installSteps').innerHTML='<p style="margin:0">You are ready to roll. 🚛</p>';$('nativeInstallBtn').style.display='none';installModal.classList.add('open');});
+$('installAppBtn').addEventListener('click',openInstallModal);
+$('closeInstallBtn').addEventListener('click',closeInstallModal);
+installModal.addEventListener('click',event=>{if(event.target===installModal)closeInstallModal();});
+$('nativeInstallBtn').addEventListener('click',async()=>{if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;closeInstallModal();});
 let pdfRecords = [];
 let emailRecords = [];
 
