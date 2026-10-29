@@ -110,7 +110,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
     <iframe class="app-frame" src="./eta.html" title="CLST Trucking ETA dispatch estimator" loading="eager"></iframe>
   </section>
   <section class="panel" id="ringcentral">
-    <div class="panel-heading"><div><h3>RingCentral · Communications</h3><div class="muted" style="font-size:12px;margin-top:4px">Check API connection and open the company communications workspace.</div></div><div class="actions" style="margin:0"><button class="secondary" id="ringcentralTestBtn" type="button">Test RingCentral</button><a class="action-link" href="https://app.ringcentral.com/" target="_blank" rel="noopener noreferrer">Open RingCentral ↗</a></div></div>
+    <div class="panel-heading"><div><h3>RingCentral · Communications</h3><div class="muted" style="font-size:12px;margin-top:4px">Check API connection and open the company communications workspace.</div></div><div class="actions" style="margin:0"><button class="secondary" id="ringcentralTestBtn" type="button">Test RingCentral</button><button class="secondary" id="mareVoiceTestBtn" type="button">Check Mare voice</button><a class="action-link" href="https://app.ringcentral.com/" target="_blank" rel="noopener noreferrer">Open RingCentral ↗</a></div></div>
     <div class="muted" style="font-size:13px">The connection test is read-only. Calls and messaging depend on the RingCentral account, assigned extension and configured telephony service.</div>
   </section>
     <section class="panel" id="ratesPanel">
@@ -499,6 +499,35 @@ async function testRingCentral() {
   }
 }
 
+async function testMareVoiceService() {
+  const btn = $('mareVoiceTestBtn');
+  btn.disabled = true;
+  btn.textContent = 'Checking Mare...';
+  status('Checking whether the separately hosted Mare voice service is reachable. This does not change call routing.');
+  try {
+    const res = await fetch('/api/voice/status', {
+      headers: { Accept: 'application/json' },
+      cache: 'no-store'
+    });
+    const data = await res.json().catch(() => ({}));
+    $('askAnswer').textContent = JSON.stringify(data, null, 2);
+    $('askSources').textContent = 'Read-only voice-service readiness check. No call forwarding is changed.';
+    if (!res.ok || data.ai_calling_ready !== true) {
+      status(data.message || 'Mare voice service is not confirmed ready. See the answer panel.', 'error');
+      connection('Mare not confirmed active', 'var(--yellow)');
+    } else {
+      status('Voice service responded. A real RingCentral inbound call test is still required.', 'success');
+      connection('Voice service reachable', 'var(--green)');
+    }
+  } catch (err) {
+    status(err.message || 'Could not check Mare voice service.', 'error');
+    connection('Mare check failed', 'var(--red)');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Check Mare voice';
+  }
+}
+
 function connect() {
   window.location.href =
     'https://clst-gmail-backend.clsttruckingllc.workers.dev/auth/start';
@@ -565,6 +594,7 @@ $('refreshEldBtn').addEventListener('click',refreshEldLocations);
 
 $('askForm').addEventListener('submit',askCLST);
 $('ringcentralTestBtn').addEventListener('click',testRingCentral);
+$('mareVoiceTestBtn').addEventListener('click',testMareVoiceService);
 $('analyzeBtn').addEventListener('click',analyze);
 $('connectBtn').addEventListener('click',connect);
 $('search').addEventListener('input',renderRates);
