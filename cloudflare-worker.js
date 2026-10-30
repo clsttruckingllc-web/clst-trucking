@@ -28,7 +28,7 @@ export default { async fetch(req, env) {
       else if (url.pathname === "/api/models" && req.method === "GET") r=json({success:true,provider:env.OPENAI_API_KEY?"openai":env.GEMINI_API_KEY?"gemini":"not_configured",model:env.OPENAI_API_KEY?(env.OPENAI_MODEL||OPENAI_MODEL):(env.GEMINI_MODEL||MODEL),pdfAnalysis:!!(env.OPENAI_API_KEY||env.GEMINI_API_KEY)});
       else if (url.pathname === "/api/messages" && req.method === "GET") r=await messages(url,env);
       else if (url.pathname === "/api/autoreply/status" && req.method === "GET") r=await autoReplyStatus(env);
-      else if (url.pathname === "/api/autoreply/run" && req.method === "POST") r=json({success:false,paused:true,message:"Automatic email replies are temporarily paused."},423);
+      else if (url.pathname === "/api/autoreply/run" && req.method === "POST") r=await runAutoReplies(env);
       else if (url.pathname === "/api/rates" && req.method === "GET") r=await rates(url,env);
       else if (url.pathname === "/api/rates" && req.method === "POST") r=await oneRate(req,env);
       else if ((url.pathname === "/api/ask" || url.pathname === "/api/ringcentral/ask") && req.method === "POST") r=await ask(req,env,url.pathname === "/api/ringcentral/ask");
@@ -40,8 +40,9 @@ export default { async fetch(req, env) {
     return new Response(r.body,{status:r.status,headers:h});
   } catch(e) { return json({error:errText(e)},500,cors); }
 }, async scheduled(event,env,ctx) {
-    // TEMPORARY PAUSE: scheduled automatic email replies are disabled until explicitly re-enabled.
-    console.log("[auto-reply] paused by code safety switch; scheduled run skipped.");
+    // Resume the existing five-minute Gmail auto-reply workflow.
+    try { await recordAutoReplyRun(env); }
+    catch (e) { console.error("[auto-reply] scheduled run failed", errText(e)); }
   }
 };
 
