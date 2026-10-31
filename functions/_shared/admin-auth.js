@@ -64,18 +64,18 @@ export async function createAdminSession(env) {
 export async function verifyAdminSession(request, env) {
   if (!env.CLST_AUTH_KV) return false;
   const header = request.headers.get("Cookie") || "";
-  const match = header.match(new RegExp("(?:^|;\\s*)" + COOKIE.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&") + "=([^;]+)"));
-  if (!match) return false;
+  const cookie = header.split(";").map(part => part.trim()).find(part => part.startsWith(COOKIE + "="));
+  if (!cookie) return false;
   try {
-    const key = "session:" + await sha256(decodeURIComponent(match[1]));
+    const key = "session:" + await sha256(decodeURIComponent(cookie.slice(COOKIE.length + 1)));
     return !!(await env.CLST_AUTH_KV.get(key));
   } catch { return false; }
 }
 export async function destroyAdminSession(request, env) {
   const header = request.headers.get("Cookie") || "";
-  const match = header.match(/(?:^|;\\s*)__Host-clst_admin=([^;]+)/);
-  if (match && env.CLST_AUTH_KV) {
-    try { await env.CLST_AUTH_KV.delete("session:" + await sha256(decodeURIComponent(match[1]))); } catch {}
+  const cookie = header.split(";").map(part => part.trim()).find(part => part.startsWith(COOKIE + "="));
+  if (cookie && env.CLST_AUTH_KV) {
+    try { await env.CLST_AUTH_KV.delete("session:" + await sha256(decodeURIComponent(cookie.slice(COOKIE.length + 1)))); } catch {}
   }
 }
 export function adminCookie(token) {
