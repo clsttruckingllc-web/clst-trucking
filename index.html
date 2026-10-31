@@ -533,7 +533,7 @@ function connect() {
     'https://clst-gmail-backend.clsttruckingllc.workers.dev/auth/start';
 }
 
-async function askCLST(event) {
+async function askKREM(event) {
   event.preventDefault();
   const question = $('askQuestion').value.trim();
   if (!question) return;
@@ -592,7 +592,7 @@ async function refreshEldLocations(){
 }
 $('refreshEldBtn').addEventListener('click',refreshEldLocations);
 
-$('askForm').addEventListener('submit',askCLST);
+$('askForm').addEventListener('submit',askKREM);
 $('ringcentralTestBtn').addEventListener('click',testRingCentral);
 $('mareVoiceTestBtn').addEventListener('click',testMareVoiceService);
 $('analyzeBtn').addEventListener('click',analyze);
