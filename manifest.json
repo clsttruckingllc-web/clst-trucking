@@ -6,8 +6,8 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#090a0d",
-  "theme_color": "#e11d2e",
+  "background_color": "#f4f6f8",
+  "theme_color": "#2563eb",
   "icons": [
     {
       "src": "/assets/clst-icon-180.png?v=2",
