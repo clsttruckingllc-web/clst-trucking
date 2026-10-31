@@ -3,23 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f4f6f8">
-<title>KREM Tracking · ETA Estimator</title>
+<meta name="theme-color" content="#0b0b0d">
+<title>KREM KREM · ETA Estimator</title>
 <style>
-:root{color-scheme:light;--bg:#f4f6f8;--panel:#fff;--line:#e2e8f0;--text:#172033;--muted:#64748b;--gold:#2563eb;--green:#16845b;--red:#b91c1c}
+:root{color-scheme:light;--bg:#0b0b0d;--panel:#fff;--line:#e5e5e5;--text:#171717;--muted:#666;--gold:#dc2626;--green:#16845b;--red:#b91c1c}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);min-height:100vh}
+body{margin:0;background:var(--bg);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;min-height:100vh}
 main{width:min(980px,100%);margin:0 auto;padding:24px 16px 48px}
 header{display:flex;align-items:center;gap:14px;margin:4px 0 28px}
-.mark{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;background:#2563eb;color:#fff;font-weight:900;font-size:18px}
-.brand{font-size:13px;letter-spacing:.13em;color:#2563eb;font-weight:800}
+.mark{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;background:#dc2626;color:#fff;font-weight:900;font-size:18px}
+.brand{font-size:13px;letter-spacing:.13em;color:#fff;font-weight:800}
 h1{font-size:clamp(28px,6vw,42px);line-height:1.08;margin:6px 0 10px}
 h2{font-size:19px;margin:0 0 16px}
 p{color:var(--muted);margin:0}
 .hero{margin-bottom:22px}
-.pill{display:inline-block;border:1px solid #bfdbfe;color:#1d4ed8;background:#eff6ff;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:750;margin-bottom:12px}
+.pill{display:inline-block;border:1px solid #7f1d1d;color:#991b1b;background:#fee2e2;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:750;margin-bottom:12px}
 .layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;min-width:0}
+.card{background:#fff;color:#171717;border:1px solid var(--line);border-radius:14px;padding:20px;min-width:0}
 .field{display:flex;flex-direction:column;gap:6px;margin:0 0 15px}
 label{font-size:13px;font-weight:700;color:#334155}
 input,select{width:100%;min-height:46px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:var(--text);padding:10px 12px;font:inherit}
@@ -28,13 +28,13 @@ input:focus,select:focus{outline:2px solid #93c5fd;outline-offset:1px}
 button{width:100%;min-height:48px;border:0;border-radius:10px;background:var(--gold);color:#fff;font-weight:850;font-size:15px;cursor:pointer;padding:10px}
 button:disabled{opacity:.65;cursor:wait}
 .secondary{background:#263746;color:var(--text);border:1px solid #486071;margin-bottom:10px}
-.result{border:1px solid var(--line);background:#f8fafc;border-radius:12px;padding:16px;margin-top:14px}
+.result{color:#171717;border:1px solid var(--line);background:#f8fafc;border-radius:12px;padding:16px;margin-top:14px}
 .result-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:800}
 .eta{font-size:clamp(25px,5vw,34px);font-weight:850;line-height:1.15;margin:8px 0;color:var(--green);overflow-wrap:anywhere}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .stat{border:1px solid var(--line);border-radius:10px;padding:12px}
 .stat strong{display:block;font-size:20px;margin-top:3px}
-.notice{border-left:3px solid var(--gold);padding:10px 12px;background:#eff6ff;border-radius:0 8px 8px 0;color:#334155;font-size:13px;margin-top:14px}
+.notice{border-left:3px solid var(--gold);padding:10px 12px;background:#fee2e2;border-radius:0 8px 8px 0;color:#7f1d1d;font-size:13px;margin-top:14px}
 .status{font-size:13px;margin:10px 0;color:var(--muted);overflow-wrap:anywhere}
 .status.ok{color:var(--green)}.status.bad,.error{color:var(--red)}
 .error{font-size:13px;margin-top:12px}
@@ -45,7 +45,7 @@ a{color:#1d4ed8}
 </head>
 <body>
 <main>
-<header><div class="mark" aria-hidden="true">K</div><div><div class="brand">KREM TRACKING</div><p>MARKO AI · Dispatch intelligence</p></div></header>
+<header><div class="mark" aria-hidden="true">K</div><div><div class="brand">KREM KREM</div><p>MARKO AI · Dispatch intelligence</p></div></header>
 <section class="hero">
   <span class="pill">DISPATCH · LIVE ROUTE ESTIMATE</span>
   <h1>Load ETA Estimator</h1>
@@ -74,7 +74,7 @@ a{color:#1d4ed8}
   <div class="notice">Automatic ETA uses the saved Rate Confirmation and the latest authorized ROCK ELD location. No location, mileage, speed or token fields are shown. ETA is an estimate and excludes live traffic, weather, loading delays and actual hours-of-service records.</div>
 </section>
 </div>
-<footer>KREM Tracking · OpenStreetMap / OSRM route estimate · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Map data attribution</a></footer>
+<footer>KREM KREM · OpenStreetMap / OSRM route estimate · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Map data attribution</a></footer>
 </main>
 <script>
 (function(){
