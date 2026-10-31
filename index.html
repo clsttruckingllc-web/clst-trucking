@@ -43,7 +43,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
       <div class="subtitle">DISPATCH INTELLIGENCE · ONE WORKSPACE</div>
     </div>
   </div>
-  <nav aria-label="Dashboard navigation"><a href="#gmail">GMAIL & AI</a><a href="#eld">ROCK ELD</a><a href="#eta">ETA DISPATCH</a><a href="#ringcentral">RINGCENTRAL</a></nav>
+  <nav aria-label="Dashboard navigation"><a href="#gmail">GMAIL & AI</a><a href="#eld">ROCK ELD</a><a href="#eta">ETA DISPATCH</a><a href="#ringcentral">RINGCENTRAL</a><a href="/account.html">ACCOUNT</a><button id="logoutBtn" class="secondary" type="button">SIGN OUT</button></nav>
   <div class="connection">
     <span class="dot" id="dot"></span>
     <span id="connectionText">Ready</span>
@@ -591,6 +591,7 @@ async function refreshEldLocations(){
   }finally{btn.disabled=false;btn.textContent='Refresh truck locations';}
 }
 $('refreshEldBtn').addEventListener('click',refreshEldLocations);
+$('logoutBtn').addEventListener('click',async()=>{const b=$('logoutBtn');b.disabled=true;try{await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin',headers:{'Accept':'application/json'}});}finally{location.replace('/login.html');}});
 
 $('askForm').addEventListener('submit',askCLST);
 $('ringcentralTestBtn').addEventListener('click',testRingCentral);
