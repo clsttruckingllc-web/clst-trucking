@@ -45,37 +45,37 @@ async function passwordMatches(password, record) {
   } catch { return false; }
 }
 export async function verifyAdminPassword(password, env) {
-  const stored = await env.CLST_AUTH_KV.get("admin:password", "json");
+  const stored = await env.CLST_GPS_LOGIN_LIMITS.get("admin:password", "json");
   if (stored) return passwordMatches(password, stored);
   return typeof env.CLST_ADMIN_PASSWORD === "string" && equal(password, env.CLST_ADMIN_PASSWORD);
 }
 export async function migrateBootstrapPassword(env) {
-  if (await env.CLST_AUTH_KV.get("admin:password")) return;
+  if (await env.CLST_GPS_LOGIN_LIMITS.get("admin:password")) return;
   if (typeof env.CLST_ADMIN_PASSWORD !== "string" || !env.CLST_ADMIN_PASSWORD) throw new Error("Initial admin password is not configured.");
   const record = await hashPassword(env.CLST_ADMIN_PASSWORD);
-  await env.CLST_AUTH_KV.put("admin:password", JSON.stringify(record));
+  await env.CLST_GPS_LOGIN_LIMITS.put("admin:password", JSON.stringify(record));
 }
 export async function createAdminSession(env) {
   const token = randomToken();
   const key = "session:" + await sha256(token);
-  await env.CLST_AUTH_KV.put(key, JSON.stringify({user:env.CLST_ADMIN_USERNAME, createdAt:Date.now()}), {expirationTtl:SESSION_TTL});
+  await env.CLST_GPS_LOGIN_LIMITS.put(key, JSON.stringify({user:env.CLST_ADMIN_USERNAME, createdAt:Date.now()}), {expirationTtl:SESSION_TTL});
   return token;
 }
 export async function verifyAdminSession(request, env) {
-  if (!env.CLST_AUTH_KV) return false;
+  if (!env.CLST_GPS_LOGIN_LIMITS) return false;
   const header = request.headers.get("Cookie") || "";
   const cookie = header.split(";").map(part => part.trim()).find(part => part.startsWith(COOKIE + "="));
   if (!cookie) return false;
   try {
     const key = "session:" + await sha256(decodeURIComponent(cookie.slice(COOKIE.length + 1)));
-    return !!(await env.CLST_AUTH_KV.get(key));
+    return !!(await env.CLST_GPS_LOGIN_LIMITS.get(key));
   } catch { return false; }
 }
 export async function destroyAdminSession(request, env) {
   const header = request.headers.get("Cookie") || "";
   const cookie = header.split(";").map(part => part.trim()).find(part => part.startsWith(COOKIE + "="));
-  if (cookie && env.CLST_AUTH_KV) {
-    try { await env.CLST_AUTH_KV.delete("session:" + await sha256(decodeURIComponent(cookie.slice(COOKIE.length + 1)))); } catch {}
+  if (cookie && env.CLST_GPS_LOGIN_LIMITS) {
+    try { await env.CLST_GPS_LOGIN_LIMITS.delete("session:" + await sha256(decodeURIComponent(cookie.slice(COOKIE.length + 1)))); } catch {}
   }
 }
 export function adminCookie(token) {
