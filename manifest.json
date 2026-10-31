@@ -1,13 +1,13 @@
 {
   "id": "/",
-  "name": "KREM Tracking · MARKO AI",
-  "short_name": "KREM Tracking",
-  "description": "KREM Tracking operations dashboard",
+  "name": "KREM KREM · MARKO AI",
+  "short_name": "KREM KREM",
+  "description": "KREM KREM operations dashboard",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f4f6f8",
-  "theme_color": "#2563eb",
+  "background_color": "#0b0b0d",
+  "theme_color": "#dc2626",
   "icons": [
     {
       "src": "/assets/clst-icon-180.png?v=2",
