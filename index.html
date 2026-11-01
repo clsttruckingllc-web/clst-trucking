@@ -533,7 +533,7 @@ function connect() {
     'https://clst-gmail-backend.clsttruckingllc.workers.dev/auth/start';
 }
 
-async function askKREM(event) {
+async function askMarko(event) {
   event.preventDefault();
   const question = $('askQuestion').value.trim();
   if (!question) return;
@@ -592,7 +592,7 @@ async function refreshEldLocations(){
 }
 $('refreshEldBtn').addEventListener('click',refreshEldLocations);
 
-$('askForm').addEventListener('submit',askKREM);
+$('askForm').addEventListener('submit',askMarko);
 $('ringcentralTestBtn').addEventListener('click',testRingCentral);
 $('mareVoiceTestBtn').addEventListener('click',testMareVoiceService);
 $('analyzeBtn').addEventListener('click',analyze);
@@ -628,7 +628,7 @@ connection('Ready');
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(err => {
-      console.warn('KREM offline shell registration unavailable:', err);
+      console.warn('CLST offline shell registration unavailable:', err);
     });
   });
 }
