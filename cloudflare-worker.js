@@ -7,6 +7,8 @@
 const MODEL = "gemini-3.5-flash-lite";
 const OPENAI_MODEL = "gpt-4.1-mini";
 const GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me";
+// HARD SAFETY SWITCH: automatic Gmail replies stay disabled until explicitly re-enabled after review.
+const AUTO_REPLY_ENABLED = false;
 const RC = "https://platform.ringcentral.com";
 
 export default { async fetch(req, env) {
@@ -40,7 +42,8 @@ export default { async fetch(req, env) {
     return new Response(r.body,{status:r.status,headers:h});
   } catch(e) { return json({error:errText(e)},500,cors); }
 }, async scheduled(event,env,ctx) {
-    // Resume the existing five-minute Gmail auto-reply workflow.
+    // Fail closed: no scheduled Gmail auto-replies while the safety switch is off.
+    if (!AUTO_REPLY_ENABLED) { console.log("[smart-auto-reply] paused by AUTO_REPLY_ENABLED=false"); return; }
     try { await recordAutoReplyRun(env); }
     catch (e) { console.error("[auto-reply] scheduled run failed", errText(e)); }
   }
@@ -445,6 +448,8 @@ async function classifyReply(env,m,token){
  return {action,confidence,reason:String(a.reason||"No reason supplied").slice(0,400),reply:String(a.reply||"").trim().slice(0,5000),subject,from,to,body};
 }
 async function processAutoReplies(env){
+ // Second line of defense: even a direct/internal call cannot send while paused.
+ if(!AUTO_REPLY_ENABLED)return {success:true,paused:true,checked:0,eligible:0,results:[],note:"Automatic email replies are disabled pending review."};
  if(!env.GEMINI_API_KEY||!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET)throw Error("Auto-reply requires Google OAuth and GEMINI_API_KEY. OpenAI is reserved for the voice system.");
  const token=await googleToken(env);
  const scopes=await gmailScopeStatus(token);
@@ -606,6 +611,9 @@ async function autoReplyStatus(env){
  try{if(await env.TOKENS.get("google_refresh_token"))scopes=await gmailScopeStatus(await googleToken(env));}catch(e){scopes={verified:false,error:errText(e)};}
  return json({
   success:true,
+  enabled:AUTO_REPLY_ENABLED,
+  paused:!AUTO_REPLY_ENABLED,
+  pauseReason:AUTO_REPLY_ENABLED?null:"Automatic email replies are disabled pending review.",
   configured:!!(env.GEMINI_API_KEY&&env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),
   aiProvider:env.GEMINI_API_KEY?"gemini":"not_configured",
   gmailConnected:!!(await env.TOKENS.get("google_refresh_token")),
@@ -616,6 +624,7 @@ async function autoReplyStatus(env){
  });
 }
 async function runAutoReplies(env){
+ if(!AUTO_REPLY_ENABLED)return json({success:true,paused:true,checked:0,eligible:0,results:[],note:"Automatic email replies are disabled pending review."});
  try{return json(await recordAutoReplyRun(env));}catch(e){return json({success:false,error:errText(e)},502);}
 }
 
