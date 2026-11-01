@@ -20,81 +20,6 @@ function decodeJsonPart(value) {
   return JSON.parse(new TextDecoder().decode(decodeBase64Url(value)));
 }
 
-async function verifyCloudflareAccessJwt(token, env) {
-  const teamDomain = String(env.CF_ACCESS_TEAM_DOMAIN || "")
-    .trim()
-    .replace(/^https?:\/\//i, "")
-    .replace(/\/$/, "");
-  const audience = String(env.CF_ACCESS_AUD || "").trim();
-
-  if (!teamDomain || !audience) {
-    return { ok: false, status: 503, error: "Cloudflare Access is not configured for this endpoint." };
-  }
-
-  const parts = token.split(".");
-  if (parts.length !== 3) {
-    return { ok: false, status: 401, error: "Invalid Cloudflare Access token." };
-  }
-
-  try {
-    const header = decodeJsonPart(parts[0]);
-    const claims = decodeJsonPart(parts[1]);
-    if (header.alg !== "RS256" || !header.kid) {
-      return { ok: false, status: 401, error: "Invalid Cloudflare Access token." };
-    }
-
-    const now = Math.floor(Date.now() / 1000);
-    const issuer = "https://" + teamDomain;
-    const aud = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
-
-    if (
-      claims.iss !== issuer ||
-      !aud.includes(audience) ||
-      !Number.isFinite(Number(claims.exp)) ||
-      Number(claims.exp) <= now ||
-      (claims.nbf !== undefined && Number(claims.nbf) > now + 60) ||
-      (claims.iat !== undefined && Number(claims.iat) > now + 60)
-    ) {
-      return { ok: false, status: 401, error: "Cloudflare Access token is expired or invalid for this application." };
-    }
-
-    const certsResponse = await fetch(issuer + "/cdn-cgi/access/certs", {
-      headers: { "Accept": "application/json" },
-      cf: { cacheTtl: 300, cacheEverything: true }
-    });
-    if (!certsResponse.ok) {
-      return { ok: false, status: 503, error: "Could not verify Cloudflare Access token." };
-    }
-
-    const certs = await certsResponse.json();
-    const jwk = Array.isArray(certs.keys) ? certs.keys.find((key) => key.kid === header.kid) : null;
-    if (!jwk) {
-      return { ok: false, status: 401, error: "Cloudflare Access signing key was not found." };
-    }
-
-    const publicKey = await crypto.subtle.importKey(
-      "jwk",
-      jwk,
-      { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-      false,
-      ["verify"]
-    );
-    const signedData = new TextEncoder().encode(parts[0] + "." + parts[1]);
-    const validSignature = await crypto.subtle.verify(
-      { name: "RSASSA-PKCS1-v1_5" },
-      publicKey,
-      decodeBase64Url(parts[2]),
-      signedData
-    );
-
-    return validSignature
-      ? { ok: true }
-      : { ok: false, status: 401, error: "Cloudflare Access token signature is invalid." };
-  } catch {
-    return { ok: false, status: 401, error: "Could not validate Cloudflare Access token." };
-  }
-}
-
 function constantTimeEqual(a, b) {
   const left = new TextEncoder().encode(String(a));
   const right = new TextEncoder().encode(String(b));
@@ -121,16 +46,30 @@ export async function onRequest({ request, env }) {
     return json({ error: "Method not allowed" }, 405);
   }
 
-  // Require a valid Cloudflare Access JWT before returning live fleet GPS.
-  // Cloudflare Access controls company sign-in; no separate ROCK ELD password is collected.
-  const accessJwt = request.headers.get("Cf-Access-Jwt-Assertion") || "";
-  const authenticated = accessJwt
-    ? await verifyCloudflareAccessJwt(accessJwt, env)
-    : { ok: false, status: 401, error: "Cloudflare Access sign-in required." };
+  // Require a short-lived, signed HttpOnly session created by /api/rockeld/session.
+  const cookieHeader = request.headers.get("Cookie") || "";
+  const sessionCookie = cookieHeader.split(";").map(part => part.trim())
+    .find(part => part.startsWith("clst_gps_session="));
+  const token = sessionCookie ? decodeURIComponent(sessionCookie.slice("clst_gps_session=".length)) : "";
+  const sessionSecret = String(env.CLST_GPS_SESSION_SECRET || "");
+  if (!sessionSecret) return json({ error: "Secure GPS session is not configured on the server." }, 503);
 
-  if (!authenticated.ok) {
-    return json({ error: authenticated.error }, authenticated.status);
-  }
+  let validSession = false;
+  try {
+    const [payloadPart, signaturePart] = token.split(".");
+    if (payloadPart && signaturePart) {
+      const decode = value => {
+        const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - value.length % 4) % 4);
+        return Uint8Array.from(atob(padded), ch => ch.charCodeAt(0));
+      };
+      const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(sessionSecret),
+        { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+      const payload = JSON.parse(new TextDecoder().decode(decode(payloadPart)));
+      validSession = Number(payload.exp) > Math.floor(Date.now() / 1000) &&
+        await crypto.subtle.verify("HMAC", key, decode(signaturePart), new TextEncoder().encode(payloadPart));
+    }
+  } catch { validSession = false; }
+  if (!validSession) return json({ error: "Secure GPS sign-in required." }, 401);
 
   // The upstream ROCK ELD API key remains server-side in encrypted Pages Secrets.
   // Never expose ROCKELD_API_KEY to browser code or responses.
