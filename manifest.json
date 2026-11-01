@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "KREM KREM · MARKO AI",
-  "short_name": "KREM KREM",
-  "description": "KREM KREM trucking operations and dispatch dashboard",
+  "name": "CLST TRUCKING · MARKO AI",
+  "short_name": "CLST TRUCKING",
+  "description": "CLST TRUCKING trucking operations and dispatch dashboard",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
