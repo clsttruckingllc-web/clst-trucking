@@ -116,11 +116,8 @@ a{color:#dc2626}
     rateRecords=flattenRates(data);
   }
   async function loadTruckLocation(load){
-    const user=sessionStorage.getItem('clst_rockeld_gps_username')||'';
-    const pass=sessionStorage.getItem('clst_rockeld_gps_password')||'';
     const headers={Accept:'application/json'};
-    if(user&&pass)headers.Authorization='Basic '+btoa(unescape(encodeURIComponent(user+':'+pass)));
-    const response=await fetchWithTimeout('/api/rockeld/locations',{headers,cache:'no-store',credentials:'same-origin'},'ROCK ELD GPS request',12000);if(response.status===401){location.href='/gps-login.html';throw new Error('GPS sign-in required.');}
+    const response=await fetchWithTimeout('/api/rockeld/locations',{headers,cache:'no-store',credentials:'same-origin'},'ROCK ELD GPS request',12000);if(response.status===401){throw new Error('Cloudflare Access sign-in required. Sign in to your company account, then retry the ETA estimate.');}
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(data.error||'Secure ROCK ELD access is not configured. Sign in through company access first.');
     const trucks=(Array.isArray(data.locations)?data.locations:[]).map(t=>({...t,
