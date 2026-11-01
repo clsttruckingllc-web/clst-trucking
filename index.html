@@ -572,7 +572,7 @@ async function refreshEldLocations(){
   $('eldStatus').textContent='Requesting fleet locations through the secured server endpoint…';
   $('eldStatus').className='status';
   try{
-    const res=await fetch('/api/rockeld/locations',{headers:{Accept:'application/json'},credentials:'same-origin',cache:'no-store'});if(res.status===401){location.href='/gps-login.html';return;}
+    const res=await fetch('/api/rockeld/locations',{headers:{Accept:'application/json'},credentials:'same-origin',cache:'no-store'});if(res.status===401){$('eldStatus').textContent='Cloudflare Access sign-in required. Sign in to your company account, then refresh truck locations.';$('eldStatus').className='status error';$('eldVehicles').innerHTML='<div class="empty">Fleet GPS is protected by Cloudflare Access. Sign in through the company access page, then refresh.</div>';return;}
     const data=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(data.error||('ROCK ELD returned HTTP '+res.status));
     const trucks=Array.isArray(data.locations)?data.locations:[];
