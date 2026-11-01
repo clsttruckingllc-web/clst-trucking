@@ -12,17 +12,67 @@
     .mark{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;background:#dc2626;font-size:24px;font-weight:900;margin-bottom:18px}
     h1{font-size:22px;margin:0 0 8px}
     p{color:#c9c9c9}
-    a{display:inline-block;margin-top:12px;padding:12px 16px;border-radius:9px;background:#dc2626;color:white;text-decoration:none;font-weight:750}
+    label{display:block;margin:20px 0 7px;font-weight:700;font-size:14px}
+    input{width:100%;padding:13px;border:1px solid #555;border-radius:9px;background:#09090b;color:white;font:inherit}
+    button{width:100%;margin-top:14px;padding:13px;border:0;border-radius:9px;background:#dc2626;color:white;font:inherit;font-weight:800;cursor:pointer}
+    button:disabled{opacity:.65;cursor:wait}
     .note{font-size:13px;color:#9ca3af}
+    #message{min-height:24px;font-size:13px;color:#fca5a5}
+    a{color:#fca5a5}
   </style>
 </head>
 <body>
   <main>
     <div class="mark" aria-hidden="true">C</div>
     <h1>CLST TRUCKING · Secure GPS Access</h1>
-    <p>Fleet GPS access is managed through your company Cloudflare Access sign-in. No separate ROCK ELD username, password, or token is required here.</p>
-    <p class="note">Continue to the CLST dashboard. If your company session is not active, Cloudflare Access will request sign-in.</p>
-    <a href="/">Continue to CLST dashboard</a>
+    <p>Sign in to view the latest authorized ROCK ELD truck locations and calculate load ETAs.</p>
+    <form id="loginForm">
+      <label for="password">Company GPS access password</label>
+      <input id="password" type="password" autocomplete="current-password" required maxlength="512" autofocus>
+      <button id="loginButton" type="submit">Unlock live GPS</button>
+      <div id="message" role="alert"></div>
+    </form>
+    <p class="note">Your password is checked securely on the server. The session is stored in an HttpOnly secure cookie and expires after 8 hours. It is never saved in this page.</p>
+    <p class="note"><a href="/">Back to CLST dashboard</a></p>
   </main>
+<script>
+(function(){
+  const form=document.getElementById('loginForm');
+  const password=document.getElementById('password');
+  const button=document.getElementById('loginButton');
+  const message=document.getElementById('message');
+  const params=new URLSearchParams(window.location.search);
+  const requested=params.get('return')||'/eta.html';
+  const returnTo=requested.startsWith('/')&&!requested.startsWith('//')?requested:'/eta.html';
+
+  fetch('/api/rockeld/session',{headers:{Accept:'application/json'},credentials:'same-origin',cache:'no-store'})
+    .then(r=>r.json()).then(data=>{if(data.authenticated)window.location.replace(returnTo);})
+    .catch(()=>{});
+
+  form.addEventListener('submit',async event=>{
+    event.preventDefault();
+    button.disabled=true;
+    button.textContent='Signing in…';
+    message.textContent='';
+    try{
+      const response=await fetch('/api/rockeld/session',{
+        method:'POST',
+        headers:{'Content-Type':'application/json',Accept:'application/json'},
+        credentials:'same-origin',
+        cache:'no-store',
+        body:JSON.stringify({password:password.value})
+      });
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok||!data.success)throw new Error(data.error||'GPS sign-in failed.');
+      password.value='';
+      window.location.replace(returnTo);
+    }catch(error){
+      message.textContent=error.message||'Could not sign in.';
+      button.disabled=false;
+      button.textContent='Unlock live GPS';
+    }
+  });
+})();
+</script>
 </body>
 </html>
