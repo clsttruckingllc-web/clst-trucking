@@ -101,13 +101,23 @@ a{color:#dc2626}
     catch(error){if(error&&error.name==='AbortError')throw new Error(label+' timed out after '+Math.round(timeoutMs/1000)+' seconds. Please try again.');throw error;}
     finally{clearTimeout(timer);}
   }
-  async function geocode(query){
-    const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us&q='+encodeURIComponent(query);
-    const response=await fetch(url,{headers:{Accept:'application/json'},cache:'no-store'});
-    if(!response.ok)throw new Error('Delivery location lookup failed.');
-    const results=await response.json();
-    if(!Array.isArray(results)||!results.length)throw new Error('Could not locate the delivery address saved for this load.');
-    return {lat:Number(results[0].lat),lon:Number(results[0].lon)};
+  async function geocode(candidates){
+    const tried=[];
+    for(const query of [...new Set(candidates.map(v=>String(v||'').trim()).filter(Boolean))]){
+      for(const search of [query,query+', USA']){
+        if(tried.includes(search))continue;
+        tried.push(search);
+        const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us&q='+encodeURIComponent(search);
+        const response=await fetchWithTimeout(url,{headers:{Accept:'application/json'},cache:'no-store'},'Delivery address lookup',12000);
+        if(!response.ok)continue;
+        const results=await response.json().catch(()=>[]);
+        if(Array.isArray(results)&&results.length){
+          const lat=Number(results[0].lat),lon=Number(results[0].lon);
+          if(Number.isFinite(lat)&&Number.isFinite(lon))return {lat,lon};
+        }
+      }
+    }
+    throw new Error('Could not locate the delivery street address in the saved Rate Confirmation. Checked '+tried.length+' address formats; no location was guessed.');
   }
   async function loadRates(){
     const response=await fetchWithTimeout('/api/rates?maxResults=10',{headers:{Accept:'application/json'},cache:'no-store',credentials:'same-origin'},'Gmail Rate Confirmations request',45000);
@@ -150,12 +160,28 @@ a{color:#dc2626}
       const load=rateRecords.find(r=>String((r.analysis||{}).load_number||'').trim().toLowerCase()===loadNumber.toLowerCase());
       if(!load)throw new Error('No saved Gmail Rate Confirmation matched load '+loadNumber+'.');
       const analysis=load.analysis||{};
-      const destination=String(analysis.delivery_location||analysis.delivery_address||analysis.delivery_city_state||analysis.destination||analysis.delivery||'').trim();
-      if(!destination)throw new Error('The Rate Confirmation does not contain a delivery location.');
+      const cityStateZip=[analysis.delivery_city,analysis.delivery_state,analysis.delivery_zip,analysis.delivery_postal_code].filter(Boolean).join(', ');
+      const locality=String(analysis.delivery_city_state||analysis.delivery_citystate||analysis.delivery_city||'').trim();
+      const postal=String(analysis.delivery_zip||analysis.delivery_postal_code||'').trim();
+      const addressCandidates=[
+        analysis.delivery_address,
+        analysis.delivery_street_address,
+        analysis.receiver_address,
+        analysis.consignee_address,
+        analysis.deliver_to,
+        analysis.final_destination,
+        [analysis.delivery_address,locality,postal].filter(Boolean).join(', '),
+        [analysis.delivery_street_address,cityStateZip].filter(Boolean).join(', '),
+        analysis.delivery_location,
+        analysis.destination,
+        analysis.delivery
+      ].map(v=>String(v||'').trim()).filter(Boolean);
+      const destination=addressCandidates[0]||'';
+      if(!destination)throw new Error('The Rate Confirmation does not contain a delivery street address.');
       $('status').textContent='Step 2/4: checking the latest ROCK ELD truck location…';
       const truck=await loadTruckLocation(load);
       $('status').textContent='Step 3/4: locating the delivery address…';
-      const destinationPoint=await geocode(destination);
+      const destinationPoint=await geocode(addressCandidates);
       $('status').textContent='Step 4/4: calculating the road route and ETA…';
       const routeUrl='https://router.project-osrm.org/route/v1/driving/'+Number(truck.longitude)+','+Number(truck.latitude)+';'+destinationPoint.lon+','+destinationPoint.lat+'?overview=false&steps=false';
       const routeResponse=await fetchWithTimeout(routeUrl,{headers:{Accept:'application/json'},cache:'no-store'},'Road-route calculation',15000);
