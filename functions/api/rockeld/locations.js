@@ -1,4 +1,3 @@
-import { verifyGpsSession } from "../../_shared/gps-auth.js";
 const JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
   "Cache-Control": "no-store, private",
@@ -122,10 +121,15 @@ export async function onRequest({ request, env }) {
     return json({ error: "Method not allowed" }, 405);
   }
 
-  // Require a valid server-signed CLST GPS session before returning live fleet GPS.
-  const authenticated = await verifyGpsSession(request, env);
-  if (!authenticated) {
-    return json({ error: "GPS login required. Open /gps-login.html and sign in." }, 401);
+  // Require a valid Cloudflare Access JWT before returning live fleet GPS.
+  // Cloudflare Access controls company sign-in; no separate ROCK ELD password is collected.
+  const accessJwt = request.headers.get("Cf-Access-Jwt-Assertion") || "";
+  const authenticated = accessJwt
+    ? await verifyCloudflareAccessJwt(accessJwt, env)
+    : { ok: false, status: 401, error: "Cloudflare Access sign-in required." };
+
+  if (!authenticated.ok) {
+    return json({ error: authenticated.error }, authenticated.status);
   }
 
   // The upstream ROCK ELD API key remains server-side in encrypted Pages Secrets.
