@@ -19,7 +19,7 @@ assert.ok(session.includes("HttpOnly; Secure; SameSite=Lax"));
 assert.ok(session.includes("const SESSION_SECONDS = 8 * 60 * 60"));
 assert.ok(!dashboard.includes("eldUsername") && !dashboard.includes("eldPassword"));
 assert.ok(endpoint.includes("const staleAfterMs = 15 * 60 * 1000"));
-assert.ok(page.includes("fetchWithTimeout('/api/rates?maxResults=50'"));
+assert.ok(page.includes("fetchWithTimeout('/api/rates?maxResults=10'"));
 assert.ok(page.includes('id="load" maxlength="80" required'));
 assert.ok(page.includes('id="calculateButton"'));
 assert.ok(page.includes("fetchWithTimeout('/api/rockeld/locations'"));
