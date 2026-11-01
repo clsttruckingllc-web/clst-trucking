@@ -117,7 +117,7 @@ a{color:#dc2626}
   }
   async function loadTruckLocation(load){
     const headers={Accept:'application/json'};
-    const response=await fetchWithTimeout('/api/rockeld/locations',{headers,cache:'no-store',credentials:'same-origin'},'ROCK ELD GPS request',12000);if(response.status===401){throw new Error('Cloudflare Access sign-in required. Sign in to your company account, then retry the ETA estimate.');}
+    const response=await fetchWithTimeout('/api/rockeld/locations',{headers,cache:'no-store',credentials:'same-origin'},'ROCK ELD GPS request',12000);if(response.status===401){window.location.assign('/gps-login.html?return='+encodeURIComponent('/eta.html?load='+encodeURIComponent($('load').value.trim())));throw new Error('Opening secure GPS sign-in…');}
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(data.error||'Secure ROCK ELD access is not configured. Sign in through company access first.');
     const trucks=(Array.isArray(data.locations)?data.locations:[]).map(t=>({...t,
@@ -186,6 +186,8 @@ a{color:#dc2626}
       $('status').className='status bad';
     }finally{button.disabled=false;button.textContent='Calculate ETA';}
   }
+  const requestedLoad=new URLSearchParams(window.location.search).get('load');
+  if(requestedLoad)$('load').value=requestedLoad;
   $('etaForm').addEventListener('submit',calculate);
 })();
 </script>
