@@ -4,7 +4,7 @@ The dashboard and ETA page call the server-side Cloudflare Pages Function at `/a
 
 ## Fleet access and server secrets
 
-The dashboard automatically refreshes locations while it is open. Access to the live GPS endpoint is restricted by a verified Cloudflare Access session; there is no second username/password form in the dashboard.
+The ETA page requests a short-lived signed GPS session. Sign-in is handled by `/gps-login.html`; the server sets an HttpOnly, Secure, SameSite=Lax cookie that expires after 8 hours. The browser never receives the session-signing secret or the upstream ROCK ELD API key.
 
 In Cloudflare Dashboard → Workers & Pages → `clst-trucking` → Settings → Variables and Secrets, configure these encrypted secrets:
 
@@ -23,7 +23,7 @@ Do not put these values in GitHub or HTML. After changing secrets, redeploy the 
 
 ## Safety and ETA limitations
 
-- The endpoint requires a verified Cloudflare Access JWT; it must not be made public.
+- The endpoint requires a valid signed GPS session; it must not be made public.
 - Keep the ROCK ELD API key and login credentials out of source control.
 - The endpoint uses `Cache-Control: no-store` and does not enable cross-origin access.
 - A report older than 15 minutes is not eligible to fill the ETA origin. A fresh report still needs human review.
