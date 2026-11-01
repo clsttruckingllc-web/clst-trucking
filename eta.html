@@ -110,7 +110,7 @@ a{color:#dc2626}
     return {lat:Number(results[0].lat),lon:Number(results[0].lon)};
   }
   async function loadRates(){
-    const response=await fetchWithTimeout('/api/rates?maxResults=50',{headers:{Accept:'application/json'},cache:'no-store',credentials:'same-origin'},'Gmail Rate Confirmations request',12000);
+    const response=await fetchWithTimeout('/api/rates?maxResults=10',{headers:{Accept:'application/json'},cache:'no-store',credentials:'same-origin'},'Gmail Rate Confirmations request',45000);
     const data=await response.json().catch(()=>({}));
     if(!response.ok||data.success===false||!Array.isArray(data.rates))throw new Error(data.error||'Saved Gmail Rate Confirmations are unavailable.');
     rateRecords=flattenRates(data);
