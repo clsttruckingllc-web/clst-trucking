@@ -51,22 +51,20 @@ export async function onRequest({ request, env }) {
   const sessionCookie = cookieHeader.split(";").map(part => part.trim())
     .find(part => part.startsWith("clst_gps_session="));
   const token = sessionCookie ? decodeURIComponent(sessionCookie.slice("clst_gps_session=".length)) : "";
-  const sessionSecret = String(env.CLST_GPS_SESSION_SECRET || "");
-  if (!sessionSecret) return json({ error: "Secure GPS session is not configured on the server." }, 503);
+  const secret = String(env.CLST_GPS_SESSION_SECRET || "");
+  if (!secret) return json({ error: "Secure GPS session is not configured on the server." }, 503);
 
   let validSession = false;
   try {
     const [payloadPart, signaturePart] = token.split(".");
-    if (payloadPart && signaturePart) {
-      const decode = value => {
-        const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - value.length % 4) % 4);
-        return Uint8Array.from(atob(padded), ch => ch.charCodeAt(0));
-      };
-      const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(sessionSecret),
+    if (payloadPart && signaturePart && /^(?:[a-f0-9]{2})+$/i.test(payloadPart) && /^(?:[a-f0-9]{2})+$/i.test(signaturePart)) {
+      const payloadBytes = Uint8Array.from(payloadPart.match(/.{2}/g), byte => parseInt(byte, 16));
+      const payload = JSON.parse(new TextDecoder().decode(payloadBytes));
+      const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret),
         { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
-      const payload = JSON.parse(new TextDecoder().decode(decode(payloadPart)));
+      const signature = Uint8Array.from(signaturePart.match(/.{2}/g), byte => parseInt(byte, 16));
       validSession = Number(payload.exp) > Math.floor(Date.now() / 1000) &&
-        await crypto.subtle.verify("HMAC", key, decode(signaturePart), new TextEncoder().encode(payloadPart));
+        await crypto.subtle.verify("HMAC", key, signature, new TextEncoder().encode(payloadPart));
     }
   } catch { validSession = false; }
   if (!validSession) return json({ error: "Secure GPS sign-in required." }, 401);
