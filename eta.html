@@ -160,22 +160,47 @@ a{color:#dc2626}
       const load=rateRecords.find(r=>String((r.analysis||{}).load_number||'').trim().toLowerCase()===loadNumber.toLowerCase());
       if(!load)throw new Error('No saved Gmail Rate Confirmation matched load '+loadNumber+'.');
       const analysis=load.analysis||{};
-      const cityStateZip=[analysis.delivery_city,analysis.delivery_state,analysis.delivery_zip,analysis.delivery_postal_code].filter(Boolean).join(', ');
-      const locality=String(analysis.delivery_city_state||analysis.delivery_citystate||analysis.delivery_city||'').trim();
-      const postal=String(analysis.delivery_zip||analysis.delivery_postal_code||'').trim();
-      const addressCandidates=[
-        analysis.delivery_address,
-        analysis.delivery_street_address,
-        analysis.receiver_address,
-        analysis.consignee_address,
-        analysis.deliver_to,
-        analysis.final_destination,
-        [analysis.delivery_address,locality,postal].filter(Boolean).join(', '),
-        [analysis.delivery_street_address,cityStateZip].filter(Boolean).join(', '),
-        analysis.delivery_location,
-        analysis.destination,
-        analysis.delivery
-      ].map(v=>String(v||'').trim()).filter(Boolean);
+      function buildAddressCandidates(a){
+        const out=[];
+        const add=value=>{
+          if(value===null||value===undefined)return;
+          if(Array.isArray(value)){value.forEach(add);return;}
+          if(typeof value==='object'){
+            const direct=value.formatted_address||value.formattedAddress||value.address||value.location;
+            if(direct)add(direct);
+            const street=value.street_address||value.streetAddress||value.address_line_1||value.addressLine1||value.street;
+            const city=value.city||value.locality||value.town;
+            const state=value.state||value.state_code||value.region;
+            const zip=value.zip||value.postal_code||value.postalCode;
+            if(street||city||state||zip)add([street,city,state,zip].filter(Boolean).join(', '));
+            return;
+          }
+          const raw=String(value).replace(/\\s+/g,' ').trim();
+          if(!raw)return;
+          out.push(raw);
+          // Some PDFs place the facility name before the street address and omit
+          // the comma between the street suffix and city. Split that safely.
+          const match=raw.match(/\\b(\\d{1,6}\\s+[^,]*?\\b(?:STREET|ST|AVENUE|AVE|ROAD|RD|BOULEVARD|BLVD|DRIVE|DR|LANE|LN|PARKWAY|PKWY|HIGHWAY|HWY|COURT|CT|CIRCLE|CIR|PLACE|PL|TERRACE|TER|WAY)\\.?)\\s*,?\\s*([A-Z][A-Z .'-]+?)\\s*,?\\s*([A-Z]{2})\\s+(\\d{5}(?:-\\d{4})?)\\b/i);
+          if(match){
+            const street=match[1].replace(/\\bPKWY\\b/i,'Parkway').replace(/\\bAVE\\b/i,'Avenue').replace(/\\bST\\b/i,'Street').replace(/\\bRD\\b/i,'Road').replace(/\\bBLVD\\b/i,'Boulevard').replace(/\\bDR\\b/i,'Drive');
+            const city=match[2].trim(),state=match[3].toUpperCase(),zip=match[4];
+            out.unshift(match[1]+', '+city+', '+state+' '+zip+', USA');
+            out.unshift(street+', '+city+', '+state+' '+zip+', USA');
+          }
+        };
+        [
+          a.delivery_address,a.delivery_street_address,a.receiver_address,
+          a.consignee_address,a.deliver_to,a.final_destination,
+          a.delivery_location,a.destination,a.delivery
+        ].forEach(add);
+        const locality=String(a.delivery_city_state||a.delivery_citystate||a.delivery_city||'').trim();
+        const state=String(a.delivery_state||'').trim();
+        const postal=String(a.delivery_zip||a.delivery_postal_code||'').trim();
+        const street=a.delivery_street_address||a.delivery_address||a.receiver_address||a.consignee_address;
+        if(street&&locality)add([street,locality,state,postal].filter(Boolean).join(', '));
+        return [...new Set(out)];
+      }
+      const addressCandidates=buildAddressCandidates(analysis);
       const destination=addressCandidates[0]||'';
       if(!destination)throw new Error('The Rate Confirmation does not contain a delivery street address.');
       $('status').textContent='Step 2/4: checking the latest ROCK ELD truck location…';
