@@ -105,7 +105,8 @@ async function gmail(env,path,token){
  const d=await res.json().catch(()=>({}));if(!res.ok)throw Error("Gmail API "+res.status+": "+String(d.error&&d.error.message||"request failed"));return d;
 }
 function head(h,n){const x=(h||[]).find(a=>String(a.name||"").toLowerCase()===n);return x?x.value:"";}
-function meta(m){const h=m.payload&&m.payload.headers||[];return{id:m.id,threadId:m.threadId,subject:head(h,"subject")||"(no subject)",from:head(h,"from"),date:head(h,"date"),snippet:m.snippet||""};}
+function meta(m,labelNamesById=new Map()){const h=m.payload&&m.payload.headers||[];const labelIds=Array.isArray(m.labelIds)?m.labelIds:[];return{id:m.id,threadId:m.threadId,subject:head(h,"subject")||"(no subject)",from:head(h,"from"),date:head(h,"date"),snippet:m.snippet||"",labelIds,labels:labelIds.map(id=>labelNamesById.get(id)).filter(Boolean)};}
+async function gmailUserLabelMap(token){const data=await gmail(null,"/labels",token);return new Map((data.labels||[]).filter(label=>label&&label.type==="user"&&label.id&&label.name).map(label=>[label.id,label.name]));}
 async function messages(url,env){
  const max=int(url.searchParams.get("maxResults"),25,1,50),q=url.searchParams.get("q")||"newer_than:30d",token=await googleToken(env);
  const d=await gmail(env,"/messages?maxResults="+max+"&q="+encodeURIComponent(inboxOnlyQuery(q)),token),out=[];
@@ -198,21 +199,22 @@ async function analyzePdfCached(env,msgId,pdf,bytes,name,subject){
  try{await env.TOKENS.put(key,JSON.stringify(result),{expirationTtl:30*24*60*60});}catch(e){}
  return result;
 }
-async function analyzeMessage(env,m,max=3,token){
- const e=meta(m),out=[];
+async function analyzeMessage(env,m,max=3,token,labelNamesById=new Map()){
+ const e=meta(m,labelNamesById),out=[];
  for(const p of pdfs(m.payload).slice(0,max)){try{out.push({filename:p.filename,analysis:await analyzePdfCached(env,m.id,p,await getPdf(env,m.id,p,token),p.filename,e.subject),error:null});}catch(err){out.push({filename:p.filename,analysis:null,error:errText(err)});}}
  return{email:e,pdfs:out};
 }
 async function rates(url,env){
  const max=int(url.searchParams.get("maxResults"),10,1,12),days=int(url.searchParams.get("days"),90,1,365),q=url.searchParams.get("q")||"newer_than:"+days+"d has:attachment filename:pdf",token=await googleToken(env);
+ const labelNamesById=await gmailUserLabelMap(token);
  const found=await gmail(env,"/messages?maxResults="+max+"&q="+encodeURIComponent(inboxOnlyQuery(q)),token),out=[];
- for(const item of(found.messages||[]).slice(0,max)){try{const m=await fullMessage(env,item.id,token);if(pdfs(m.payload).length)out.push(await analyzeMessage(env,m,3,token));}catch(e){out.push({email:{id:item.id,subject:"Could not read message",from:"",date:""},pdfs:[{filename:"attachment.pdf",analysis:null,error:errText(e)}]});}}
+ for(const item of(found.messages||[]).slice(0,max)){try{const m=await fullMessage(env,item.id,token);if(pdfs(m.payload).length)out.push(await analyzeMessage(env,m,3,token,labelNamesById));}catch(e){out.push({email:{id:item.id,subject:"Could not read message",from:"",date:"",labels:[]},pdfs:[{filename:"attachment.pdf",analysis:null,error:errText(e)}]});}}
  return json({success:true,query:q,resultSizeEstimate:found.resultSizeEstimate||out.length,rates:out});
 }
 async function oneRate(req,env){
  let b;try{b=await req.json();}catch(e){return json({error:"Request body must be JSON."},400);}
  const id=b.messageId||b.id;if(!id)return json({error:"Provide messageId or id."},400);
- const token=await googleToken(env),result=await analyzeMessage(env,await fullMessage(env,String(id),token),5,token);return json({success:true,messageId:id,subject:result.email.subject,pdfCount:result.pdfs.length,analyses:result.pdfs});
+ const token=await googleToken(env),labelNamesById=await gmailUserLabelMap(token),result=await analyzeMessage(env,await fullMessage(env,String(id),token),5,token,labelNamesById);return json({success:true,messageId:id,subject:result.email.subject,labels:result.email.labels,pdfCount:result.pdfs.length,analyses:result.pdfs});
 }
 function textParts(p,out=[]){
  if(!p)return out;const mime=String(p.mimeType||"").toLowerCase();
