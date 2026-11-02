@@ -638,5 +638,8 @@ if ('serviceWorker' in navigator) {
 }
 
 </script>
+<script>
+(()=>{const logoutButton=document.getElementById('clstLogout');if(logoutButton)logoutButton.addEventListener('click',()=>{sessionStorage.removeItem('clst_marko_session_v1');location.replace('/login.html')});})();
+</script>
 </body>
 </html>
