@@ -141,7 +141,7 @@ a{color:#dc2626}
     const a=load.analysis||{};
     const truckHint=[a.truck_number,a.truck,a.truck_id,a.vehicle_id,a.vehicleId,a.unit_number].filter(Boolean).map(String);
     const driverLabels=Array.isArray(load.email?.labels)?load.email.labels.map(String).map(x=>x.trim()).filter(Boolean):[];
-    const key=value=>String(value||'').normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+    const key=value=>String(value||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
     const hintMatches=truckHint.length?trucks.filter(t=>truckHint.some(h=>[t.vehicleId,t.id,t.truckNumber,t.vehicleNumber,t.unitNumber,t.vehicleName].some(v=>v!==null&&v!==undefined&&key(v)===key(h)))):[];
     const labelKeys=driverLabels.flatMap(label=>[label,label.split('/').pop()||label]).map(key).filter(Boolean);
     const driverMatches=labelKeys.length?trucks.filter(t=>[t.driverName,t.driver_name,t.assignedDriverName,t.operatorName].some(v=>v&&labelKeys.includes(key(v)))):[];
