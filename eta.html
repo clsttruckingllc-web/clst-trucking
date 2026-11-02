@@ -230,7 +230,8 @@ a{color:#dc2626}
       const elapsed=drivingHours+rests*restHours;
       const arrival=new Date(Date.now()+elapsed*3600000);
       $('arrival').textContent=fmtDate(arrival);
-      $('loadLabel').textContent='Load '+String(analysis.load_number||loadNumber);
+      const assignedDriverLabels=Array.isArray(load.email?.labels)?load.email.labels.join(', '):'';
+      $('loadLabel').textContent='Load '+String(analysis.load_number||loadNumber)+(assignedDriverLabels?' · Gmail Label: '+assignedDriverLabels:'');
       $('truckLocation').textContent=String(truck.location||('GPS '+Number(truck.latitude).toFixed(4)+', '+Number(truck.longitude).toFixed(4)));
       $('deliveryLocation').textContent=destination;
       $('roadMiles').textContent=miles.toFixed(1)+' mi';
