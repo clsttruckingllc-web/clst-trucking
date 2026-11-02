@@ -44,6 +44,14 @@ export function sameOrigin(request) {
   return !origin || origin === new URL(request.url).origin;
 }
 
+export function safeEqualText(a, b) {
+  const left = encoder.encode(String(a));
+  const right = encoder.encode(String(b));
+  let diff = left.length ^ right.length;
+  for (let i = 0; i < Math.max(left.length, right.length); i++) diff |= (left[i] || 0) ^ (right[i] || 0);
+  return diff === 0;
+}
+
 export async function hashPassword(password, saltBytes) {
   const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
   const bits = await crypto.subtle.deriveBits({
