@@ -64,6 +64,11 @@ input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:tran
         <label for="confirmPassword">Confirm password</label>
         <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="12" maxlength="256">
       </div>
+      <div class="field" id="adminKeyField" hidden>
+        <label for="adminSetupKey">One-time administrator setup key</label>
+        <input id="adminSetupKey" name="adminSetupKey" type="password" autocomplete="off" maxlength="256">
+        <p class="hint">Required only to claim the first administrator account.</p>
+      </div>
       <button class="submit" id="submitButton" type="submit">Log in</button>
       <div id="message" role="status" aria-live="polite"></div>
     </form>
@@ -74,6 +79,7 @@ input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:tran
 (function(){
   const $=id=>document.getElementById(id);
   let mode="login";
+  let adminSetupRequired=true;
   const params=new URLSearchParams(location.search);
   const requested=params.get("return")||"/";
   const returnTo=requested.startsWith("/")&&!requested.startsWith("//")?requested:"/";
@@ -87,6 +93,8 @@ input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:tran
     $("submitButton").textContent=signup?"Create account":"Log in";
     $("confirmField").hidden=!signup;
     $("confirmPassword").required=signup;
+    $("adminKeyField").hidden=!(signup&&adminSetupRequired);
+    $("adminSetupKey").required=signup&&adminSetupRequired;
     $("passwordHint").hidden=!signup;
     $("password").autocomplete=signup?"new-password":"current-password";
     $("message").textContent="";
@@ -96,7 +104,7 @@ input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:tran
   $("signupTab").addEventListener("click",()=>setMode("signup"));
 
   fetch("/api/auth/session",{headers:{Accept:"application/json"},credentials:"same-origin",cache:"no-store"})
-    .then(r=>r.json()).then(data=>{if(data.authenticated)location.replace(returnTo);})
+    .then(r=>r.json()).then(data=>{adminSetupRequired=data.adminSetupRequired!==false;if(data.authenticated)location.replace(returnTo);setMode(mode);})
     .catch(()=>{});
 
   $("authForm").addEventListener("submit",async event=>{
@@ -117,7 +125,7 @@ input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:tran
       const response=await fetch(endpoint,{
         method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},
         credentials:"same-origin",cache:"no-store",
-        body:JSON.stringify({username,password})
+        body:JSON.stringify({username,password,adminSetupKey:$("adminSetupKey").value})
       });
       const data=await response.json().catch(()=>({}));
       if(!response.ok||!data.success)throw new Error(data.error||"Account request failed.");
@@ -125,6 +133,7 @@ input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:tran
       message.textContent=mode==="signup"?(data.user?.role==="admin"?"Administrator account created.":"Account created."):"Signed in.";
       $("password").value="";
       $("confirmPassword").value="";
+      $("adminSetupKey").value="";
       location.replace(returnTo);
     }catch(error){
       message.className="";
