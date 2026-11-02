@@ -8,7 +8,12 @@ export async function onRequest({ request, env }) {
 
   if (request.method === "GET") {
     const user = await getSessionUser(request, env);
-    return json({ authenticated: Boolean(user), user: user ? { username: user.username, role: user.role } : null });
+    const admin = await env.AUTH_DB.prepare("SELECT id FROM users WHERE role = 'admin' LIMIT 1").first();
+    return json({
+      authenticated: Boolean(user),
+      user: user ? { username: user.username, role: user.role } : null,
+      adminSetupRequired: !admin
+    });
   }
 
   if (!sameOrigin(request)) return json({ error: "Cross-origin request blocked." }, 403);
