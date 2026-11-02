@@ -9,14 +9,16 @@ This branch adds the Marko login/sign-up page and server-side authentication fou
    - Variable name: `AUTH_DB`
    - Database: the new Marko authentication database
 3. Apply `migrations/0001_mare_auth.sql` to that database.
-4. Add an encrypted Pages secret named `AUTH_SESSION_SECRET` containing a unique random value of at least 32 bytes.
+4. Add encrypted Pages secrets:
+   - `AUTH_SESSION_SECRET`: a unique random value of at least 32 bytes.
+   - `AUTH_ADMIN_SETUP_KEY`: a separate one-time bootstrap secret you choose and keep private. Enter it in the sign-up form when creating the first admin account.
 5. Deploy a preview and verify first sign-up, sign-in, sign-out, and unauthenticated redirects before promoting the change.
 
 Do not put passwords, password hashes, API keys, or the session secret in GitHub source code.
 
 ## Account rules
 
-- The first successfully registered account receives the `admin` role.
+- The first account can receive the `admin` role only when the correct `AUTH_ADMIN_SETUP_KEY` is supplied; this prevents a stranger from claiming the first account.
 - A partial unique database index prevents a second admin account.
 - Later sign-ups receive the ordinary `user` role.
 - Passwords are stored as salted PBKDF2-HMAC-SHA-256 hashes, never as plain text.
