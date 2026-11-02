@@ -19,28 +19,23 @@
 <header class="brand"><div class="mark">C</div><div><div class="brand-name">CLST TRUCKING</div><div class="brand-sub">MARKO AI · Dispatch intelligence</div></div></header>
 <section class="panel">
 <div class="eyebrow">CLST operations workspace</div><h1 id="heading">Welcome back.</h1><p class="intro" id="intro">Log in to open the CLST command center.</p>
-<div class="tabs" role="tablist" aria-label="Account access"><button class="tab" id="loginTab" type="button" role="tab" aria-selected="true">Log in</button><button class="tab" id="signupTab" type="button" role="tab" aria-selected="false">Sign up</button></div>
 <form id="authForm">
 <div class="field"><label for="username">Username</label><input id="username" name="username" autocomplete="username" minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]+" required></div>
 <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required></div>
-<div class="field" id="confirmField" hidden><label for="confirmPassword">Confirm password</label><input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128"></div>
 <button class="submit" id="submitButton" type="submit">Log in</button><div id="message" role="status" aria-live="polite"></div>
 </form>
-<div class="note">Team prototype: accounts are saved in this browser only. This is a convenient front-door screen, not server-enforced security. A shared secure sign-in will be added during the CLST rebrand.</div>
+<div class="note">CLST team access. Account creation is reserved for the owner.</div>
 </section><p class="foot">CLST TRUCKING · MARKO AI</p>
 </main>
 <script>
 (()=>{'use strict';
-const $=id=>document.getElementById(id),STORE='clst_marko_accounts_v1',SESSION='clst_marko_session_v1';let mode='login';
+const $=id=>document.getElementById(id),STORE='clst_marko_accounts_v1',SESSION='clst_marko_session_v1';
 const read=()=>{try{return JSON.parse(localStorage.getItem(STORE)||'{}')}catch{return {}}};
-const write=x=>localStorage.setItem(STORE,JSON.stringify(x));
 const enc=s=>new TextEncoder().encode(s);
 const hex=b=>Array.from(new Uint8Array(b),x=>x.toString(16).padStart(2,'0')).join('');
 async function derive(password,salt){const key=await crypto.subtle.importKey('raw',enc(password),'PBKDF2',false,['deriveBits']);return hex(await crypto.subtle.deriveBits({name:'PBKDF2',salt:Uint8Array.from(salt.match(/../g),x=>parseInt(x,16)),iterations:160000,hash:'SHA-256'},key,256))}
-function setMode(next){mode=next;const signup=mode==='signup';$('loginTab').setAttribute('aria-selected',String(!signup));$('signupTab').setAttribute('aria-selected',String(signup));$('heading').textContent=signup?'Create your account.':'Welcome back.';$('intro').textContent=signup?'Create your CLST team login to continue.':'Log in to open the CLST command center.';$('submitButton').textContent=signup?'Create account':'Log in';$('confirmField').hidden=!signup;$('confirmPassword').required=signup;$('password').autocomplete=signup?'new-password':'current-password';$('message').textContent='';$('message').className=''}
-$('loginTab').addEventListener('click',()=>setMode('login'));$('signupTab').addEventListener('click',()=>setMode('signup'));
 if(sessionStorage.getItem(SESSION)==='yes')location.replace('/');
-$('authForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('submitButton'),msg=$('message'),username=$('username').value.trim().toLowerCase(),password=$('password').value;btn.disabled=true;btn.textContent=mode==='signup'?'Creating account…':'Signing in…';msg.textContent='';
-try{const accounts=read();if(mode==='signup'){if(password!==$('confirmPassword').value)throw Error('The passwords do not match.');if(accounts[username])throw Error('That username already exists in this browser.');const salt=hex(crypto.getRandomValues(new Uint8Array(16)));accounts[username]={salt,hash:await derive(password,salt),createdAt:new Date().toISOString()};write(accounts);msg.className='ok';msg.textContent='Account created. Opening CLST…'}else{const account=accounts[username];if(!account||await derive(password,account.salt)!==account.hash)throw Error('Incorrect username or password.');msg.className='ok';msg.textContent='Welcome back. Opening CLST…'}sessionStorage.setItem(SESSION,'yes');$('password').value='';$('confirmPassword').value='';location.replace('/')}catch(err){msg.className='';msg.textContent=err.message||'Could not complete sign-in.';btn.disabled=false;btn.textContent=mode==='signup'?'Create account':'Log in'}});
+$('authForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('submitButton'),msg=$('message'),username=$('username').value.trim().toLowerCase(),password=$('password').value;btn.disabled=true;btn.textContent='Signing in…';msg.textContent='';
+try{const accounts=read();const account=accounts[username];if(!account||await derive(password,account.salt)!==account.hash)throw Error('Incorrect username or password.');msg.className='ok';msg.textContent='Welcome back. Opening CLST…'}sessionStorage.setItem(SESSION,'yes');$('password').value='';location.replace('/')}catch(err){msg.className='';msg.textContent=err.message||'Could not complete sign-in.';btn.disabled=false;btn.textContent='Log in'}});
 })();
 </script></body></html>
