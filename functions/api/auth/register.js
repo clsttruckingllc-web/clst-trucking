@@ -29,7 +29,7 @@ export async function onRequest({ request, env }) {
     return json({ error: "Password must be at least 12 characters." }, 400);
   }
 
-  const salt = newPasswordSalt();
+  const salt = await newPasswordSalt();
   const saltText = toBase64Url(salt);
   const passwordHash = await hashPassword(password, salt);
   const id = crypto.randomUUID();
