@@ -1,5 +1,5 @@
 import {
-  createSessionCookie, hashPassword, json, newPasswordSalt, sameOrigin, toBase64Url
+  createSessionCookie, hashPassword, json, newPasswordSalt, sameOrigin, safeEqualText, toBase64Url
 } from "../../_shared/auth.js";
 
 export async function onRequest({ request, env }) {
@@ -16,6 +16,13 @@ export async function onRequest({ request, env }) {
   try { body = await request.json(); } catch { return json({ error: "Invalid request." }, 400); }
   const username = typeof body.username === "string" ? body.username.trim() : "";
   const password = typeof body.password === "string" ? body.password : "";
+  const admin = await env.AUTH_DB.prepare("SELECT id FROM users WHERE role = 'admin' LIMIT 1").first();
+  if (!admin) {
+    const expectedSetupKey = String(env.AUTH_ADMIN_SETUP_KEY || "");
+    const suppliedSetupKey = typeof body.adminSetupKey === "string" ? body.adminSetupKey : "";
+    if (!expectedSetupKey) return json({ error: "The first-admin setup key has not been configured on the server." }, 503);
+    if (!safeEqualText(suppliedSetupKey, expectedSetupKey)) return json({ error: "The first-admin setup key is incorrect." }, 403);
+  }
   if (!/^[a-zA-Z0-9._-]{3,32}$/.test(username)) {
     return json({ error: "Username must be 3–32 characters and use letters, numbers, dot, underscore or hyphen." }, 400);
   }
