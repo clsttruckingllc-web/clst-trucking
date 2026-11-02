@@ -17,12 +17,11 @@ export async function onRequest({ request, env }) {
   const username = typeof body.username === "string" ? body.username.trim() : "";
   const password = typeof body.password === "string" ? body.password : "";
   const admin = await env.AUTH_DB.prepare("SELECT id FROM users WHERE role = 'admin' LIMIT 1").first();
-  if (!admin) {
-    const expectedSetupKey = String(env.AUTH_ADMIN_SETUP_KEY || "");
-    const suppliedSetupKey = typeof body.adminSetupKey === "string" ? body.adminSetupKey : "";
-    if (!expectedSetupKey) return json({ error: "The first-admin setup key has not been configured on the server." }, 503);
-    if (!safeEqualText(suppliedSetupKey, expectedSetupKey)) return json({ error: "The first-admin setup key is incorrect." }, 403);
-  }
+  if (admin) return json({ error: "Sign-up is closed. Only the administrator can authorize future accounts." }, 403);
+  const expectedSetupKey = String(env.AUTH_ADMIN_SETUP_KEY || "");
+  const suppliedSetupKey = typeof body.adminSetupKey === "string" ? body.adminSetupKey : "";
+  if (!expectedSetupKey) return json({ error: "The first-admin setup key has not been configured on the server." }, 503);
+  if (!safeEqualText(suppliedSetupKey, expectedSetupKey)) return json({ error: "The first-admin setup key is incorrect." }, 403);
   if (!/^[a-zA-Z0-9._-]{3,32}$/.test(username)) {
     return json({ error: "Username must be 3–32 characters and use letters, numbers, dot, underscore or hyphen." }, 400);
   }
@@ -37,24 +36,13 @@ export async function onRequest({ request, env }) {
   const createdAt = Math.floor(Date.now() / 1000);
 
   try {
-    // The database's unique partial index guarantees that concurrent sign-ups
-    // cannot create two administrators. The first successful insert is admin.
-    await env.AUTH_DB.prepare(`
-      INSERT INTO users (id, username, password_salt, password_hash, role, created_at)
-      SELECT ?, ?, ?, ?,
-        CASE WHEN NOT EXISTS (SELECT 1 FROM users WHERE role = 'admin')
-          THEN 'admin' ELSE 'user' END,
-        ?
-    `).bind(id, username, saltText, passwordHash, createdAt).run();
+    // The first account is the sole administrator. The database unique index
+    // prevents two concurrent first sign-ups from creating two admins.
+    await env.AUTH_DB.prepare(
+      "INSERT INTO users (id, username, password_salt, password_hash, role, created_at) VALUES (?, ?, ?, ?, 'admin', ?)"
+    ).bind(id, username, saltText, passwordHash, createdAt).run();
   } catch {
-    // If another first-sign-up won the race, retry as an ordinary user.
-    try {
-      await env.AUTH_DB.prepare(
-        "INSERT INTO users (id, username, password_salt, password_hash, role, created_at) VALUES (?, ?, ?, ?, 'user', ?)"
-      ).bind(id, username, saltText, passwordHash, createdAt).run();
-    } catch {
-      return json({ error: "That username is already in use, or the account could not be created." }, 409);
-    }
+    return json({ error: "The first account was already claimed, or this username is unavailable." }, 409);
   }
 
   const user = await env.AUTH_DB.prepare(
