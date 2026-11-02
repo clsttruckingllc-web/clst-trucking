@@ -119,8 +119,11 @@ a{color:#dc2626}
     }
     throw new Error('Could not locate the delivery street address in the saved Rate Confirmation. Checked '+tried.length+' address formats; no location was guessed.');
   }
-  async function loadRates(){
-    const response=await fetchWithTimeout('/api/rates?maxResults=10',{headers:{Accept:'application/json'},cache:'no-store',credentials:'same-origin'},'Gmail Rate Confirmations request',45000);
+  async function loadRates(loadNumber){
+    // Search Gmail for this exact load number instead of analyzing the latest ten unrelated PDFs.
+    const query='newer_than:365d "'+String(loadNumber).replace(/["\\]/g,'')+'" has:attachment filename:pdf';
+    const params=new URLSearchParams({maxResults:'5',q:query});
+    const response=await fetchWithTimeout('/api/rates?'+params.toString(),{headers:{Accept:'application/json'},cache:'no-store',credentials:'same-origin'},'Gmail Rate Confirmation search',45000);
     const data=await response.json().catch(()=>({}));
     if(!response.ok||data.success===false||!Array.isArray(data.rates))throw new Error(data.error||'Saved Gmail Rate Confirmations are unavailable.');
     rateRecords=flattenRates(data);
@@ -164,7 +167,7 @@ a{color:#dc2626}
       const loadNumber=$('load').value.trim();
       if(!loadNumber)throw new Error('Enter the load number.');
       $('status').textContent='Step 1/4: loading saved Gmail Rate Confirmations…';
-      await loadRates();
+      await loadRates(loadNumber);
       const load=rateRecords.find(r=>String((r.analysis||{}).load_number||'').trim().toLowerCase()===loadNumber.toLowerCase());
       if(!load)throw new Error('No saved Gmail Rate Confirmation matched load '+loadNumber+'.');
       const analysis=load.analysis||{};
