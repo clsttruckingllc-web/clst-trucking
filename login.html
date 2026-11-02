@@ -88,6 +88,7 @@ input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:tran
     const signup=mode==="signup";
     $("loginTab").setAttribute("aria-selected",String(!signup));
     $("signupTab").setAttribute("aria-selected",String(signup));
+    $("signupTab").hidden=!adminSetupRequired;
     $("heading").textContent=signup?"Create your account.":"Welcome back.";
     $("intro").textContent=signup?"Your first account becomes the workspace administrator.":"Sign in to continue to your Marko workspace.";
     $("submitButton").textContent=signup?"Create account":"Log in";
@@ -104,7 +105,7 @@ input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:tran
   $("signupTab").addEventListener("click",()=>setMode("signup"));
 
   fetch("/api/auth/session",{headers:{Accept:"application/json"},credentials:"same-origin",cache:"no-store"})
-    .then(r=>r.json()).then(data=>{adminSetupRequired=data.adminSetupRequired!==false;if(data.authenticated)location.replace(returnTo);setMode(mode);})
+    .then(r=>r.json()).then(data=>{adminSetupRequired=data.adminSetupRequired!==false;$("signupTab").hidden=!adminSetupRequired;if(data.authenticated)location.replace(returnTo);setMode(mode);})
     .catch(()=>{});
 
   $("authForm").addEventListener("submit",async event=>{
