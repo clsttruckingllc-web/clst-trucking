@@ -33,6 +33,9 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CLST TRUCKING">
+<script>
+(()=>{try{if(sessionStorage.getItem('clst_marko_session_v1')!=='yes'){const next=location.pathname+location.search+location.hash;location.replace('/login.html?return='+encodeURIComponent(next));}}catch{location.replace('/login.html');}})();
+</script>
 </head>
 <body>
 <header>
@@ -44,6 +47,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
     </div>
   </div>
   <nav aria-label="Dashboard navigation"><a href="#gmail">GMAIL & AI</a><a href="#eld">ROCK ELD</a><a href="#eta">ETA DISPATCH</a><a href="#ringcentral">RINGCENTRAL</a></nav>
+  <button type="button" id="clstLogout" class="secondary" style="padding:8px 12px;font-size:12px">Log out</button>
   <div class="connection">
     <span class="dot" id="dot"></span>
     <span id="connectionText">Ready</span>
