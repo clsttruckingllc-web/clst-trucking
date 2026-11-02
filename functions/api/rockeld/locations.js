@@ -121,6 +121,15 @@ export async function onRequest({ request, env }) {
       return {
         vehicleId: vehicle.vehicleId ?? null,
         id: vehicle.id ?? null,
+        vehicleName: vehicle.vehicleName ?? vehicle.vehicle_name ?? vehicle.unitName ?? vehicle.unit_name ?? vehicle.name ?? vehicle.description ?? null,
+        driverName: vehicle.driverName ?? vehicle.driver_name ?? vehicle.assignedDriverName ?? vehicle.assigned_driver_name ??
+          (typeof vehicle.driver === "string" ? vehicle.driver :
+            vehicle.driver?.name ?? vehicle.assignedDriver?.name ?? vehicle.assigned_driver?.name ??
+            ([vehicle.driver?.firstName ?? vehicle.driver?.first_name, vehicle.driver?.lastName ?? vehicle.driver?.last_name].filter(Boolean).join(" ") ||
+              vehicle.operatorName || vehicle.operator_name || null)),
+        truckNumber: vehicle.truckNumber ?? vehicle.truck_number ?? vehicle.vehicleNumber ??
+          vehicle.vehicle_number ?? vehicle.powerUnitNumber ?? vehicle.power_unit_number ??
+          vehicle.unitNumber ?? vehicle.unit_number ?? vehicle.unit ?? vehicle.number ?? null,
         latitude: validCoordinates ? latitude : null,
         longitude: validCoordinates ? longitude : null,
         location: vehicle.geoCodedLocation ?? null,

@@ -140,12 +140,20 @@ a{color:#dc2626}
     if(!trucks.length)throw new Error('ROCK ELD has no fresh truck locations within the last 15 minutes.');
     const a=load.analysis||{};
     const truckHint=[a.truck_number,a.truck,a.truck_id,a.vehicle_id,a.vehicleId,a.unit_number].filter(Boolean).map(String);
-    if(truckHint.length){
-      const matched=trucks.find(t=>truckHint.some(h=>[t.vehicleId,t.id].some(v=>v!==null&&v!==undefined&&String(v).toLowerCase()===h.toLowerCase())));
-      if(matched)return matched;
-    }
-    if(trucks.length===1)return trucks[0];
-    throw new Error('More than one truck has a fresh GPS location, but this Rate Confirmation does not identify the assigned truck. The load must be assigned to a truck in the saved load data.');
+    const driverLabels=Array.isArray(load.email?.labels)?load.email.labels.map(String).map(x=>x.trim()).filter(Boolean):[];
+    const key=value=>String(value||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+    const hintMatches=truckHint.length?trucks.filter(t=>truckHint.some(h=>[t.vehicleId,t.id,t.truckNumber,t.vehicleNumber,t.unitNumber,t.vehicleName].some(v=>v!==null&&v!==undefined&&key(v)===key(h)))):[];
+    const labelKeys=driverLabels.flatMap(label=>[label,label.split('/').pop()||label]).map(key).filter(Boolean);
+    const driverMatches=labelKeys.length?trucks.filter(t=>[t.driverName,t.driver_name,t.assignedDriverName,t.operatorName].some(v=>v&&labelKeys.includes(key(v)))):[];
+    if(hintMatches.length>1)throw new Error('The Rate Confirmation truck identifier matches more than one fresh ROCK ELD vehicle. No truck was selected.');
+    if(driverMatches.length>1)throw new Error('The Gmail driver Label matches more than one fresh ROCK ELD vehicle. No truck was selected.');
+    if(hintMatches.length===1&&driverMatches.length===1&&hintMatches[0]!==driverMatches[0])throw new Error('The truck identifier and Gmail driver Label point to different ROCK ELD vehicles. No truck was selected.');
+    if(driverLabels.length&&!driverMatches.length)throw new Error('The Gmail driver Label ('+driverLabels.join(', ')+') could not be matched to an assigned driver in ROCK ELD. No truck was guessed.');
+    if(truckHint.length&&!hintMatches.length)throw new Error('The truck identifier in the Rate Confirmation could not be matched to ROCK ELD. No truck was guessed.');
+    if(driverMatches.length===1)return driverMatches[0];
+    if(hintMatches.length===1)return hintMatches[0];
+    if(trucks.length===1&&!driverLabels.length&&!truckHint.length)return trucks[0];
+    throw new Error('More than one truck has a fresh GPS location, but the load has no unique driver Label or truck match. No truck was guessed.');
   }
   async function calculate(event){
     event.preventDefault();
@@ -222,7 +230,8 @@ a{color:#dc2626}
       const elapsed=drivingHours+rests*restHours;
       const arrival=new Date(Date.now()+elapsed*3600000);
       $('arrival').textContent=fmtDate(arrival);
-      $('loadLabel').textContent='Load '+String(analysis.load_number||loadNumber);
+      const assignedDriverLabels=Array.isArray(load.email?.labels)?load.email.labels.join(', '):'';
+      $('loadLabel').textContent='Load '+String(analysis.load_number||loadNumber)+(assignedDriverLabels?' · Gmail Label: '+assignedDriverLabels:'');
       $('truckLocation').textContent=String(truck.location||('GPS '+Number(truck.latitude).toFixed(4)+', '+Number(truck.longitude).toFixed(4)));
       $('deliveryLocation').textContent=destination;
       $('roadMiles').textContent=miles.toFixed(1)+' mi';
