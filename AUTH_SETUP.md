@@ -20,11 +20,11 @@ Do not put passwords, password hashes, API keys, or the session secret in GitHub
 
 - The first account can receive the `admin` role only when the correct `AUTH_ADMIN_SETUP_KEY` is supplied; this prevents a stranger from claiming the first account.
 - A partial unique database index prevents a second admin account.
-- Later sign-ups receive the ordinary `user` role.
+- After the first administrator is created, public sign-up is closed. The single-owner version does not create additional accounts.
 - Passwords are stored as salted PBKDF2-HMAC-SHA-256 hashes, never as plain text.
 - Sessions are signed, HttpOnly, Secure, SameSite=Strict cookies and expire after eight hours.
 - The role is read from D1 on each authenticated request; it is not trusted from browser storage.
 
 ## Important scope
 
-This is single-workspace account access for the existing Marko application. It does not yet provide separate company tenants, per-company data isolation, invitations, password reset, or admin user-management screens. Do not advertise multi-company isolation until those controls are implemented and tested.
+This is a single-owner account gate for the existing Marko application. After the first admin account is claimed, public registration is closed. It does not yet provide additional users, invitations, password reset, separate company tenants, per-company data isolation, or admin user-management screens. Do not advertise multi-company isolation until those controls are implemented and tested.
