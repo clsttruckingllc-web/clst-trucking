@@ -4,8 +4,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b0b0d"><meta name="description" content="CLST TRUCKING operations hub for Gmail rate confirmations, dispatch ETA, ROCK ELD GPS, and RingCentral.">
-<title>CLST TRUCKING · MARKO AI</title>
+<meta name="theme-color" content="#0b0b0d"><meta name="description" content="MARKWAY operations hub for Gmail rate confirmations, dispatch ETA, ROCK ELD GPS, and RingCentral.">
+<title>MARKWAY · MARKO AI</title>
 <style>
 :root{color-scheme:light;--bg:#0b0b0d;--panel:#fff;--panel2:#f8f8f8;--border:#e5e5e5;--text:#171717;--muted:#666;--red:#dc2626;--red2:#991b1b;--green:#16845b;--yellow:#b7791f}
 *{box-sizing:border-box}
@@ -32,7 +32,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/clst-icon-180.png?v=2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CLST TRUCKING">
+<meta name="apple-mobile-web-app-title" content="MARKWAY">
 <script>
 (()=>{try{if(sessionStorage.getItem('clst_marko_session_v1')!=='yes'){const next=location.pathname+location.search+location.hash;location.replace('/login.html?return='+encodeURIComponent(next));}}catch{location.replace('/login.html');}})();
 </script>
@@ -40,9 +40,9 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
 <body>
 <header>
   <div class="brand">
-    <div class="logo">C</div>
+    <div class="logo">M</div>
     <div>
-      <h1>CLST TRUCKING</h1>
+      <h1>MARKWAY</h1>
       <div class="subtitle">DISPATCH INTELLIGENCE · ONE WORKSPACE</div>
     </div>
   </div>
@@ -57,7 +57,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
 <main>
   <section class="welcome">
     <div>
-      <div class="eyebrow">CLST TRUCKING / COMMAND CENTER</div>
+      <div class="eyebrow">MARKWAY / COMMAND CENTER</div>
       <h2>Everything moving. One command center.</h2>
       <div class="muted">Gmail rate confirmations, AI load intelligence, live ELD locations, ETA planning and RingCentral tools — together in one workspace.</div>
     </div>
@@ -135,7 +135,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
   </section>
 </main>
 
-<footer>CLST TRUCKING · MARKO AI</footer>
+<footer>MARKWAY · MARKO AI</footer>
 
 <script>
 'use strict';
@@ -444,7 +444,7 @@ async function analyze({background = false} = {}) {
       );
     }
   } catch (err) {
-    console.error('CLST TRUCKING:',err);
+    console.error('MARKWAY:',err);
     // If a background refresh fails, keep the last successful results visible
     // and don't make the whole dashboard look disconnected.
     if (background && emailRecords.length) {
@@ -632,7 +632,7 @@ connection('Ready');
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(err => {
-      console.warn('CLST offline shell registration unavailable:', err);
+      console.warn('MARKWAY offline shell registration unavailable:', err);
     });
   });
 }
