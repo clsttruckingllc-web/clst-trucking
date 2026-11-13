@@ -55,9 +55,10 @@ export async function onRequest({ request, env }) {
   }
   if (request.method === "GET") return json({ authenticated: await validSession(request, secret) });
   if (request.method === "DELETE") {
-    return json({ success: true }, 200, {
-      "Set-Cookie": COOKIE + "=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0", "Set-Cookie": COOKIE + "=; HttpOnly; Secure; SameSite=Lax; Path=/api/rockeld; Max-Age=0"
-    });
+    const headers = new Headers(JSON_HEADERS);
+    headers.append("Set-Cookie", COOKIE + "=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0");
+    headers.append("Set-Cookie", COOKIE + "=; HttpOnly; Secure; SameSite=Lax; Path=/api/rockeld; Max-Age=0");
+    return new Response(JSON.stringify({ success: true }), { status: 200, headers });
   }
   if (!(request.headers.get("Content-Type") || "").toLowerCase().includes("application/json")) {
     return json({ error: "Expected application/json." }, 415);
