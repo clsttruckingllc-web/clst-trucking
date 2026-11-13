@@ -10,16 +10,10 @@
   "theme_color": "#dc2626",
   "icons": [
     {
-      "src": "/assets/clst-icon-180.png?v=2",
-      "sizes": "180x180",
+      "src": "/assets/krem-mark.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/assets/clst-icon.svg?v=2",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
     }
   ]
 }
