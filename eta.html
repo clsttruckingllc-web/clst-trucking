@@ -8,10 +8,10 @@
 <style>
 :root{color-scheme:light;--bg:#0b0b0d;--panel:#fff;--line:#e5e5e5;--text:#171717;--muted:#666;--gold:#dc2626;--green:#16845b;--red:#b91c1c}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;min-height:100vh}
+body{margin:0;background:var(--bg);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;min-height:100vh}\nbody::after{content:"";position:fixed;inset:0;z-index:5;pointer-events:none;background-image:url("/assets/krem-mark.png");background-repeat:repeat;background-size:116px 116px;opacity:.055}\nmain{position:relative;z-index:1}
 main{width:min(980px,100%);margin:0 auto;padding:24px 16px 48px}
 header{display:flex;align-items:center;gap:14px;margin:4px 0 28px}
-.mark{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;background:#dc2626;color:#fff;font-weight:900;font-size:18px}
+.mark{display:block;width:48px;height:48px;object-fit:contain;border-radius:12px;background:#fff;padding:2px;flex:0 0 48px}
 .brand{font-size:13px;letter-spacing:.13em;color:#fff;font-weight:800}
 h1{font-size:clamp(28px,6vw,42px);line-height:1.08;margin:6px 0 10px}
 h2{font-size:19px;margin:0 0 16px}
@@ -45,7 +45,7 @@ a{color:#dc2626}
 </head>
 <body>
 <main>
-<header><div class="mark" aria-hidden="true">T</div><div><div class="brand">TANCHEVSKI AI</div><p>TANCHEVSKI AI · Dispatch Intelligence</p></div></header>
+<header><img class="mark" src="/assets/krem-mark.png" alt="Tanchevski AI logo"><div><div class="brand">TANCHEVSKI AI</div><p>TANCHEVSKI AI · Dispatch Intelligence</p></div></header>
 <section class="hero">
   <span class="pill">DISPATCH · LIVE ROUTE ESTIMATE</span>
   <h1>Load ETA Estimator</h1>
