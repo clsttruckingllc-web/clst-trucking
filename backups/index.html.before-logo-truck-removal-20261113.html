@@ -1,0 +1,647 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0b0d"><meta name="description" content="Tanchevski AI operations hub for Gmail rate confirmations, dispatch ETA, ROCK ELD GPS, and RingCentral.">
+<title>TANCHEVSKI AI</title>
+<style>
+:root{color-scheme:dark;--bg:#08090c;--panel:#14161c;--panel2:#1b1e26;--border:#30333d;--text:#f7f7f8;--muted:#a5a9b3;--red:#e11d2e;--red2:#a90f20;--green:#36c28a;--yellow:#f4bd4e}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:104px}
+body{margin:0;background:radial-gradient(ellipse at 50% -20%,#351018 0%,#111217 36%,var(--bg) 72%);color:var(--text);font:15px/1.55 Inter,Arial,Helvetica,sans-serif;min-height:100vh}
+button,input{font:inherit}button{border:1px solid transparent;border-radius:11px;padding:11px 16px;font-weight:800;cursor:pointer;transition:transform .18s,border-color .18s,background .18s,box-shadow .18s}button:hover,.action-link:hover{transform:translateY(-2px)}button:disabled{opacity:.6;cursor:wait}
+.primary{background:linear-gradient(135deg,#f02c40,#b80e24);color:#fff;box-shadow:0 8px 22px #d719302b}.primary:hover{background:linear-gradient(135deg,#ff4052,#c51229);box-shadow:0 10px 26px #d7193040}.secondary,.action-link{background:#20232b;color:#f5f5f5;border:1px solid #414550}.secondary:hover,.action-link:hover{border-color:#d92a3b;background:#2a1a20}
+header{position:sticky;top:0;z-index:10;padding:12px max(4%,calc((100% - 1450px)/2));background:rgba(8,9,12,.92);backdrop-filter:blur(18px);border-bottom:1px solid #343039;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;display:block;object-fit:contain;background:#fff;border:1px solid #e11d2e;border-radius:50%;padding:3px;box-shadow:0 0 22px #e11d2e25}h1{margin:0;font-size:21px;letter-spacing:.02em}h2{margin:0 0 8px;font-size:clamp(24px,3vw,34px);letter-spacing:-.7px;line-height:1.12}h3{margin:0;font-size:18px}.subtitle,.muted,.stat-label{color:var(--muted)}.subtitle,.connection{font-size:12px}.subtitle{letter-spacing:.1em}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--yellow);margin-right:7px;box-shadow:0 0 12px currentColor}
+nav{display:flex;gap:5px;flex-wrap:wrap}nav a{color:#d8d9dd;text-decoration:none;padding:9px 12px;border-radius:9px;font-size:11px;font-weight:850;letter-spacing:.05em}nav a:hover{background:#3b111a;color:#fff}
+main{max-width:1450px;margin:auto;padding:30px 4% 58px}
+.welcome,.panel-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.welcome{position:relative;overflow:hidden;padding:30px;margin-bottom:20px;border:1px solid #49212a;border-radius:20px;background:linear-gradient(115deg,rgba(120,12,28,.45),rgba(20,22,29,.97) 48%,rgba(10,11,15,.98));box-shadow:0 18px 48px #0007}
+.welcome:after{content:"";position:absolute;right:-70px;top:-140px;width:360px;height:360px;border:1px solid #e11d2e30;border-radius:50%;box-shadow:0 0 0 34px #e11d2e0b,0 0 0 70px #e11d2e08;pointer-events:none}
+.welcome>div{position:relative;z-index:1}.eyebrow{font-size:11px;font-weight:900;letter-spacing:.16em;color:#ff6674;margin-bottom:9px}.welcome .muted{max-width:650px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.action-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:11px;padding:11px 16px;font-weight:850}
+.eta-launch{background:linear-gradient(135deg,#e11d2e,#9f1020);border-color:#f04b5a;color:white;box-shadow:0 8px 24px #e11d2e35}.eta-launch:hover{background:linear-gradient(135deg,#fa3448,#bd1428);border-color:#ff7883}
+.notice,.status{border:1px solid var(--border);border-radius:12px;padding:13px 16px;font-size:13px;line-height:1.55;overflow-wrap:anywhere}.notice{background:#15171d;color:#b8bbc3;margin-bottom:14px}.status{background:#15171d;color:#e4e5e8;margin-bottom:20px}.status.success{color:#68d9a9;border-color:#255540}.status.error{color:#ff929a;border-color:#642b34}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}.stat,.panel{background:linear-gradient(145deg,#191b22,#111318);color:var(--text);border:1px solid var(--border);border-radius:16px}.stat{padding:20px;position:relative;overflow:hidden}.stat:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(#ff5362,#a90f20)}.stat-number{font-size:29px;font-weight:900;margin-top:7px;overflow-wrap:anywhere;letter-spacing:-.6px;color:#fff}.stat-label{font-size:12px;font-weight:750;letter-spacing:.04em}
+.panel{padding:21px;margin-bottom:20px;scroll-margin-top:105px;box-shadow:0 12px 32px #0003}.panel-heading{margin-bottom:16px}.search{width:100%;max-width:350px;background:#0c0e13;border:1px solid #3b3e48;border-radius:10px;padding:11px;color:var(--text)}
+.rate-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.ask-row{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}.ask-row input{flex:1;min-width:220px;background:#0c0e13;border:1px solid #3b3e48;border-radius:10px;padding:12px;color:var(--text)}.ask-answer{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;background:#0d0f14;border:1px solid #343741;border-radius:11px;padding:15px;min-height:54px;margin-top:14px;color:#f4f4f5}.ask-sources{font-size:12px;color:var(--muted);margin-top:10px;overflow-wrap:anywhere}
+.rate-card{background:linear-gradient(145deg,#1c1e25,#12141a);color:#f4f4f5;border:1px solid #373a44;border-radius:13px;padding:17px;min-width:0}.rate-card h4{margin:0 0 10px;font-size:16px;overflow-wrap:anywhere}.pill{display:inline-block;border-radius:20px;padding:5px 9px;background:#481a22;color:#ffb0b7;font-size:11px;font-weight:850}.pill.good{color:#8de5b9;background:#123d2c}.pill.bad{color:#ffadb4;background:#4a1820}.amount{font-size:25px;font-weight:900;margin:13px 0;color:#fff}.detail{display:grid;grid-template-columns:minmax(95px,.8fr) minmax(0,1.2fr);gap:12px;padding:9px 0;border-bottom:1px solid #30333c;font-size:12px;line-height:1.5}.detail span:first-child{color:#a5a9b3}.detail span:last-child{text-align:right;overflow-wrap:anywhere;color:#f1f1f2}.error-box,.warning-box{padding:11px;border-radius:9px;font-size:12px;line-height:1.5;overflow-wrap:anywhere;margin-top:12px}.error-box{border:1px solid #71303a;background:#32151c;color:#ffb2ba}.warning-box{border:1px solid #74531d;background:#302512;color:#f7d58b}.empty{border:1px dashed #484b55;color:#a5a9b3;border-radius:12px;padding:25px 15px;text-align:center;line-height:1.6;background:#101217}
+table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;vertical-align:top;padding:12px;border-bottom:1px solid #30333c;font-size:12px;overflow-wrap:anywhere}th{color:#a5a9b3}.table-wrap{overflow-x:auto}
+.gps-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.truck-card{background:#1b1e25;color:#f4f4f5;border:1px solid #373a44;border-radius:13px;padding:15px;min-width:0}.truck-id{font-size:18px;font-weight:900}.truck-location{font-size:12px;color:#a5a9b3;margin:8px 0;overflow-wrap:anywhere}.fresh{color:#5fdda5}.stale{color:#ff9da4}.app-frame{width:100%;height:1100px;border:1px solid #3a3d47;border-radius:14px;background:#08090c;display:block}footer{text-align:center;color:#9296a1;padding:24px;border-top:1px solid #292c34;font-size:12px}
+a{color:#ff7b86}
+@media(max-width:850px){header{padding:12px 4%}.gps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rate-grid{grid-template-columns:1fr}.app-frame{height:1450px}}
+@media(max-width:560px){h1{font-size:18px}.stats{grid-template-columns:1fr}.welcome{padding:20px}.panel{padding:15px}.gps-grid{grid-template-columns:1fr}.actions{width:100%}.actions button,.actions .action-link{flex:1;justify-content:center}.app-frame{height:1550px}nav{width:100%;order:3}nav a{flex:1;text-align:center}.connection{margin-left:auto}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/assets/krem-mark.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/krem-mark.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TANCHEVSKI AI">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <img class="logo" src="/assets/krem-mark.png" alt="KREM Chat logo">
+    <div>
+      <h1>TANCHEVSKI AI</h1>
+      <div class="subtitle">AI OPERATIONS · ONE WORKSPACE</div>
+    </div>
+  </div>
+  <nav aria-label="Dashboard navigation"><a href="#gmail">GMAIL & AI</a><a href="#eld">ROCK ELD</a><a href="#eta">ETA DISPATCH</a><a href="#ringcentral">RINGCENTRAL</a></nav>
+  <div class="connection">
+    <span class="dot" id="dot"></span>
+    <span id="connectionText">Ready</span>
+  </div>
+</header>
+
+<main>
+  <section class="welcome">
+    <div>
+      <div class="eyebrow">TANCHEVSKI AI / COMMAND CENTER</div>
+      <h2>Everything moving. One command center.</h2>
+      <div class="muted">Gmail rate confirmations, AI load intelligence, live ELD locations, ETA planning and RingCentral tools — together in one workspace.</div>
+    </div>
+    <div class="actions">
+      <button class="secondary" id="connectBtn">Connect Gmail</button>
+      <a class="action-link eta-launch" href="/eta">Open ETA workspace</a>
+      <button class="primary" id="analyzeBtn">Analyze Gmail PDFs</button>
+    </div>
+  </section>
+
+  <div class="notice">
+    <strong>Secure connection:</strong>
+    This dashboard calls the Cloudflare Pages API. Your backend API key is not included in this HTML file. PDF analysis is performed by your backend and Gemini.
+  </div>
+
+  <div class="status" id="status" role="status" aria-live="polite">
+    Ready. Click Analyze Gmail PDFs to retrieve and analyze PDF attachments.
+  </div>
+
+  <section class="stats">
+    <div class="stat">
+      <div class="stat-label">PDF Attachments</div>
+      <div class="stat-number" id="pdfCount">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Verified Rate Total (USD, unique loads)</div>
+      <div class="stat-number" id="rateTotal">—</div>
+      <div class="muted" id="dedupeNote" style="font-size:12px;margin-top:6px"></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Last Updated</div>
+      <div class="stat-number" id="updated" style="font-size:19px">Not yet</div>
+    </div>
+  </section>
+
+  <section class="panel" id="gmail">
+    <div class="panel-heading"><h3>Ask TANCHEVSKI AI about Gmail & Rate Confirmations</h3></div>
+    <div class="muted" style="margin-bottom:12px">Ask for full load details from our carrier Rate Confirmations: broker, pickup, delivery, freight, equipment, miles, pay terms, detention, and driver instructions.</div>
+    <form id="askForm" class="ask-row">
+      <input id="askQuestion" type="text" maxlength="600" placeholder="Example: Can you give me more details about load 102190?" aria-label="Ask TANCHEVSKI AI a question" required>
+      <button class="primary" id="askBtn" type="submit">Ask TANCHEVSKI AI</button>
+    </form>
+    <div id="askAnswer" class="ask-answer" role="status" aria-live="polite">Your answer will appear here.</div>
+    <div id="askSources" class="ask-sources"></div>
+  </section>
+
+<section class="panel" id="eld">
+    <div class="panel-heading"><div><h3>ROCK ELD · Fleet GPS</h3><div class="muted" style="font-size:12px;margin-top:4px">Fleet locations load automatically through the server using the encrypted ROCK ELD key. Cloudflare Access controls who can view live truck positions.</div></div><button class="primary" id="refreshEldBtn" type="button">Refresh truck locations</button></div>
+    <div id="eldStatus" class="status">Connecting to ROCK ELD through the secured server endpoint…</div>
+    <div id="eldVehicles" class="gps-grid"><div class="empty">Fleet locations will appear after sign-in.</div></div>
+  </section>
+  <section class="panel" id="eta">
+    <div class="panel-heading"><div><h3>Dispatch ETA · Load planning</h3><div class="muted" style="font-size:12px;margin-top:4px">Choose a Gmail load and use current truck location to estimate delivery.</div></div><a class="action-link eta-launch" href="/eta" target="_blank" rel="noopener">Launch ETA workspace</a></div>
+    <iframe class="app-frame" src="/eta" title="Tanchevski AI ETA dispatch estimator" loading="eager"></iframe>
+  </section>
+  <section class="panel" id="ringcentral">
+    <div class="panel-heading"><div><h3>RingCentral · Communications</h3><div class="muted" style="font-size:12px;margin-top:4px">Check API connection and open the company communications workspace.</div></div><div class="actions" style="margin:0"><button class="secondary" id="ringcentralTestBtn" type="button">Test RingCentral</button><button class="secondary" id="mareVoiceTestBtn" type="button">Check Mare voice</button><a class="action-link" href="https://app.ringcentral.com/" target="_blank" rel="noopener noreferrer">Open RingCentral ↗</a></div></div>
+    <div class="muted" style="font-size:13px">The connection test is read-only. Calls and messaging depend on the RingCentral account, assigned extension and configured telephony service.</div>
+  </section>
+    <section class="panel" id="ratesPanel">
+    <div class="panel-heading">
+      <h3>Rate Confirmations</h3>
+      <input id="search" class="search" type="search" placeholder="Search broker, load, pickup, delivery..." aria-label="Search rate confirmations">
+    </div>
+    <div id="rates">
+      <div class="empty">Your analyzed PDF Rate Confirmations will appear here.</div>
+    </div>
+  </section>
+
+  <section class="panel" id="emailsPanel">
+    <div class="panel-heading"><h3>Source Gmail Messages</h3></div>
+    <div id="emails">
+      <div class="empty">Email information will appear after analysis.</div>
+    </div>
+  </section>
+</main>
+
+<footer>TANCHEVSKI AI</footer>
+
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+let pdfRecords = [];
+let emailRecords = [];
+
+function esc(v) {
+  return String(v ?? '—').replace(/[&<>"']/g, c => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[c]));
+}
+
+function get(o, keys, fallback='—') {
+  for (const k of keys) {
+    const v = o?.[k];
+    if (v !== null && v !== undefined && v !== '') return v;
+  }
+  return fallback;
+}
+
+function status(msg, type='') {
+  $('status').textContent = msg;
+  $('status').className = 'status' + (type ? ' ' + type : '');
+}
+
+function connection(msg, color='var(--yellow)') {
+  $('connectionText').textContent = msg;
+  $('dot').style.background = color;
+}
+
+function amount(a) {
+  const raw = get(a, ['rate_amount','rateAmount','total_rate'], null);
+  if (raw === null) return null;
+  const n = typeof raw === 'number'
+    ? raw
+    : Number(String(raw).replace(/[$,\s]/g,''));
+  return Number.isFinite(n) ? n : null;
+}
+
+function money(n, currency='USD') {
+  if (n === null || n === undefined || n === '') return 'Rate unavailable';
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style:'currency',
+      currency:currency || 'USD'
+    }).format(n);
+  } catch {
+    return String(n);
+  }
+}
+
+function flatten(data) {
+  const out = [];
+  for (const item of (Array.isArray(data.rates) ? data.rates : [])) {
+    const email = item.email || {};
+    for (const pdf of (Array.isArray(item.pdfs) ? item.pdfs : [])) {
+      out.push({
+        email,
+        filename:pdf.filename || 'attachment.pdf',
+        analysis:pdf.analysis || null,
+        error:pdf.error || null
+      });
+    }
+  }
+  return out;
+}
+
+function loadKey(r) {
+  const a = r.analysis || {};
+  const id = String(get(a, ['load_number'], '')).trim().toLowerCase();
+  if (id && id !== '—') return 'load:' + id;
+  return 'file:' + String(r.filename || '').trim().toLowerCase();
+}
+
+/*
+ * Count each load number once in the total.
+ * If duplicate PDFs have different verified rates, do not silently
+ * choose one: flag the conflict and exclude that load from the total.
+ */
+function uniqueVerifiedLoads() {
+  const seen = new Map();
+
+  for (const r of pdfRecords) {
+    const a = r.analysis;
+    if (!a || a.rate_verified !== true) continue;
+
+    const n = amount(a);
+    if (n === null) continue;
+
+    const key = loadKey(r);
+
+    if (!seen.has(key)) {
+      seen.set(key, {
+        amount:n,
+        record:r,
+        conflict:false
+      });
+    } else {
+      const prev = seen.get(key);
+      if (prev.amount !== n) {
+        prev.conflict = true;
+        prev.otherAmount = n;
+      }
+    }
+  }
+
+  return [...seen.values()];
+}
+
+function renderStats() {
+  $('pdfCount').textContent = pdfRecords.length;
+
+  const unique = uniqueVerifiedLoads();
+  const total = unique
+    .filter(x => !x.conflict)
+    .reduce((sum, x) => sum + x.amount, 0);
+
+  const countable = unique.filter(x => !x.conflict).length;
+  $('rateTotal').textContent = countable ? money(total) : '—';
+
+  const verifiedRows = pdfRecords.filter(
+    r => r.analysis?.rate_verified === true && amount(r.analysis) !== null
+  ).length;
+
+  const duplicates = Math.max(0, verifiedRows - unique.length);
+  const conflicts = unique.filter(x => x.conflict).length;
+
+  let note = `${duplicates} duplicate record(s) excluded from the total.`;
+  if (!duplicates) note = 'Each load counted once where a load number is available.';
+  if (conflicts) note += ` ${conflicts} load(s) have conflicting rates and are excluded pending review.`;
+
+  $('dedupeNote').textContent = note;
+  $('updated').textContent = new Date().toLocaleTimeString([], {
+    hour:'2-digit',
+    minute:'2-digit'
+  });
+}
+
+function renderRates() {
+  const q = $('search').value.trim().toLowerCase();
+  const rows = pdfRecords.filter(r => JSON.stringify(r).toLowerCase().includes(q));
+
+  if (!rows.length) {
+    $('rates').innerHTML = `<div class="empty">${
+      pdfRecords.length
+        ? 'No records match your search.'
+        : 'No PDF records returned. Check Gmail attachments and backend errors.'
+    }</div>`;
+    return;
+  }
+
+  $('rates').innerHTML = '<div class="rate-grid">' + rows.map(r => {
+    const a = r.analysis;
+    const e = r.email || {};
+    const n = a ? amount(a) : null;
+    const verified = a?.rate_verified === true;
+
+    const fields = a ? [
+      ['Load number',get(a,['load_number'])],
+      ['Broker',get(a,['broker_company'])],
+      ['Contact',get(a,['broker_contact'])],
+      ['Broker phone',get(a,['broker_phone'])],
+      ['Broker email',get(a,['broker_email'])],
+      ['Pickup date',get(a,['pickup_date'])],
+      ['Pickup time',get(a,['pickup_time'])],
+      ['Pickup location',get(a,['pickup_location'])],
+      ['Delivery date',get(a,['delivery_date'])],
+      ['Delivery time',get(a,['delivery_time'])],
+      ['Delivery location',get(a,['delivery_location'])],
+      ['Commodity',get(a,['commodity'])],
+      ['Weight',get(a,['weight'])],
+      ['Equipment',get(a,['equipment'])],
+      ['Miles',get(a,['miles'])],
+      ['Detention terms',get(a,['detention_terms'])],
+      ['TONU terms',get(a,['tonu_terms'])],
+      ['Payment terms',get(a,['payment_terms'])],
+      ['Special instructions',get(a,['special_instructions'])],
+      ['Rate verification',verified ? 'Verified in PDF' : 'Not verified'],
+      ['Verification notes',get(a,['verification_notes'])]
+    ] : [];
+
+    const detail = fields.map(([k,v]) =>
+      `<div class="detail"><span>${esc(k)}</span><span>${esc(v)}</span></div>`
+    ).join('');
+
+    const title = a ? get(a,['load_number'],r.filename) : r.filename;
+    const label = r.error
+      ? 'Analysis failed'
+      : a?.document_type === 'rate_confirmation'
+        ? (verified ? 'Rate confirmation · verified' : 'Rate confirmation · unverified')
+        : get(a,['document_type'],'Document analyzed');
+
+    const duplicateCount = pdfRecords.filter(x =>
+      x !== r &&
+      loadKey(x) === loadKey(r) &&
+      x.analysis?.rate_verified === true &&
+      r.analysis?.rate_verified === true
+    ).length;
+
+    const errorText = r.error || '';
+    const quotaProblem = /quota|rate.?limit|high demand|503|429/i.test(errorText);
+
+    return `<article class="rate-card">
+      <h4>${esc(title)}</h4>
+      <span class="pill ${r.error ? 'bad' : verified ? 'good' : ''}">${esc(label)}</span>
+      <div class="amount">${esc(n !== null ? money(n,get(a,['rate_currency'],'USD')) : 'Rate unavailable')}</div>
+      <div class="detail"><span>PDF file</span><span>${esc(r.filename)}</span></div>
+      <div class="detail"><span>Email subject</span><span>${esc(get(e,['subject']))}</span></div>
+      <div class="detail"><span>Email sender</span><span>${esc(get(e,['from']))}</span></div>
+      <div class="detail"><span>Email date</span><span>${esc(get(e,['date']))}</span></div>
+      ${detail}
+      ${duplicateCount ? '<div class="warning-box">Another verified attachment with the same load number exists. It is counted only once in the total.</div>' : ''}
+      ${r.error ? `<div class="error-box">PDF analysis error: ${esc(errorText)}${quotaProblem ? '<br><br>Gemini is temporarily busy or the API quota is exhausted. The HTML cannot remove a Gemini quota restriction; the backend/model configuration must be checked.' : ''}</div>` : ''}
+      ${!r.error && !a ? '<div class="error-box">The backend returned no analysis for this PDF.</div>' : ''}
+    </article>`;
+  }).join('') + '</div>';
+}
+
+function renderEmails() {
+  if (!emailRecords.length) {
+    $('emails').innerHTML = '<div class="empty">No Gmail messages returned.</div>';
+    return;
+  }
+
+  $('emails').innerHTML = '<div class="table-wrap"><table><thead><tr><th>Subject</th><th>From</th><th>Date</th><th>PDFs</th></tr></thead><tbody>' +
+    emailRecords.map(x => {
+      const e = x.email || {};
+      const p = Array.isArray(x.pdfs) ? x.pdfs : [];
+      return `<tr>
+        <td>${esc(get(e,['subject']))}</td>
+        <td>${esc(get(e,['from']))}</td>
+        <td>${esc(get(e,['date']))}</td>
+        <td>${p.length}</td>
+      </tr>`;
+    }).join('') +
+    '</tbody></table></div>';
+}
+
+async function analyze({background = false} = {}) {
+  const b = $('analyzeBtn');
+  b.disabled = true;
+  b.textContent = 'Analyzing PDFs...';
+  status('Checking the newest matching Gmail message and analyzing its PDF attachments.');
+  connection('Connecting...');
+
+  try {
+    // Start with one message so the dashboard stays responsive while the backend analyzes PDFs.
+    // Stop waiting after 90 seconds and show an error instead of spinning forever.
+    const res = await fetch('/api/rates?maxResults=1', {
+      headers:{Accept:'application/json'},
+      cache:'no-store',
+      signal: AbortSignal.timeout(90000)
+    });
+
+    const raw = await res.text();
+    let data;
+
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      throw new Error('API did not return JSON. Check the Pages deployment and /api/rates function.');
+    }
+
+    if (!res.ok) {
+      throw new Error('API error ' + res.status + ': ' +
+        String(data.error || data.message || raw).slice(0,500));
+    }
+
+    if (data.success === false || data.error) {
+      throw new Error(data.error || 'Backend reported an error.');
+    }
+
+    if (!Array.isArray(data.rates)) {
+      throw new Error('Unexpected backend response: missing rates array.');
+    }
+
+    emailRecords = data.rates;
+    pdfRecords = flatten(data);
+
+    renderStats();
+    renderRates();
+    renderEmails();
+
+    const failed = pdfRecords.filter(r => r.error).length;
+    const done = pdfRecords.filter(r => r.analysis).length;
+
+    connection('Backend connected','var(--green)');
+
+    if (!pdfRecords.length) {
+      status('Gmail was queried, but no PDF attachments were returned.');
+    } else if (failed) {
+      status(
+        `Found ${pdfRecords.length} PDF attachment(s). ${done} analyzed; ${failed} failed. The total counts each load once. Open failed cards for details.`,
+        'error'
+      );
+    } else {
+      status(
+        `Finished: ${pdfRecords.length} PDF attachment(s); ${done} analyzed. The total counts each load once.`,
+        'success'
+      );
+    }
+  } catch (err) {
+    console.error('TANCHEVSKI AI:',err);
+    // If a background refresh fails, keep the last successful results visible
+    // and don't make the whole dashboard look disconnected.
+    if (background && emailRecords.length) {
+      connection('Showing saved results','var(--green)');
+      status('Automatic refresh failed (' + (err.message || 'network error') + '). Showing the last successfully loaded results. You can retry with Analyze Gmail PDFs.','error');
+    } else {
+      connection('Connection error','var(--red)');
+      status(err.message || 'Could not retrieve PDF data.','error');
+    }
+  } finally {
+    b.disabled = false;
+    b.textContent = 'Analyze Gmail PDFs';
+  }
+}
+
+async function testRingCentral() {
+  const btn = $('ringcentralTestBtn');
+  btn.disabled = true;
+  btn.textContent = 'Testing RingCentral...';
+  status('Checking RingCentral authentication and assigned extension/devices. This is a read-only test.');
+  try {
+    const res = await fetch('/api/ringcentral', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store'
+    });
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); }
+    catch { throw new Error('RingCentral test returned a non-JSON response. Check the Pages deployment.'); }
+
+    if (!res.ok) {
+      const message = data.message || data.error || ('HTTP ' + res.status);
+      status('RingCentral test failed: ' + message, 'error');
+      $('askAnswer').textContent = JSON.stringify(data, null, 2);
+      connection('RingCentral test failed', 'var(--red)');
+      return;
+    }
+
+    $('askAnswer').textContent = JSON.stringify(data, null, 2);
+    $('askSources').textContent = 'Read-only RingCentral diagnostic. No SIP credentials are displayed.';
+    const state = data.status || 'unknown';
+    if (state === 'sip_info_available' || state === 'connected_no_sip_device') {
+      status('RingCentral API authentication succeeded. Result: ' + state + '. See details in the answer panel.', 'success');
+      connection('RingCentral API connected', 'var(--green)');
+    } else {
+      status('RingCentral returned status: ' + state + '. See the answer panel for the next step.', 'error');
+      connection('RingCentral needs attention', 'var(--yellow)');
+    }
+  } catch (err) {
+    status(err.message || 'Could not test RingCentral.', 'error');
+    connection('RingCentral test failed', 'var(--red)');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Test RingCentral';
+  }
+}
+
+async function testMareVoiceService() {
+  const btn = $('mareVoiceTestBtn');
+  btn.disabled = true;
+  btn.textContent = 'Checking Mare...';
+  status('Checking whether the separately hosted Mare voice service is reachable. This does not change call routing.');
+  try {
+    const res = await fetch('/api/voice/status', {
+      headers: { Accept: 'application/json' },
+      cache: 'no-store'
+    });
+    const data = await res.json().catch(() => ({}));
+    $('askAnswer').textContent = JSON.stringify(data, null, 2);
+    $('askSources').textContent = 'Read-only voice-service readiness check. No call forwarding is changed.';
+    if (!res.ok || data.ai_calling_ready !== true) {
+      status(data.message || 'Mare voice service is not confirmed ready. See the answer panel.', 'error');
+      connection('Mare not confirmed active', 'var(--yellow)');
+    } else {
+      status('Voice service responded. A real RingCentral inbound call test is still required.', 'success');
+      connection('Voice service reachable', 'var(--green)');
+    }
+  } catch (err) {
+    status(err.message || 'Could not check Mare voice service.', 'error');
+    connection('Mare check failed', 'var(--red)');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Check Mare voice';
+  }
+}
+
+function connect() {
+  window.location.href =
+    'https://clst-gmail-backend.clsttruckingllc.workers.dev/auth/start';
+}
+
+async function askTanchevski(event) {
+  event.preventDefault();
+  const question = $('askQuestion').value.trim();
+  if (!question) return;
+  const btn = $('askBtn');
+  btn.disabled = true;
+  btn.textContent = 'Searching...';
+  $('askAnswer').textContent = 'Searching connected Gmail messages and reading relevant PDFs...';
+  $('askSources').textContent = '';
+  try {
+    const res = await fetch('/api/ask', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({question}),
+      cache:'no-store'
+    });
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); } catch { throw new Error('API did not return JSON. Check the Pages /api/ask function and deployment.'); }
+    if (!res.ok || data.error) throw new Error('API error ' + res.status + ': ' + String(data.error || data.message || 'Request failed').slice(0,500));
+    $('askAnswer').textContent = data.answer || 'I could not find an answer in Gmail/PDF data.';
+    const sources = Array.isArray(data.sources) ? data.sources : [];
+    $('askSources').textContent = sources.length
+      ? 'Sources checked: ' + sources.map(s => [s.subject, s.from, s.hasPdf ? '(PDF attached)' : ''].filter(Boolean).join(' ')).join(' · ')
+      : 'No matching source emails were found.';
+  } catch (err) {
+    $('askAnswer').textContent = err.message || 'Could not query TANCHEVSKI AI.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Ask TANCHEVSKI AI';
+  }
+}
+
+
+async function refreshEldLocations(){
+  const btn=$('refreshEldBtn');btn.disabled=true;btn.textContent='Refreshing…';
+  $('eldStatus').textContent='Requesting fleet locations through the secured server endpoint…';
+  $('eldStatus').className='status';
+  try{
+    const res=await fetch('/api/rockeld/locations',{headers:{Accept:'application/json'},credentials:'same-origin',cache:'no-store'});if(res.status===401){$('eldStatus').textContent='Cloudflare Access sign-in required. Sign in to your company account, then refresh truck locations.';$('eldStatus').className='status error';$('eldVehicles').innerHTML='<div class="empty">Fleet GPS is protected by Cloudflare Access. Sign in through the company access page, then refresh.</div>';return;}
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(data.error||('ROCK ELD returned HTTP '+res.status));
+    const trucks=Array.isArray(data.locations)?data.locations:[];
+    $('eldVehicles').innerHTML=trucks.length?trucks.map(t=>{
+      const fresh=t.status==='fresh';
+      return '<article class="truck-card"><div class="truck-id">Truck '+esc(t.vehicleId??t.id??'—')+'</div><div class="'+(fresh?'fresh':'stale')+'" style="font-size:11px;font-weight:900;margin-top:5px">'+esc(String(t.status||'unknown').toUpperCase())+(t.ageMinutes===null||t.ageMinutes===undefined?'':' · '+esc(t.ageMinutes)+' min old')+'</div><div class="truck-location">'+esc(t.location||'Location unavailable')+'</div><div class="muted" style="font-size:11px">Speed: '+esc(t.speed??'—')+' · Report: '+esc(t.lastReport||'Unknown')+'</div></article>';
+    }).join(''):'<div class="empty">ROCK ELD returned no vehicle records.</div>';
+    const fresh=trucks.filter(t=>t.status==='fresh'&&t.location).length;
+    $('eldStatus').textContent='ROCK ELD connected · '+trucks.length+' vehicle record(s) · '+fresh+' fresh location(s) within 15 minutes.';
+    $('eldStatus').className='status '+(trucks.length?'success':'');
+    const frame=document.querySelector('.app-frame');if(frame?.contentWindow)frame.contentWindow.postMessage({type:'CLST_ELD_LOCATIONS',locations:trucks},location.origin);
+  }catch(err){
+    $('eldVehicles').innerHTML='<div class="empty">Fleet GPS could not be loaded. Confirm that this site is signed in through Cloudflare Access and that the ROCK ELD server secret is configured.</div>';
+    $('eldStatus').textContent='ROCK ELD connection needs secure sign-in: '+String(err.message||err);
+    $('eldStatus').className='status error';
+  }finally{btn.disabled=false;btn.textContent='Refresh truck locations';}
+}
+$('refreshEldBtn').addEventListener('click',refreshEldLocations);
+
+$('askForm').addEventListener('submit',askTanchevski);
+$('ringcentralTestBtn').addEventListener('click',testRingCentral);
+$('mareVoiceTestBtn').addEventListener('click',testMareVoiceService);
+$('analyzeBtn').addEventListener('click',analyze);
+$('connectBtn').addEventListener('click',connect);
+$('search').addEventListener('input',renderRates);
+
+// Automatically refresh Gmail data every 60 seconds while the dashboard is open.
+let autoRefreshBusy = false;
+async function autoRefreshGmail() {
+  if (autoRefreshBusy || document.hidden || $('analyzeBtn').disabled) return;
+  autoRefreshBusy = true;
+  try {
+    await analyze({background:true});
+  } finally {
+    autoRefreshBusy = false;
+  }
+}
+window.addEventListener('load', () => {
+  autoRefreshGmail();
+  refreshEldLocations();
+  window.setInterval(autoRefreshGmail, 60000);
+  window.setInterval(refreshEldLocations, 120000);
+});
+
+const params = new URLSearchParams(location.search);
+if (params.get('gmail') === 'connected') {
+  status('Gmail authorization completed. The dashboard will automatically check Gmail for PDFs while this page is open.','success');
+  history.replaceState({},document.title,location.pathname);
+}
+
+connection('Ready');
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => {
+      console.warn('TANCHEVSKI AI offline shell registration unavailable:', err);
+    });
+  });
+}
+
+</script>
+</body>
+</html>
