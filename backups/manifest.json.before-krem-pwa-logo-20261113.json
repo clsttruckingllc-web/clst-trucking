@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "TANCHEVSKI AI",
+  "short_name": "TANCHEVSKI AI",
+  "description": "Tanchevski AI operations and dispatch dashboard",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b0b0d",
+  "theme_color": "#dc2626",
+  "icons": [
+    {
+      "src": "/assets/clst-icon-180.png?v=2",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/clst-icon.svg?v=2",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
