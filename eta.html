@@ -6,41 +6,48 @@
 <meta name="theme-color" content="#0b0b0d">
 <title>TANCHEVSKI AI · ETA Estimator</title>
 <style>
-:root{color-scheme:light;--bg:#0b0b0d;--panel:#fff;--line:#e5e5e5;--text:#171717;--muted:#666;--gold:#dc2626;--green:#16845b;--red:#b91c1c}
+:root{color-scheme:dark;--bg:#08090c;--panel:#15171d;--line:#30333c;--text:#f8fafc;--muted:#a8adb8;--gold:#e11d2e;--green:#f3f4f6;--red:#ff4655}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;min-height:100vh}\nbody::after{content:"";position:fixed;inset:0;z-index:5;pointer-events:none;background-image:url("/assets/krem-mark.png");background-repeat:repeat;background-size:116px 116px;opacity:.055}\nmain{position:relative;z-index:1}
+body{margin:0;background:radial-gradient(ellipse at 50% -15%,#351018 0%,#111217 38%,var(--bg) 72%);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;min-height:100vh;overflow-x:hidden}\nbody::after{content:"";position:fixed;inset:0;z-index:5;pointer-events:none;background-image:url("/assets/krem-mark.png");background-repeat:repeat;background-size:142px 142px;opacity:.025}\nmain{position:relative;z-index:1}
 main{width:min(980px,100%);margin:0 auto;padding:24px 16px 48px}
-header{display:flex;align-items:center;gap:14px;margin:4px 0 28px}
+header{display:flex;align-items:center;gap:14px;margin:4px 0 28px;padding:12px 16px;border:1px solid #3a2027;border-radius:16px;background:linear-gradient(110deg,rgba(225,29,46,.14),rgba(20,21,26,.92) 48%);box-shadow:0 12px 34px rgba(0,0,0,.28)}
 .mark{display:block;width:48px;height:48px;object-fit:contain;border-radius:12px;background:#fff;padding:2px;flex:0 0 48px}
 .brand{font-size:13px;letter-spacing:.13em;color:#fff;font-weight:800}
-h1{font-size:clamp(28px,6vw,42px);line-height:1.08;margin:6px 0 10px}
+h1{font-size:clamp(28px,6vw,42px);line-height:1.08;margin:6px 0 10px;color:#fff;text-shadow:0 3px 24px rgba(225,29,46,.2)}
 h2{font-size:19px;margin:0 0 16px}
 p{color:var(--muted);margin:0}
 .hero{margin-bottom:22px}
-.pill{display:inline-block;border:1px solid #7f1d1d;color:#991b1b;background:#fee2e2;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:750;margin-bottom:12px}
+.pill{display:inline-block;border:1px solid #a51e2c;color:#fff;background:linear-gradient(90deg,#b51225,#54121b);border-radius:99px;padding:5px 12px;font-size:12px;font-weight:800;margin-bottom:12px;letter-spacing:.04em}
 .layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.card{background:#fff;color:#171717;border:1px solid var(--line);border-radius:14px;padding:20px;min-width:0}
+.card{background:linear-gradient(145deg,#1a1c23,#111318);color:#f8fafc;border:1px solid #343640;border-top:2px solid #b91c2c;border-radius:16px;padding:20px;min-width:0;box-shadow:0 16px 38px rgba(0,0,0,.28)}
 .field{display:flex;flex-direction:column;gap:6px;margin:0 0 15px}
-label{font-size:13px;font-weight:700;color:#334155}
-input,select{width:100%;min-height:46px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:var(--text);padding:10px 12px;font:inherit}
+label{font-size:13px;font-weight:750;color:#f1f3f6}
+input,select{width:100%;min-height:46px;border-radius:9px;border:1px solid #555965;background:#f8fafc;color:#111318;padding:10px 12px;font:inherit}
 input:focus,select:focus{outline:2px solid #dc2626;outline-offset:1px}
 .help{font-size:12px;color:var(--muted)}
-button{width:100%;min-height:48px;border:0;border-radius:10px;background:var(--gold);color:#fff;font-weight:850;font-size:15px;cursor:pointer;padding:10px}
+button{width:100%;min-height:48px;border:1px solid #ff5968;border-radius:10px;background:linear-gradient(100deg,#a90e20,#ed263b);color:#fff;font-weight:850;font-size:15px;cursor:pointer;padding:10px;box-shadow:0 7px 20px rgba(225,29,46,.2);transition:filter .2s,transform .2s}button:hover{filter:brightness(1.12);transform:translateY(-1px)}
 button:disabled{opacity:.65;cursor:wait}
-.secondary{background:#263746;color:var(--text);border:1px solid #486071;margin-bottom:10px}
-.result{color:#171717;border:1px solid var(--line);background:#f8fafc;border-radius:12px;padding:16px;margin-top:14px}
-.result-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:800}
-.eta{font-size:clamp(25px,5vw,34px);font-weight:850;line-height:1.15;margin:8px 0;color:var(--green);overflow-wrap:anywhere}
+.secondary{background:#242832;color:#fff;border:1px solid #555965;margin-bottom:10px}
+.result{color:#f8fafc;border:1px solid #3b3e49;background:linear-gradient(145deg,#0d0f14,#191b22);border-radius:13px;padding:16px;margin-top:14px}
+.result-label{font-size:12px;color:#c2c6cf;text-transform:uppercase;letter-spacing:.1em;font-weight:800}
+.eta{font-size:clamp(25px,5vw,34px);font-weight:850;line-height:1.15;margin:8px 0;color:#fff;overflow-wrap:anywhere}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.stat{border:1px solid var(--line);border-radius:10px;padding:12px}
+.stat{border:1px solid #343741;background:#171920;border-radius:10px;padding:12px}
 .stat strong{display:block;font-size:20px;margin-top:3px}
-.notice{border-left:3px solid var(--gold);padding:10px 12px;background:#fee2e2;border-radius:0 8px 8px 0;color:#7f1d1d;font-size:13px;margin-top:14px}
+.notice{border-left:3px solid #e11d2e;padding:10px 12px;background:#241319;border-radius:0 8px 8px 0;color:#f2dce0;font-size:13px;margin-top:14px}
 .status{font-size:13px;margin:10px 0;color:var(--muted);overflow-wrap:anywhere}
 .status.ok{color:var(--green)}.status.bad,.error{color:var(--red)}
 .error{font-size:13px;margin-top:12px}
-footer{color:var(--muted);font-size:12px;text-align:center;margin-top:22px}
-a{color:#dc2626}
+footer{color:#a8adb8;font-size:12px;text-align:center;margin-top:24px;padding:14px;border-top:1px solid #30333c}
+a{color:#ff6573}
 @media(max-width:680px){main{padding:18px 12px 32px}.layout{grid-template-columns:1fr}.card{padding:17px}.hero{margin-bottom:18px}}
+.truck-scene{position:relative;overflow:hidden;margin:0 0 22px;padding:8px 12px 15px;border:1px solid #35232a;border-radius:16px;background:linear-gradient(100deg,#111318,#1a1015 52%,#101116);box-shadow:inset 0 1px rgba(255,255,255,.04),0 12px 30px rgba(0,0,0,.24)}
+.truck-svg{display:block;width:min(100%,680px);height:auto;margin:0 auto;filter:drop-shadow(0 8px 10px rgba(0,0,0,.45));animation:truckFloat 4.8s ease-in-out infinite}
+.wheel{transform-box:fill-box;transform-origin:center;animation:wheelTurn 2.2s linear infinite}
+.road-line{display:block;height:2px;width:90%;margin:0 auto;background:linear-gradient(90deg,transparent,#d71930 18%,#f5f5f5 50%,#d71930 82%,transparent);opacity:.65}
+@keyframes truckFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes wheelTurn{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.truck-svg,.wheel{animation:none!important}}
 </style>
 </head>
 <body>
@@ -51,6 +58,30 @@ a{color:#dc2626}
   <h1>Load ETA Estimator</h1>
   <p>Load Rate Confirmations automatically by load number, then calculate the estimated arrival from the current truck location and route.</p>
 </section>
+<div class="truck-scene" aria-label="Animated black and red semi truck illustration">
+<svg class="truck-svg" viewBox="0 0 760 190" role="img" aria-hidden="true">
+  <defs><linearGradient id="trailerPaint" x1="0" x2="1"><stop offset="0" stop-color="#17191e"/><stop offset=".72" stop-color="#30333b"/><stop offset="1" stop-color="#111318"/></linearGradient><linearGradient id="cabPaint" x1="0" x2="1"><stop offset="0" stop-color="#b30f24"/><stop offset="1" stop-color="#f02a40"/></linearGradient></defs>
+  <ellipse cx="380" cy="161" rx="335" ry="12" fill="#000" opacity=".48"/>
+  <g class="truck-body">
+    <path d="M55 34h450v105H55z" rx="5" fill="url(#trailerPaint)" stroke="#666b75" stroke-width="2"/>
+    <path d="M55 34h450v8H55z" fill="#d71930"/><path d="M55 132h450v7H55z" fill="#d71930"/>
+    <path d="M505 77h112l48 39v23H505z" fill="url(#cabPaint)" stroke="#ff5968" stroke-width="2"/>
+    <path d="M535 86h67l33 29H535z" fill="#111923" stroke="#858b96" stroke-width="2"/>
+    <path d="M540 91h28v25h-28z" fill="#dce6ef" opacity=".82"/>
+    <path d="M576 91h24l27 25h-51z" fill="#a8c2d7" opacity=".72"/>
+    <path d="M617 127h38l10 12h-48z" fill="#17191e"/>
+    <path d="M505 137h160" stroke="#f4f4f5" stroke-width="3" opacity=".85"/>
+    <path d="M66 51h428" stroke="#fff" stroke-width="2" opacity=".12"/>
+    <text x="280" y="96" fill="#f8fafc" font-size="23" font-weight="800" letter-spacing="8" text-anchor="middle">TANCHEVSKI</text>
+    <text x="280" y="116" fill="#e11d2e" font-size="10" font-weight="800" letter-spacing="5" text-anchor="middle">AI · DISPATCH</text>
+    <path d="M626 126h22" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+    <path d="M650 145h14" stroke="#e11d2e" stroke-width="5" stroke-linecap="round"/>
+    <g class="wheel"><circle cx="147" cy="145" r="22" fill="#08090c" stroke="#777d87" stroke-width="5"/><circle cx="147" cy="145" r="8" fill="#d8dbe0"/></g>
+    <g class="wheel"><circle cx="454" cy="145" r="22" fill="#08090c" stroke="#777d87" stroke-width="5"/><circle cx="454" cy="145" r="8" fill="#d8dbe0"/></g>
+    <g class="wheel"><circle cx="562" cy="145" r="22" fill="#08090c" stroke="#777d87" stroke-width="5"/><circle cx="562" cy="145" r="8" fill="#d8dbe0"/></g>
+    <g class="wheel"><circle cx="632" cy="145" r="22" fill="#08090c" stroke="#777d87" stroke-width="5"/><circle cx="632" cy="145" r="8" fill="#d8dbe0"/></g>
+  </g>
+</svg><span class="road-line"></span></div>
 <div class="layout">
 <section class="card">
   <h2>Trip details</h2>
