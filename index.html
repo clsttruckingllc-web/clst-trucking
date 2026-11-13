@@ -4,8 +4,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b0b0d"><meta name="description" content="MARKWAY operations hub for Gmail rate confirmations, dispatch ETA, ROCK ELD GPS, and RingCentral.">
-<title>MARKWAY · MARKO AI</title>
+<meta name="theme-color" content="#0b0b0d"><meta name="description" content="Tanchevski AI operations hub for Gmail rate confirmations, dispatch ETA, ROCK ELD GPS, and RingCentral.">
+<title>TANCHEVSKI AI</title>
 <style>
 :root{color-scheme:light;--bg:#0b0b0d;--panel:#fff;--panel2:#f8f8f8;--border:#e5e5e5;--text:#171717;--muted:#666;--red:#dc2626;--red2:#991b1b;--green:#16845b;--yellow:#b7791f}
 *{box-sizing:border-box}
@@ -32,7 +32,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/clst-icon-180.png?v=2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="MARKWAY">
+<meta name="apple-mobile-web-app-title" content="TANCHEVSKI AI">
 <script>
 (()=>{try{if(sessionStorage.getItem('clst_marko_session_v1')!=='yes'){const next=location.pathname+location.search+location.hash;location.replace('/login.html?return='+encodeURIComponent(next));}}catch{location.replace('/login.html');}})();
 </script>
@@ -42,8 +42,8 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
   <div class="brand">
     <div class="logo">M</div>
     <div>
-      <h1>MARKWAY</h1>
-      <div class="subtitle">DISPATCH INTELLIGENCE · ONE WORKSPACE</div>
+      <h1>TANCHEVSKI AI</h1>
+      <div class="subtitle">AI OPERATIONS · ONE WORKSPACE</div>
     </div>
   </div>
   <nav aria-label="Dashboard navigation"><a href="#gmail">GMAIL & AI</a><a href="#eld">ROCK ELD</a><a href="#eta">ETA DISPATCH</a><a href="#ringcentral">RINGCENTRAL</a></nav>
@@ -57,7 +57,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
 <main>
   <section class="welcome">
     <div>
-      <div class="eyebrow">MARKWAY / COMMAND CENTER</div>
+      <div class="eyebrow">TANCHEVSKI AI / COMMAND CENTER</div>
       <h2>Everything moving. One command center.</h2>
       <div class="muted">Gmail rate confirmations, AI load intelligence, live ELD locations, ETA planning and RingCentral tools — together in one workspace.</div>
     </div>
@@ -94,11 +94,11 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
   </section>
 
   <section class="panel" id="gmail">
-    <div class="panel-heading"><h3>Ask MARKO AI about Gmail & Rate Confirmations</h3></div>
+    <div class="panel-heading"><h3>Ask TANCHEVSKI AI about Gmail & Rate Confirmations</h3></div>
     <div class="muted" style="margin-bottom:12px">Ask for full load details from our carrier Rate Confirmations: broker, pickup, delivery, freight, equipment, miles, pay terms, detention, and driver instructions.</div>
     <form id="askForm" class="ask-row">
-      <input id="askQuestion" type="text" maxlength="600" placeholder="Example: Can you give me more details about load 102190?" aria-label="Ask MARKO AI a question" required>
-      <button class="primary" id="askBtn" type="submit">Ask MARKO AI</button>
+      <input id="askQuestion" type="text" maxlength="600" placeholder="Example: Can you give me more details about load 102190?" aria-label="Ask TANCHEVSKI AI a question" required>
+      <button class="primary" id="askBtn" type="submit">Ask TANCHEVSKI AI</button>
     </form>
     <div id="askAnswer" class="ask-answer" role="status" aria-live="polite">Your answer will appear here.</div>
     <div id="askSources" class="ask-sources"></div>
@@ -111,7 +111,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
   </section>
   <section class="panel" id="eta">
     <div class="panel-heading"><div><h3>Dispatch ETA · Load planning</h3><div class="muted" style="font-size:12px;margin-top:4px">Choose a Gmail load and use current truck location to estimate delivery.</div></div><a class="action-link" href="/eta" target="_blank" rel="noopener">Open ETA full page ↗</a></div>
-    <iframe class="app-frame" src="/eta" title="CLST Trucking ETA dispatch estimator" loading="eager"></iframe>
+    <iframe class="app-frame" src="/eta" title="Tanchevski AI ETA dispatch estimator" loading="eager"></iframe>
   </section>
   <section class="panel" id="ringcentral">
     <div class="panel-heading"><div><h3>RingCentral · Communications</h3><div class="muted" style="font-size:12px;margin-top:4px">Check API connection and open the company communications workspace.</div></div><div class="actions" style="margin:0"><button class="secondary" id="ringcentralTestBtn" type="button">Test RingCentral</button><button class="secondary" id="mareVoiceTestBtn" type="button">Check Mare voice</button><a class="action-link" href="https://app.ringcentral.com/" target="_blank" rel="noopener noreferrer">Open RingCentral ↗</a></div></div>
@@ -135,7 +135,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}th,td{text-align:left;
   </section>
 </main>
 
-<footer>MARKWAY · MARKO AI</footer>
+<footer>TANCHEVSKI AI</footer>
 
 <script>
 'use strict';
@@ -444,7 +444,7 @@ async function analyze({background = false} = {}) {
       );
     }
   } catch (err) {
-    console.error('MARKWAY:',err);
+    console.error('TANCHEVSKI AI:',err);
     // If a background refresh fails, keep the last successful results visible
     // and don't make the whole dashboard look disconnected.
     if (background && emailRecords.length) {
@@ -563,10 +563,10 @@ async function askMarko(event) {
       ? 'Sources checked: ' + sources.map(s => [s.subject, s.from, s.hasPdf ? '(PDF attached)' : ''].filter(Boolean).join(' ')).join(' · ')
       : 'No matching source emails were found.';
   } catch (err) {
-    $('askAnswer').textContent = err.message || 'Could not query MARKO AI.';
+    $('askAnswer').textContent = err.message || 'Could not query TANCHEVSKI AI.';
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Ask MARKO AI';
+    btn.textContent = 'Ask TANCHEVSKI AI';
   }
 }
 
@@ -632,7 +632,7 @@ connection('Ready');
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(err => {
-      console.warn('MARKWAY offline shell registration unavailable:', err);
+      console.warn('TANCHEVSKI AI offline shell registration unavailable:', err);
     });
   });
 }
