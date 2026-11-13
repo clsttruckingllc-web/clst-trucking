@@ -56,7 +56,7 @@ export async function onRequest({ request, env }) {
   if (request.method === "GET") return json({ authenticated: await validSession(request, secret) });
   if (request.method === "DELETE") {
     return json({ success: true }, 200, {
-      "Set-Cookie": COOKIE + "=; HttpOnly; Secure; SameSite=Lax; Path=/api/rockeld; Max-Age=0"
+      "Set-Cookie": COOKIE + "=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0", "Set-Cookie": COOKIE + "=; HttpOnly; Secure; SameSite=Lax; Path=/api/rockeld; Max-Age=0"
     });
   }
   if (!(request.headers.get("Content-Type") || "").toLowerCase().includes("application/json")) {
@@ -74,6 +74,6 @@ export async function onRequest({ request, env }) {
   const token = payload + "." + await sign(payload, secret);
   return json({ success: true, expiresIn: SESSION_SECONDS }, 200, {
     "Set-Cookie": COOKIE + "=" + encodeURIComponent(token) +
-      "; HttpOnly; Secure; SameSite=Lax; Path=/api/rockeld; Max-Age=" + SESSION_SECONDS
+      "; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=" + SESSION_SECONDS
   });
 }
