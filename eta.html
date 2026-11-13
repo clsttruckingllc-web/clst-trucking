@@ -43,13 +43,6 @@ button:disabled{opacity:.65;cursor:wait}
 footer{color:#a8adb8;font-size:12px;text-align:center;margin-top:24px;padding:14px;border-top:1px solid #30333c}
 a{color:#ff6573}
 @media(max-width:680px){main{padding:18px 12px 32px}.layout{grid-template-columns:1fr}.card{padding:17px}.hero{margin-bottom:18px}}
-.truck-scene{position:relative;overflow:hidden;margin:0 0 22px;padding:8px 12px 15px;border:1px solid #35232a;border-radius:16px;background:linear-gradient(100deg,#111318,#1a1015 52%,#101116);box-shadow:inset 0 1px rgba(255,255,255,.04),0 12px 30px rgba(0,0,0,.24)}
-.truck-svg{display:block;width:min(100%,680px);height:auto;margin:0 auto;filter:drop-shadow(0 8px 10px rgba(0,0,0,.45));animation:truckFloat 4.8s ease-in-out infinite}
-.wheel{transform-box:fill-box;transform-origin:center;animation:wheelTurn 2.2s linear infinite}
-.road-line{display:block;height:2px;width:90%;margin:0 auto;background:linear-gradient(90deg,transparent,#d71930 18%,#f5f5f5 50%,#d71930 82%,transparent);opacity:.65}
-@keyframes truckFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-@keyframes wheelTurn{to{transform:rotate(360deg)}}
-@media(prefers-reduced-motion:reduce){.truck-svg,.wheel{animation:none!important}}
 </style>
 </head>
 <body>
@@ -60,29 +53,6 @@ a{color:#ff6573}
   <h1>Load ETA Estimator</h1>
   <p>Load Rate Confirmations automatically by load number, then calculate the estimated arrival from the current truck location and route.</p>
 </section>
-<div class="truck-scene" aria-label="Animated black and red semi truck illustration">
-<svg class="truck-svg" viewBox="0 0 760 190" role="img" aria-hidden="true">
-  <defs><linearGradient id="trailerPaint" x1="0" x2="1"><stop offset="0" stop-color="#17191e"/><stop offset=".72" stop-color="#30333b"/><stop offset="1" stop-color="#111318"/></linearGradient><linearGradient id="cabPaint" x1="0" x2="1"><stop offset="0" stop-color="#b30f24"/><stop offset="1" stop-color="#f02a40"/></linearGradient></defs>
-  <ellipse cx="380" cy="161" rx="335" ry="12" fill="#000" opacity=".48"/>
-  <g class="truck-body">
-    <path d="M55 34h450v105H55z" rx="5" fill="url(#trailerPaint)" stroke="#666b75" stroke-width="2"/>
-    <path d="M55 34h450v8H55z" fill="#d71930"/><path d="M55 132h450v7H55z" fill="#d71930"/>
-    <path d="M505 77h112l48 39v23H505z" fill="url(#cabPaint)" stroke="#ff5968" stroke-width="2"/>
-    <path d="M535 86h67l33 29H535z" fill="#111923" stroke="#858b96" stroke-width="2"/>
-    <path d="M540 91h28v25h-28z" fill="#dce6ef" opacity=".82"/>
-    <path d="M576 91h24l27 25h-51z" fill="#a8c2d7" opacity=".72"/>
-    <path d="M617 127h38l10 12h-48z" fill="#17191e"/>
-    <path d="M505 137h160" stroke="#f4f4f5" stroke-width="3" opacity=".85"/>
-    <path d="M66 51h428" stroke="#fff" stroke-width="2" opacity=".12"/>
-    
-    <path d="M626 126h22" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
-    <path d="M650 145h14" stroke="#e11d2e" stroke-width="5" stroke-linecap="round"/>
-    <g class="wheel"><circle cx="147" cy="145" r="22" fill="#08090c" stroke="#777d87" stroke-width="5"/><circle cx="147" cy="145" r="8" fill="#d8dbe0"/></g>
-    <g class="wheel"><circle cx="454" cy="145" r="22" fill="#08090c" stroke="#777d87" stroke-width="5"/><circle cx="454" cy="145" r="8" fill="#d8dbe0"/></g>
-    <g class="wheel"><circle cx="562" cy="145" r="22" fill="#08090c" stroke="#777d87" stroke-width="5"/><circle cx="562" cy="145" r="8" fill="#d8dbe0"/></g>
-    <g class="wheel"><circle cx="632" cy="145" r="22" fill="#08090c" stroke="#777d87" stroke-width="5"/><circle cx="632" cy="145" r="8" fill="#d8dbe0"/></g>
-  </g>
-</svg><span class="road-line"></span></div>
 <div class="layout">
 <section class="card">
   <h2>Trip details</h2>
