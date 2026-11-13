@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b0b0d">
-  <title>CLST TRUCKING · Secure GPS Access</title>
+  <title>TANCHEVSKI AI · Secure Access</title>
   <style>
     *{box-sizing:border-box}
     body{font:16px/1.6 system-ui,sans-serif;max-width:460px;margin:12vh auto;padding:24px;color:#f5f5f5;background:#0b0b0d}
@@ -24,12 +24,12 @@
 <body>
   <main>
     <div class="mark" aria-hidden="true">C</div>
-    <h1>CLST TRUCKING · Secure GPS Access</h1>
-    <p>Sign in to view the latest authorized ROCK ELD truck locations and calculate load ETAs.</p>
+    <h1>TANCHEVSKI AI · Secure Access</h1>
+    <p>Sign in to view the the TANCHEVSKI AI operations dashboard.</p>
     <form id="loginForm">
-      <label for="password">Company GPS access password</label>
+      <label for="password">Access password</label>
       <input id="password" type="password" autocomplete="current-password" required maxlength="512" autofocus>
-      <button id="loginButton" type="submit">Unlock live GPS</button>
+      <button id="loginButton" type="submit">Unlock TANCHEVSKI AI</button>
       <div id="message" role="alert"></div>
     </form>
     <p class="note">Your password is checked securely on the server. The session is stored in an HttpOnly secure cookie and expires after 8 hours. It is never saved in this page.</p>
@@ -42,7 +42,7 @@
   const button=document.getElementById('loginButton');
   const message=document.getElementById('message');
   const params=new URLSearchParams(window.location.search);
-  const requested=params.get('return')||'/eta.html';
+  const requested=params.get('return')||'/';
   const returnTo=requested.startsWith('/')&&!requested.startsWith('//')?requested:'/eta.html';
 
   fetch('/api/rockeld/session',{headers:{Accept:'application/json'},credentials:'same-origin',cache:'no-store'})
@@ -69,7 +69,7 @@
     }catch(error){
       message.textContent=error.message||'Could not sign in.';
       button.disabled=false;
-      button.textContent='Unlock live GPS';
+      button.textContent='Unlock TANCHEVSKI AI';
     }
   });
 })();
