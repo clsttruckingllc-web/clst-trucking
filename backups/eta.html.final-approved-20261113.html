@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0b0d">
+<title>TANCHEVSKI AI · ETA Estimator</title>
+<style>
+:root{color-scheme:dark;--bg:#08090c;--panel:#15171d;--line:#30333c;--text:#f8fafc;--muted:#a8adb8;--gold:#e11d2e;--green:#f3f4f6;--red:#ff4655}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -15%,#351018 0%,#111217 38%,var(--bg) 72%);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#fff;min-height:100vh;overflow-x:hidden}
+main{position:relative;z-index:1}
+main{width:min(980px,100%);margin:0 auto;padding:24px 16px 48px}
+header{display:flex;align-items:center;gap:14px;margin:4px 0 28px;padding:12px 16px;border:1px solid #3a2027;border-radius:16px;background:linear-gradient(110deg,rgba(225,29,46,.14),rgba(20,21,26,.92) 48%);box-shadow:0 12px 34px rgba(0,0,0,.28)}
+.mark{display:block;width:58px;height:58px;object-fit:contain;border-radius:12px;background:#fff;padding:2px;flex:0 0 58px}
+.brand{font-size:13px;letter-spacing:.13em;color:#fff;font-weight:800}
+h1{font-size:clamp(28px,6vw,42px);line-height:1.08;margin:6px 0 10px;color:#fff;text-shadow:0 3px 24px rgba(225,29,46,.2)}
+h2{font-size:19px;margin:0 0 16px}
+p{color:var(--muted);margin:0}
+.hero{margin-bottom:22px}
+.pill{display:inline-block;border:1px solid #a51e2c;color:#fff;background:linear-gradient(90deg,#b51225,#54121b);border-radius:99px;padding:5px 12px;font-size:12px;font-weight:800;margin-bottom:12px;letter-spacing:.04em}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:linear-gradient(145deg,#1a1c23,#111318);color:#f8fafc;border:1px solid #343640;border-top:2px solid #b91c2c;border-radius:16px;padding:20px;min-width:0;box-shadow:0 16px 38px rgba(0,0,0,.28)}
+.field{display:flex;flex-direction:column;gap:6px;margin:0 0 15px}
+label{font-size:13px;font-weight:750;color:#f1f3f6}
+input,select{width:100%;min-height:46px;border-radius:9px;border:1px solid #555965;background:#f8fafc;color:#111318;padding:10px 12px;font:inherit}
+input:focus,select:focus{outline:2px solid #dc2626;outline-offset:1px}
+.help{font-size:12px;color:var(--muted)}
+button{width:100%;min-height:48px;border:1px solid #ff5968;border-radius:10px;background:linear-gradient(100deg,#a90e20,#ed263b);color:#fff;font-weight:850;font-size:15px;cursor:pointer;padding:10px;box-shadow:0 7px 20px rgba(225,29,46,.2);transition:filter .2s,transform .2s}button:hover{filter:brightness(1.12);transform:translateY(-1px)}
+button:disabled{opacity:.65;cursor:wait}
+.secondary{background:#242832;color:#fff;border:1px solid #555965;margin-bottom:10px}
+.result{color:#f8fafc;border:1px solid #3b3e49;background:linear-gradient(145deg,#0d0f14,#191b22);border-radius:13px;padding:16px;margin-top:14px}
+.result-label{font-size:12px;color:#c2c6cf;text-transform:uppercase;letter-spacing:.1em;font-weight:800}
+.eta{font-size:clamp(25px,5vw,34px);font-weight:850;line-height:1.15;margin:8px 0;color:#fff;overflow-wrap:anywhere}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.stat{border:1px solid #343741;background:#171920;border-radius:10px;padding:12px}
+.stat strong{display:block;font-size:20px;margin-top:3px}
+.notice{border-left:3px solid #e11d2e;padding:10px 12px;background:#241319;border-radius:0 8px 8px 0;color:#f2dce0;font-size:13px;margin-top:14px}
+.status{font-size:13px;margin:10px 0;color:var(--muted);overflow-wrap:anywhere}
+.status.ok{color:var(--green)}.status.bad,.error{color:var(--red)}
+.error{font-size:13px;margin-top:12px}
+footer{color:#a8adb8;font-size:12px;text-align:center;margin-top:24px;padding:14px;border-top:1px solid #30333c}
+a{color:#ff6573}
+@media(max-width:680px){main{padding:18px 12px 32px}.layout{grid-template-columns:1fr}.card{padding:17px}.hero{margin-bottom:18px}}
+</style>
+</head>
+<body>
+<main>
+<header><img class="mark" src="/assets/krem-mark.png" alt="Tanchevski AI logo"><div><div class="brand">TANCHEVSKI AI</div><p>TANCHEVSKI AI · Dispatch Intelligence</p></div></header>
+<section class="hero">
+  <span class="pill">DISPATCH · LIVE ROUTE ESTIMATE</span>
+  <h1>Load ETA Estimator</h1>
+  <p>Load Rate Confirmations automatically by load number, then calculate the estimated arrival from the current truck location and route.</p>
+</section>
+<div class="layout">
+<section class="card">
+  <h2>Trip details</h2>
+  <form id="etaForm">
+    <div class="field"><label for="load">Load Number</label><input id="load" maxlength="80" required placeholder="Enter load number"><span class="help">Only enter the load number. Truck location, delivery details, route and ETA load automatically.</span></div>
+    <button type="submit" id="calculateButton">Calculate ETA</button>
+    <div id="error" class="error" role="alert" hidden></div>
+    <div id="status" class="status" role="status">Ready. Enter a load number to calculate its ETA.</div>
+  </form></section>
+<section class="card" aria-live="polite">
+  <h2>Automatic estimate</h2><p id="resultIntro">Enter a load number. Current truck location and delivery route will be retrieved automatically.</p>
+  <div class="result">
+    <div class="result-label">Estimated arrival</div><div id="arrival" class="eta">Waiting for load</div><div id="loadLabel" class="help"></div>
+    <div class="stats">
+      <div class="stat"><span class="help">Current truck location</span><strong id="truckLocation" style="font-size:15px">—</strong></div>
+      <div class="stat"><span class="help">Delivery location</span><strong id="deliveryLocation" style="font-size:15px">—</strong></div>
+      <div class="stat"><span class="help">Road miles</span><strong id="roadMiles">—</strong></div>
+      <div class="stat"><span class="help">Driving time</span><strong id="driveTime">—</strong></div>
+    </div>
+  </div>
+  <div class="notice">Automatic ETA uses the saved Rate Confirmation and the latest authorized ROCK ELD location. No location, mileage, speed or token fields are shown. ETA is an estimate and excludes live traffic, weather, loading delays and actual hours-of-service records.</div>
+</section>
+</div>
+<footer>TANCHEVSKI AI · OpenStreetMap / OSRM route estimate · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Map data attribution</a></footer>
+</main>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  let rateRecords=[];
+  const pad=n=>String(n).padStart(2,'0');
+  function localInputValue(date){return date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+'T'+pad(date.getHours())+':'+pad(date.getMinutes());}
+  function flattenRates(data){
+    const out=[];
+    for(const item of (Array.isArray(data?.rates)?data.rates:[])){
+      const email=item.email||{};
+      for(const pdf of (Array.isArray(item.pdfs)?item.pdfs:[])){
+        if(pdf.analysis&&typeof pdf.analysis==='object')out.push({email,filename:pdf.filename||'Rate Confirmation PDF',analysis:pdf.analysis});
+      }
+    }
+    return out;
+  }
+  function fmtDate(date){return new Intl.DateTimeFormat(undefined,{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(date);}
+  function fmtDuration(hours){const whole=Math.floor(hours),mins=Math.round((hours-whole)*60);return mins?whole+' h '+mins+' min':whole+' h';}
+  async function fetchWithTimeout(url,options={},label='Request',timeoutMs=12000){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),timeoutMs);
+    try{return await fetch(url,{...options,signal:controller.signal});}
+    catch(error){if(error&&error.name==='AbortError')throw new Error(label+' timed out after '+Math.round(timeoutMs/1000)+' seconds. Please try again.');throw error;}
+    finally{clearTimeout(timer);}
+  }
+  async function geocode(candidates){
+    const tried=[];
+    for(const query of [...new Set(candidates.map(v=>String(v||'').trim()).filter(Boolean))]){
+      for(const search of [query,query+', USA']){
+        if(tried.includes(search))continue;
+        tried.push(search);
+        const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us&q='+encodeURIComponent(search);
+        const response=await fetchWithTimeout(url,{headers:{Accept:'application/json'},cache:'no-store'},'Delivery address lookup',12000);
+        if(!response.ok)continue;
+        const results=await response.json().catch(()=>[]);
+        if(Array.isArray(results)&&results.length){
+          const lat=Number(results[0].lat),lon=Number(results[0].lon);
+          if(Number.isFinite(lat)&&Number.isFinite(lon))return {lat,lon};
+        }
+      }
+    }
+    throw new Error('Could not locate the delivery street address in the saved Rate Confirmation. Checked '+tried.length+' address formats; no location was guessed.');
+  }
+  async function loadRates(loadNumber){
+    // Search Gmail for this exact load number instead of analyzing the latest ten unrelated PDFs.
+    const query='newer_than:365d "'+String(loadNumber).replace(/["\\]/g,'')+'" has:attachment filename:pdf';
+    const params=new URLSearchParams({maxResults:'5',q:query});
+    const response=await fetchWithTimeout('/api/rates?'+params.toString(),{headers:{Accept:'application/json'},cache:'no-store',credentials:'same-origin'},'Gmail Rate Confirmation search',45000);
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok||data.success===false||!Array.isArray(data.rates))throw new Error(data.error||'Saved Gmail Rate Confirmations are unavailable.');
+    rateRecords=flattenRates(data);
+  }
+  async function loadTruckLocation(load){
+    const headers={Accept:'application/json'};
+    const response=await fetchWithTimeout('/api/rockeld/locations',{headers,cache:'no-store',credentials:'same-origin'},'ROCK ELD GPS request',12000);if(response.status===401){window.location.assign('/gps-login.html?return='+encodeURIComponent('/eta.html?load='+encodeURIComponent($('load').value.trim())));throw new Error('Opening secure GPS sign-in…');}
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(data.error||'Secure ROCK ELD access is not configured. Sign in through company access first.');
+    const trucks=(Array.isArray(data.locations)?data.locations:[]).map(t=>({...t,
+      latitude:Number(t.latitude??t.lat??t.latitudeDegrees),
+      longitude:Number(t.longitude??t.lon??t.lng??t.longitudeDegrees),
+      status:String(t.status||'').toLowerCase(),
+      ageMinutes:Number(t.ageMinutes??t.age_minutes??NaN)
+    })).filter(t=>Number.isFinite(t.latitude)&&Number.isFinite(t.longitude)&&
+      (t.status==='fresh'||(Number.isFinite(t.ageMinutes)&&t.ageMinutes<=15)));
+    if(!trucks.length)throw new Error('ROCK ELD has no fresh truck locations within the last 15 minutes.');
+    const a=load.analysis||{};
+    const truckHint=[a.truck_number,a.truck,a.truck_id,a.vehicle_id,a.vehicleId,a.unit_number].filter(Boolean).map(String);
+    const driverLabels=Array.isArray(load.email?.labels)?load.email.labels.map(String).map(x=>x.trim()).filter(Boolean):[];
+    const key=value=>String(value||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+    const hintMatches=truckHint.length?trucks.filter(t=>truckHint.some(h=>[t.vehicleId,t.id,t.truckNumber,t.vehicleNumber,t.unitNumber,t.vehicleName].some(v=>v!==null&&v!==undefined&&key(v)===key(h)))):[];
+    const labelKeys=driverLabels.flatMap(label=>[label,label.split('/').pop()||label]).map(key).filter(Boolean);
+    const driverMatches=labelKeys.length?trucks.filter(t=>[t.driverName,t.driver_name,t.assignedDriverName,t.operatorName].some(v=>v&&labelKeys.includes(key(v)))):[];
+    if(hintMatches.length>1)throw new Error('The Rate Confirmation truck identifier matches more than one fresh ROCK ELD vehicle. No truck was selected.');
+    if(driverMatches.length>1)throw new Error('The Gmail driver Label matches more than one fresh ROCK ELD vehicle. No truck was selected.');
+    if(hintMatches.length===1&&driverMatches.length===1&&hintMatches[0]!==driverMatches[0])throw new Error('The truck identifier and Gmail driver Label point to different ROCK ELD vehicles. No truck was selected.');
+    if(driverLabels.length&&!driverMatches.length)throw new Error('The Gmail driver Label ('+driverLabels.join(', ')+') could not be matched to an assigned driver in ROCK ELD. No truck was guessed.');
+    if(truckHint.length&&!hintMatches.length)throw new Error('The truck identifier in the Rate Confirmation could not be matched to ROCK ELD. No truck was guessed.');
+    if(driverMatches.length===1)return driverMatches[0];
+    if(hintMatches.length===1)return hintMatches[0];
+    if(trucks.length===1&&!driverLabels.length&&!truckHint.length)return trucks[0];
+    throw new Error('More than one truck has a fresh GPS location, but the load has no unique driver Label or truck match. No truck was guessed.');
+  }
+  async function calculate(event){
+    event.preventDefault();
+    const button=$('calculateButton');button.disabled=true;button.textContent='Calculating automatically…';$('error').hidden=true;
+    $('status').textContent='Finding the load, current truck location and delivery route…';$('status').className='status';
+    $('arrival').textContent='Calculating…';$('truckLocation').textContent='Loading…';$('deliveryLocation').textContent='Loading…';$('roadMiles').textContent='—';$('driveTime').textContent='—';
+    try{
+      const loadNumber=$('load').value.trim();
+      if(!loadNumber)throw new Error('Enter the load number.');
+      $('status').textContent='Step 1/4: loading saved Gmail Rate Confirmations…';
+      await loadRates(loadNumber);
+      const load=rateRecords.find(r=>String((r.analysis||{}).load_number||'').trim().toLowerCase()===loadNumber.toLowerCase());
+      if(!load)throw new Error('No saved Gmail Rate Confirmation matched load '+loadNumber+'.');
+      const analysis=load.analysis||{};
+      function buildAddressCandidates(a){
+        const out=[];
+        const add=value=>{
+          if(value===null||value===undefined)return;
+          if(Array.isArray(value)){value.forEach(add);return;}
+          if(typeof value==='object'){
+            const direct=value.formatted_address||value.formattedAddress||value.address||value.location;
+            if(direct)add(direct);
+            const street=value.street_address||value.streetAddress||value.address_line_1||value.addressLine1||value.street;
+            const city=value.city||value.locality||value.town;
+            const state=value.state||value.state_code||value.region;
+            const zip=value.zip||value.postal_code||value.postalCode;
+            if(street||city||state||zip)add([street,city,state,zip].filter(Boolean).join(', '));
+            return;
+          }
+          const raw=String(value).replace(/\s+/g,' ').trim();
+          if(!raw)return;
+          out.push(raw);
+          // Some PDFs place the facility name before the street address and omit
+          // the comma between the street suffix and city. Split that safely.
+          const match=raw.match(/\b(\d{1,6}\s+[^,]*?\b(?:STREET|ST|AVENUE|AVE|ROAD|RD|BOULEVARD|BLVD|DRIVE|DR|LANE|LN|PARKWAY|PKWY|HIGHWAY|HWY|COURT|CT|CIRCLE|CIR|PLACE|PL|TERRACE|TER|WAY)\.?)\s*,?\s*([A-Z][A-Z .'-]+?)\s*,?\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?)\b/i);
+          if(match){
+            const street=match[1].replace(/\bPKWY\b/i,'Parkway').replace(/\bAVE\b/i,'Avenue').replace(/\bST\b/i,'Street').replace(/\bRD\b/i,'Road').replace(/\bBLVD\b/i,'Boulevard').replace(/\bDR\b/i,'Drive');
+            const city=match[2].trim(),state=match[3].toUpperCase(),zip=match[4];
+            out.unshift(match[1]+', '+city+', '+state+' '+zip+', USA');
+            out.unshift(street+', '+city+', '+state+' '+zip+', USA');
+          }
+        };
+        [
+          a.delivery_address,a.delivery_street_address,a.receiver_address,
+          a.consignee_address,a.deliver_to,a.final_destination,
+          a.delivery_location,a.destination,a.delivery
+        ].forEach(add);
+        const locality=String(a.delivery_city_state||a.delivery_citystate||a.delivery_city||'').trim();
+        const state=String(a.delivery_state||'').trim();
+        const postal=String(a.delivery_zip||a.delivery_postal_code||'').trim();
+        const street=a.delivery_street_address||a.delivery_address||a.receiver_address||a.consignee_address;
+        if(street&&locality)add([street,locality,state,postal].filter(Boolean).join(', '));
+        return [...new Set(out)];
+      }
+      const addressCandidates=buildAddressCandidates(analysis);
+      const destination=addressCandidates[0]||'';
+      if(!destination)throw new Error('The Rate Confirmation does not contain a delivery street address.');
+      $('status').textContent='Step 2/4: checking the latest ROCK ELD truck location…';
+      const truck=await loadTruckLocation(load);
+      $('status').textContent='Step 3/4: locating the delivery address…';
+      const destinationPoint=await geocode(addressCandidates);
+      $('status').textContent='Step 4/4: calculating the road route and ETA…';
+      const routeUrl='https://router.project-osrm.org/route/v1/driving/'+Number(truck.longitude)+','+Number(truck.latitude)+';'+destinationPoint.lon+','+destinationPoint.lat+'?overview=false&steps=false';
+      const routeResponse=await fetchWithTimeout(routeUrl,{headers:{Accept:'application/json'},cache:'no-store'},'Road-route calculation',15000);
+      if(!routeResponse.ok)throw new Error('The road-route service is unavailable. Please try again.');
+      const route=await routeResponse.json();
+      if(route.code!=='Ok'||!route.routes?.length)throw new Error('No driving route was found between the truck and delivery location.');
+      const miles=route.routes[0].distance/1609.344;
+      const speed=Number(truck.speed??truck.speedMph??truck.speed_mph);
+      const mph=Number.isFinite(speed)&&speed>3?Math.min(speed,65):50;
+      const drivingHours=miles/mph;
+      const dailyHours=10,restHours=10;
+      const rests=miles===0?0:Math.max(0,Math.ceil(drivingHours/dailyHours)-1);
+      const elapsed=drivingHours+rests*restHours;
+      const arrival=new Date(Date.now()+elapsed*3600000);
+      $('arrival').textContent=fmtDate(arrival);
+      const assignedDriverLabels=Array.isArray(load.email?.labels)?load.email.labels.join(', '):'';
+      $('loadLabel').textContent='Load '+String(analysis.load_number||loadNumber)+(assignedDriverLabels?' · Gmail Label: '+assignedDriverLabels:'');
+      $('truckLocation').textContent=String(truck.location||('GPS '+Number(truck.latitude).toFixed(4)+', '+Number(truck.longitude).toFixed(4)));
+      $('deliveryLocation').textContent=destination;
+      $('roadMiles').textContent=miles.toFixed(1)+' mi';
+      $('driveTime').textContent=fmtDuration(drivingHours);
+      $('resultIntro').textContent='ETA calculated from the latest authorized ROCK ELD location and the saved Rate Confirmation.';
+      $('status').textContent='ETA calculated. GPS report: '+(truck.lastReport||'time unavailable')+'.';
+      $('status').className='status ok';
+    }catch(error){
+      $('arrival').textContent='Unable to calculate';
+      $('error').textContent=String(error.message||error);$('error').hidden=false;
+      $('status').textContent='Automatic ETA needs the load record and authorized live truck location.';
+      $('status').className='status bad';
+    }finally{button.disabled=false;button.textContent='Calculate ETA';}
+  }
+  const requestedLoad=new URLSearchParams(window.location.search).get('load');
+  if(requestedLoad)$('load').value=requestedLoad;
+  $('etaForm').addEventListener('submit',calculate);
+})();
+</script>
+</body>
+</html>
