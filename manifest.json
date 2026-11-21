@@ -10,13 +10,13 @@
   "theme_color": "#dc2626",
   "icons": [
     {
-      "src": "https://emil.tail1d1a20.ts.net/krem-happy-tech-512.png",
+      "src": "https://emil.tail1d1a20.ts.net/krem-happy-tech-512.png?v=20261121-1405",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://emil.tail1d1a20.ts.net/krem-happy-tech-512.png",
+      "src": "https://emil.tail1d1a20.ts.net/krem-happy-tech-512.png?v=20261121-1405",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
